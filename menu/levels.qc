@@ -1,5 +1,8 @@
 //I'm feeling lazy, so I'm going to only provide X slots, like quake's menu.
-static string levels[] = {};
+// static string levels[] = {};
+
+// defined until the official support is released
+string(searchhandle handle, float num) search_getpackagename = #0;
 
 class mitem_levelsoption : mitem_text
 {
@@ -66,7 +69,7 @@ static string(string modname) scanlevels =
 		l = strreplace("_", " ", l);
 		// get modificaton date
 		filepath = sprintf("%s.sav", modname); // correct path
-		searchhandle sh = search_begin(filepath, 0, 0);
+		searchhandle sh = search_begin(filepath, TRUE, TRUE);
 		if (sizeof(sh) > 0) {
 			string moddt = search_getfilemtime(sh,0); // get date time
 			// "%Y-%m-%d %H:%M:%S"
@@ -138,6 +141,7 @@ void(mitem_desktop desktop) M_Levels =
 
 	float modscount = tokenizebyseparator(cvar_string("game"), ";"); 
 	string currentgame = "";
+	// gets last mod loaded
 	for (float i = 0; i < modscount; i++)
 	{
 		currentgame = strtolower(argv(i));
@@ -145,16 +149,17 @@ void(mitem_desktop desktop) M_Levels =
 	// a default...
 	if (currentgame == "" || currentgame == "fte") currentgame = "id1";
 
-	string desc;
 	float idirs;
-	string info;
 	for (idirs = 0; ; idirs++)
 	{
+		// Game dir info
 		string gamedir = getgamedirinfo(idirs, GGDI_GAMEDIR);
 		if not(gamedir) // carefull...
-			break; 
-		desc = getgamedirinfo(idirs, GGDI_DESCRIPTION);
-		info = getgamedirinfo(idirs, GGDI_GAMEDIRLIST);
+			break;
+		string desc = getgamedirinfo(idirs, GGDI_DESCRIPTION);
+		string info = getgamedirinfo(idirs, GGDI_GAMEDIRLIST);
+		string modcmd = getgamedirinfo(idirs, GGDI_LOADCOMMAND);
+		// string icon = getgamedirinfo(idirs, GGDI_ICON);
 
 		gamedir = strtolower(gamedir);
 		
@@ -163,14 +168,10 @@ void(mitem_desktop desktop) M_Levels =
 		if (substring(gamedir, 0, 1) != "." && substring(gamedir, 0, 2) != ".." && hasperiodinname == 0) 
 		{
 			if (desc=="")
-				desc = sprintf("^m%s^m", gamedir);
+				desc = sprintf("^m%s", gamedir);
 			else
-				desc = sprintf("^m%s^m ^h%s^h", desc, gamedir);	//include the gamedir, faded somewhat.
-
-			// string icon = getgamedirinfo(idirs, GGDI_ICON);
-
-			string modcmd;
-			modcmd = getgamedirinfo(idirs, GGDI_LOADCOMMAND);
+				desc = sprintf("^m%s ^h%s", desc, gamedir);	//include the gamedir, faded somewhat.
+			
 			if not(modcmd) //for dp users, if they somehow run this
 				modcmd = sprintf("gamedir %s", gamedir);
 			// command to load the mod and open the levels menu again
@@ -187,32 +188,45 @@ void(mitem_desktop desktop) M_Levels =
 
 				y+=modnamescale+2; // padding for the next line item
 
-				print(sprintf("gamedir: %s, currentgame: %s\n", gamedir, currentgame));
+				// print(sprintf("gamedir: %s, currentgame: %s\n", gamedir, currentgame));
 				if (currentgame == gamedir) 
 				{
 					// search for mod maps to list
-					print(sprintf("Searching for: %s\n", gamedir));
-					searchhandle sh = search_begin("maps/*.bsp", 2, 0);
+					// print(sprintf("Searching for: %s\n", gamedir));
+					searchhandle sh = search_begin("maps/*.bsp", 2, TRUE);
 					if (search_getsize(sh) > 0)
 					{
 						float li;
 						for(li=0;li<search_getsize(sh);li++)
 						{
+							// get filename
 							string fname = search_getfilename(sh,li);
+							// print(sprintf("fname: %s\n", fname)); // DEBUG
+							// extract mod name from package path (id1): "id1/pack0.pak"
+							string pkname = search_getpackagename(sh,li);
+							// print(sprintf("idx %f, pkname: %s\n", li, pkname)); // DEBUG
+
 							// parse name out of filepath
 							tokenizebyseparator(argv(tokenizebyseparator(fname, "/")-1), "."); 
 							string mapname = argv(0);
+							print(sprintf("mapname: %s\n", mapname)); // DEBUG
 
 							// exclude some files that may also be .bsp but are not maps
 							if (strtolower(substring(mapname, 0, 2)) == "b_")
 								continue;
+							
+							tokenizebyseparator(pkname, "/");
+							string pkrootdir = argv(0);
+							print(sprintf("gamedir: %s - pkrootdir: %s\n", gamedir, pkrootdir)); // DEBUG
 
+							if (gamedir != pkrootdir)
+								continue;
+								
 							// TODO: get more info on levels:
 							// Spoike
 							// first 12 bytes of a bsp are {int version; int entofs; int entlen;}
 							// if you check that the version is either 29 or the bsp2 value, you can then fseek to the entofs, 
 							// read entlen bytes from the file, and then parse it however you want (eg with tokenize)
-
 
 							// command to load the level
 							string lvlcmd = strcat("m_pop; map ", mapname, ";\n");

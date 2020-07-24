@@ -214,8 +214,6 @@ nonstatic void(mitem_desktop desktop) M_Options_Basic =
 			fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
 	}
 
-	posy += padding*2;
-
 	fr.add(spawn_check (_("Always Run"), cv2("cl_run", "cl_alwaysrun"), optionsize),
 		fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
 	if (engine!=E_QSS) {
