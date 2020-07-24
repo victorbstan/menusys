@@ -100,34 +100,34 @@ nonstatic void(mitem_desktop desktop) M_Options =
 	// show the options.
 	float fl = RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN;
 	if (checkcommand2("fps_preset", FALSE)) {
-		fr.add(spawn(mitem_text, item_text:"Graphical Presets", item_command:"m_pop;m_preset", item_scale:TXT_NMSZ), 
+		fr.add(spawn(mitem_text, item_text:"^mGraphical Presets", item_command:"m_pop;m_preset", item_scale:TXT_NMSZ), 
 			fl, [bsx, by], [0, TXT_NMSZ]); by += TXT_NMSZ+spacing; }
-	fr.add(spawn(mitem_text, item_text:"Game Configs", item_command:"m_pop;m_configs", item_scale:TXT_NMSZ), 
+	fr.add(spawn(mitem_text, item_text:"^mGame Configs", item_command:"m_pop;m_configs", item_scale:TXT_NMSZ), 
 		fl, [bsx, by], [0, TXT_NMSZ]); by += TXT_NMSZ+spacing;
-	fr.add(spawn(mitem_text, item_text:"Basic Setup", item_command:"m_pop;m_basicopts",	item_scale:TXT_NMSZ), 
+	fr.add(spawn(mitem_text, item_text:"^mBasic Setup", item_command:"m_pop;m_basicopts",	item_scale:TXT_NMSZ), 
 		fl, [bsx, by], [0, TXT_NMSZ]); by += TXT_NMSZ+spacing;
-	fr.add(spawn(mitem_text, item_text:"Keys", item_command:"m_pop;m_keys", item_scale:TXT_NMSZ), 
+	fr.add(spawn(mitem_text, item_text:"^mKeys", item_command:"m_pop;m_keys", item_scale:TXT_NMSZ), 
 		fl, [bsx, by], [0, TXT_NMSZ]); by += TXT_NMSZ+spacing;
-	fr.add(spawn(mitem_text, item_text:"Audio", item_command:"m_pop;m_audio", item_scale:TXT_NMSZ), 
+	fr.add(spawn(mitem_text, item_text:"^mAudio", item_command:"m_pop;m_audio", item_scale:TXT_NMSZ), 
 		fl, [bsx, by], [0, TXT_NMSZ]); by += TXT_NMSZ+spacing;
-	fr.add(spawn(mitem_text, item_text:"Video", item_command:"m_pop;m_video", item_scale:TXT_NMSZ), 
+	fr.add(spawn(mitem_text, item_text:"^mVideo", item_command:"m_pop;m_video", item_scale:TXT_NMSZ), 
 		fl, [bsx, by], [0, TXT_NMSZ]); by += TXT_NMSZ+spacing;
-	fr.add(spawn(mitem_text, item_text:"Effects", item_command:"m_pop;m_effects", item_scale:TXT_NMSZ), 
+	fr.add(spawn(mitem_text, item_text:"^mEffects", item_command:"m_pop;m_effects", item_scale:TXT_NMSZ), 
 		fl, [bsx, by], [0, TXT_NMSZ]); by += TXT_NMSZ+spacing;
 	if (checkcommand2("r_particledesc", FALSE)) {
-		fr.add(spawn(mitem_text, item_text:"Particles", item_command:"m_pop;m_particles", item_scale:TXT_NMSZ), 
+		fr.add(spawn(mitem_text, item_text:"^mParticles", item_command:"m_pop;m_particles", item_scale:TXT_NMSZ), 
 			fl, [bsx, by], [0, TXT_NMSZ]); by += TXT_NMSZ+spacing; }
 	if (checkcommand2("ezhud_nquake", FALSE)) {
-		fr.add(spawn(mitem_text, item_text:"Hud", item_command:"m_pop;m_hud", item_scale:TXT_NMSZ), 
+		fr.add(spawn(mitem_text, item_text:"^mHud", item_command:"m_pop;m_hud", item_scale:TXT_NMSZ), 
 			fl, [bsx, by], [0, TXT_NMSZ]); by += TXT_NMSZ+spacing; }
 	if (checkcommand2("pkg", FALSE)) {
-		fr.add(spawn(mitem_text, item_text:"Updates", item_command:"m_pop;m_updates", item_scale:TXT_NMSZ), 
+		fr.add(spawn(mitem_text, item_text:"^mUpdates", item_command:"m_pop;m_updates", item_scale:TXT_NMSZ), 
 			fl, [bsx, by], [0, TXT_NMSZ]); by += TXT_NMSZ+spacing; }
 
 	by += padding*2; 
 
 	if (checkbuiltin2(buf_cvarlist, TRUE)) {
-		fr.add(spawn(mitem_text, item_text:"Advanced Settings", item_command:"m_pop;m_cvars", item_scale:TXT_NMSZ), 
+		fr.add(spawn(mitem_text, item_text:"^mAdvanced Settings", item_command:"m_pop;m_cvars", item_scale:TXT_NMSZ), 
 			fl, [bsx, by], [0, TXT_NMSZ]); by += TXT_NMSZ+spacing; }
 
 	by += padding*4; 
