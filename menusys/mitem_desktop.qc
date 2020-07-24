@@ -347,7 +347,7 @@ void(mitem_desktop desktop, vector screensize) items_draw =
 //		if (drawgetimagesize(autocvar_cl_cursor) == '0 0')
 //			ui.drawpic(ui.mousepos - autocvar_cl_cursorbias*'1 1', autocvar_cl_cursor, autocvar_cl_cursorsize*'1 1', '1 1 1', 1, 0);
 //		else
-			ui.drawcharacter(ui.mousepos - [stringwidth("+", (engine==E_QSS?!TRUE:TRUE), '4 4')*0.5, 4], '+', '8 8', '1 1 1', 1, 0);
+			ui.drawcharacter(ui.mousepos - [stringwidth("+", (engine==E_QSS?FALSE:TRUE), '4 4')*0.5, 4], '+', '8 8', '1 1 1', 1, 0);
 	}
 
 #ifndef MENU

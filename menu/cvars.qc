@@ -90,7 +90,7 @@ void(vector pos, float idx) mitem_cvargrid::grid_draw =
 		col *= 0.5;
 
 	vector valuepos = [pos_x+item_size_x/2, pos_y];
-	pos_x = valuepos_x - stringwidth(text, (engine==E_QSS?!TRUE:TRUE), '1 1 0'*this.item_scale) - 8;
+	pos_x = valuepos_x - stringwidth(text, (engine==E_QSS?FALSE:TRUE), '1 1 0'*this.item_scale) - 8;
 	valuepos_x += 1;
 	ui.drawstring(pos, text, '1 1 0' * item_scale, col, item_alpha, 0);
 	ui.drawstring(valuepos, value, '1 1 0' * item_scale, col, item_alpha, 0);

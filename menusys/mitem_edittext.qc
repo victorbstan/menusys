@@ -82,7 +82,7 @@ float(vector pos, float scan, float char, float down) mitem_edit::item_keypress 
 		if (ui.mousepos[0] > valuepos-8)
 		{
 			spos = strlen(curval);
-			while (spos>0 && ui.mousepos[0] < valuepos+stringwidth(substring(curval, 0, spos), (engine==E_QSS?!TRUE:TRUE), '1 1 0'*item_scale))
+			while (spos>0 && ui.mousepos[0] < valuepos+stringwidth(substring(curval, 0, spos), (engine==E_QSS?FALSE:TRUE), '1 1 0'*item_scale))
 				spos--;
 		}
 	}
