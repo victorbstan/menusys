@@ -9,9 +9,7 @@ the great thing about providing source is that you can change it.
 you can instead just shove your preset settings directly into the quotes instead of exec.
 */
 
-// 160 Is "half screen", assuming screen size is 320
-static float offset_l = -160;
-static float offset_r = 160;
+// NOTE: this should just be some choices in a drop-down menu...
 
 struct
 {
@@ -52,24 +50,68 @@ nonstatic float(string fname) checkfileexists =
 nonstatic void(mitem_desktop desktop) M_Preset =
 {
 	local float i;
-	mitem_exmenu m;
-	m = spawn(mitem_exmenu, item_text:_("Graphical Presets"), item_flags:IF_SELECTABLE, item_command:"m_options");
-	desktop.add(m, RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, '0 0', '0 0');
-	desktop.item_focuschange(m, IF_KFOCUSED);
-	m.totop();
 
+	float menux = MENU_WIDTH;
+	float menuy = MENU_HEIGHT;
+	float padding = PADDING;
+	float spacing = SPACING;
+	float titleoffset = -12;
 
-	float h = 200 * 0.5;
-	//draw title art above the options
+	// Main menu
+	
+	// no dupes please.
+	local mitem_exmenu mm;
+	mm = (mitem_exmenu)desktop.findchildtext(_("Graphical Presets"));
+	if (mm) { mm.totop(); return; }
+	// create a fullscreen frame
+	mm = spawn(mitem_exmenu, item_text:_("Graphical Presets"), item_flags:IF_SELECTABLE|IF_NOCURSOR, item_command:"m_options");
+	desktop.add(mm, RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, '0 0', '0 0');
+	desktop.item_focuschange(mm, IF_KFOCUSED);
+	mm.totop();
+
+	// Frame menu
+
+	mitem_frame m = spawn(mitem_frame, item_flags:IF_SELECTABLE|IF_NOCURSOR, frame_hasscroll:FALSE);
+	mm.add(
+		m,
+		RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, // top-left|bottom-right relation
+		[menux*-0.5, menuy*-0.5], // top-left
+		[menux*0.5, menuy*0.5] // bottom-right
+	);
+
+	// Title
+	
 	mitem_pic banner = spawn(mitem_pic, item_text:"gfx/p_option.lmp", item_size_y:24, item_flags:IF_CENTERALIGN);
-	m.add(banner, RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_OWN_MIN|RS_Y_MAX_PARENT_MID, 
-		[banner.item_size_x*-0.5, -h-32], [banner.item_size_x*0.5, -h-8]);
-	//spawn a container frame for the actual options. this provides a scrollbar if we have too many items.
-	mitem_frame fr = spawn(mitem_frame, item_flags: IF_SELECTABLE, frame_hasscroll:TRUE);
-	m.add(fr, RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN, [0, -h], [0, h*2]);
-	float fl = RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN;
+	m.add(
+		banner,
+		RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MID|RS_Y_MAX_OWN_MIN,
+		[(banner.item_size_x*-0.5)+titleoffset, padding], [banner.item_size_x*0.5, 24]
+	);
 
-	float fs, y=0;
+	// Content
+
+	// spawn a container frame for the actual options. this provides a scrollbar if we have too many items.
+	mitem_frame fr = spawn(mitem_frame, item_flags: IF_SELECTABLE, frame_hasscroll:TRUE,
+		item_framesize_x: padding, // sides
+		item_framesize_y: padding, // top
+		item_framesize_z: padding // bottom
+	);
+	m.add(
+		fr,
+		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, // top-left|bottom-right relation
+		[0, banner.item_size_y+padding], // top-left
+		[0, 0] // bottom-right
+	);
+	
+	// Options
+	
+	float y=0;
+	
+	// Headline
+	fr.addc(spawn_headline("Graphic Presets"), y); y+=TXT_MDSZ+padding;
+
+	float fl = RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN;
+	float fs;
 	fs = search_begin("configs/preset_*.cfg", TRUE, TRUE);
 	float c = search_getsize(fs);
 	for (i = 0; i < c; i++)
@@ -80,19 +122,20 @@ nonstatic void(mitem_desktop desktop) M_Preset =
 		iname = sprintf("exec \"configs/preset_%s.cfg\";vid_reload", iname);
 		if (dname && !fr.findchildcmd(iname))
 		{
-			fr.add(spawn(mitem_text, item_text:dname, item_command:iname, item_scale:16, item_flags:IF_CENTERALIGN), fl, [0, y], '100 16');
-			y+=16;
+			fr.add(spawn(mitem_text, item_text:dname, item_command:iname, 
+				item_scale:TXT_NMSZ, item_flags:IF_CENTERALIGN), 
+				fl, [0, y], [0, TXT_NMSZ]); y+=TXT_NMSZ+spacing;
 		}
 	}
 	search_end(fs);
 	if (c <= 0)
 	{
 		//add the default options
-		for (i = 0, float pos = 0; i < presets.length; i++)
+		for (i = 0; i < presets.length; i++)
 		{
 			fr.add(spawn(mitem_text, item_text:presets[i].name, item_command:sprintf("fps_preset %s", presets[i].preset), 
-				item_scale:16, item_flags:IF_CENTERALIGN), fl, [0, pos], [100, 16]);
-			pos += 16;
+				item_scale:TXT_NMSZ, item_flags:IF_CENTERALIGN), 
+				fl, [0, y], [0, TXT_NMSZ]); y+=TXT_NMSZ+spacing;
 		}
 	}
 

@@ -1,21 +1,21 @@
-class mitem_playerpreview : mitem_spinnymodel
-{
-	virtual void(vector pos) item_draw =
-	{
-		if (checkbuiltin2(setcustomskin, FALSE))
-		{
-			//if you wanted to get more advanced, you could use q3 skins here.
-			if (cvar("noskins"))
-				setcustomskin(self, "", sprintf("q1upper \"%s\"\nq1lower \"%s\"\n\n", cvar_string("topcolor"), cvar_string("bottomcolor")));
-			else if (cvar_string("cl_teamskin") != "")
-				setcustomskin(self, "", sprintf("q1upper \"%s\"\nq1lower \"%s\"\nqwskin \"%s\"\n", cvar_string("topcolor"), cvar_string("bottomcolor"), cvar_string("cl_teamskin")));
-			else
-				setcustomskin(self, "", sprintf("q1upper \"%s\"\nq1lower \"%s\"\nqwskin \"%s\"\n", cvar_string("topcolor"), cvar_string("bottomcolor"), cvar_string("skin")));
-		}
-	
-		super::item_draw(pos);
-	};
-};
+// class mitem_playerpreview : mitem_spinnymodel
+// {
+// 	virtual void(vector pos) item_draw =
+// 	{
+// 		if (checkbuiltin2(setcustomskin, FALSE))
+// 		{
+// 			//if you wanted to get more advanced, you could use q3 skins here.
+// 			if (cvar("noskins"))
+// 				setcustomskin(self, "", sprintf("q1upper \"%s\"\nq1lower \"%s\"\n\n", cvar_string("topcolor"), cvar_string("bottomcolor")));
+// 			else if (cvar_string("cl_teamskin") != "")
+// 				setcustomskin(self, "", sprintf("q1upper \"%s\"\nq1lower \"%s\"\nqwskin \"%s\"\n", cvar_string("topcolor"), cvar_string("bottomcolor"), cvar_string("cl_teamskin")));
+// 			else
+// 				setcustomskin(self, "", sprintf("q1upper \"%s\"\nq1lower \"%s\"\nqwskin \"%s\"\n", cvar_string("topcolor"), cvar_string("bottomcolor"), cvar_string("skin")));
+// 		}
+
+// 		super::item_draw(pos);
+// 	};
+// };
 
 static string() skinopts =
 {
@@ -90,42 +90,105 @@ class options_basic : mitem_exmenu
 };
 nonstatic void(mitem_desktop desktop) M_Options_Basic =
 {
-	mitem_exmenu m;
-	m = spawn(options_basic, item_text:_("Basic Options"), item_flags:IF_SELECTABLE, item_command:"m_options");
-	desktop.add(m, RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, '0 0', '0 0');
-	desktop.item_focuschange(m, IF_KFOCUSED);
-	m.totop();
+	float menux = MENU_WIDTH;
+	float menuy = MENU_HEIGHT;
+	float padding = PADDING;
+	float spacing = SPACING;
+	float qplaquewidth = 32;
+	float plaquepadding = 24;
+	float titleoffset = -12;
 
-	float h = 200 * 0.5;
-	//draw title art above the options
-	mitem_pic banner = spawn(mitem_pic, item_text:"gfx/ttl_cstm.lmp", item_size_y:24, item_flags:IF_CENTERALIGN);
-	m.add(banner, RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_OWN_MIN|RS_Y_MAX_PARENT_MID, [(160-160-banner.item_size_x)*0.5, -h-32], [banner.item_size_x, -h-8]);
-	//spawn a container frame for the actual options. this provides a scrollbar if we have too many items.
-	mitem_frame fr = spawn(mitem_frame, item_flags: IF_SELECTABLE, frame_hasscroll:TRUE);
-	m.add(fr, RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_OWN_MIN, [-160, -h], [160, h*2]);
+	// Main menu
+	
+	// no dupes please.
+	local mitem_exmenu mm;
+	mm = (mitem_exmenu)desktop.findchildtext(_("Basic Options"));
+	if (mm) { mm.totop(); return; }
+	// create a fullscreen frame
+	mm = spawn(mitem_exmenu, item_text:_("Basic Options"), item_flags:IF_SELECTABLE|IF_NOCURSOR, item_command:"m_options");
+	desktop.add(mm, RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, '0 0', '0 0');
+	desktop.item_focuschange(mm, IF_KFOCUSED);
+	mm.totop();
+
+	// Frame menu
+
+	mitem_frame m = spawn(mitem_frame, item_flags:IF_SELECTABLE|IF_NOCURSOR, frame_hasscroll:FALSE);
+	mm.add(
+		m,
+		RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, // top-left|bottom-right relation
+		[menux*-0.5, menuy*-0.5], // top-left
+		[menux*0.5, menuy*0.5] // bottom-right
+	);
+
+	// Title
+	
+	mitem_pic banner = spawn(mitem_pic, item_text:"gfx/p_option.lmp", item_size_y:24, item_flags:IF_CENTERALIGN);
+	m.add(
+		banner,
+		RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MID|RS_Y_MAX_OWN_MIN,
+		[(banner.item_size_x*-0.5)+titleoffset, padding], [banner.item_size_x*0.5, 24]
+	);
+
+	// Content
+
+	// spawn a container frame for the actual options. this provides a scrollbar if we have too many items.
+	mitem_frame fr = spawn(mitem_frame, item_flags: IF_SELECTABLE, frame_hasscroll:TRUE,
+		item_framesize_x: padding, // sides
+		item_framesize_y: padding, // top
+		item_framesize_z: padding // bottom
+	);
+	m.add(
+		fr,
+		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, // top-left|bottom-right relation
+		[0, banner.item_size_y+padding], // top-left
+		[0, 0] // bottom-right
+	);
+	
+	// Options
+
+	float posy = 0;
+	float posx = 0;
+	float maxposx = -SCRLY-padding;
+	float optionswidth = menux-SCRLY;
+	vector optionsize = [optionswidth, TXT_NMSZ];
+
+	// Headline
+	fr.addc(spawn_headline("Basic Setup"), posy); posy+=TXT_MDSZ+padding;
+
 	float fl = RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN;
-	float pos = 0;
+	fr.add(spawn_edit(_("Player Name"), cv2("_cl_name", "name"), optionsize), 
+		fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
+	fr.add(spawn_edit(_("Player Team"), "team", optionsize), 
+		fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
+	fr.add(spawn_combo(_("Player Skin"), "skin", optionsize, skinopts()), 
+		fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
+	fr.add(menuitemcolour_spawn(_("Upper Colour"), "topcolor", optionsize), 
+		fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
+	fr.add(menuitemcolour_spawn(_("Lower Colour"), "bottomcolor", optionsize),
+		fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
 	
+	posy += padding*2;
 
-	fr.add(menuitemeditt_spawn(_("Player Name"), 		cv2("_cl_name", "name"), 			'280 8'), 	fl, [0, pos], [0, 8]); pos += 8;
-	fr.add(menuitemeditt_spawn(_("Player Team"), 		"team",						'280 8'), 	fl, [0, pos], [0, 8]); pos += 8;
-	fr.add(menuitemcombo_spawn(_("Player Skin"), 		"skin",						'280 8', 	skinopts()), fl, [0, pos], [0, 8]); pos += 8;
-																	
-																	
-	fr.add(menuitemcolour_spawn(_("Upper Colour"), 	"topcolor", 					'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
-	fr.add(menuitemcolour_spawn(_("Lower Colour"), 	"bottomcolor", 					'280 8'),	fl, [0, pos], [0, 8]); pos += 8;	/*aka: arse colour*/
-	pos += 8;
-	fr.add(menuitemcheck_spawn (_("Always Run"),		"cl_run", 					'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
-	fr.add(menuitemcheck_spawn (_("Invert Mouse"),		"m_pitchsign", 					'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
-	fr.add(menuitemslider_spawn(_("Sensitivity"),		"sensitivity", 			'3 20 1',	'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
-	fr.add(menuitemslider_spawn(_("Fov"),			"fov", 				'80 130 5',	'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
-	fr.add(menuitemslider_spawn(_("Viewmodel Fov"),		"r_viewmodel_fov", 		'80 130 5',	'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
-	fr.add(menuitemslider_spawn(_("Gamma"),			cv2("v_gamma", "gamma"), 	'0.4 1.3 0.1',	'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
-	fr.add(menuitemslider_spawn(_("Contrast"),		cv2("v_contrast", "contrast"), 	'0.8 1.8 0.1', 	'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
-	fr.add(menuitemslider_spawn(_("Brightness"),		cv2("v_brightness", "brightness"),'0.0 0.5 0.1', '280 8'),	fl, [0, pos], [0, 8]); pos += 8;
-	fr.add(menuitemslider_spawn(_("Crosshair"),		"crosshair", 			'0.0 19 1', 	'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
-	
-	m.add(spawn (mitem_playerpreview, item_text: "progs/player.mdl", firstframe:0, framecount:6, shootframe:119, shootframes:6), RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, [-200, 12*-16/2], [-40, 12*16/2]);
+	fr.add(spawn_check (_("Always Run"), "cl_run", optionsize),
+		fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
+	fr.add(spawn_check (_("Invert Mouse"), "m_pitchsign", optionsize),
+		fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
+	fr.add(spawn_hslider(_("Sensitivity"), "sensitivity", '3 20 1', optionsize),
+		fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
+	fr.add(spawn_hslider(_("Fov"), "fov", '80 130 5', optionsize), 
+		fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
+	fr.add(spawn_hslider(_("Viewmodel Fov"), "r_viewmodel_fov", '80 130 5', optionsize), 
+		fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
+	fr.add(spawn_hslider(_("Gamma"), cv2("v_gamma", "gamma"), '0.4 1.3 0.1', optionsize), 
+		fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
+	fr.add(spawn_hslider(_("Contrast"), cv2("v_contrast", "contrast"), '0.8 1.8 0.1', optionsize), 
+		fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
+	fr.add(spawn_hslider(_("Brightness"), cv2("v_brightness", "brightness"),'0.0 0.5 0.1', optionsize),
+		fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
+	fr.add(spawn_hslider(_("Crosshair"), "crosshair", '0.0 19 1', optionsize), 
+		fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
+
+	// m.add(spawn (mitem_playerpreview, item_text: "progs/player.mdl", firstframe:0, framecount:6, shootframe:119, shootframes:6), RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, [-200, 12*-16/2], [-40, 12*16/2]);
 
 	addmenuback(m);
 };

@@ -8,6 +8,16 @@ class mitem_hslider : mitem
 	virtual float(vector pos, float scan, float char, float down) item_keypress;
 
 	vector item_slidercontrols;	//min, max, step
+
+	void() mitem_hslider =
+	{
+		if (item_text)
+			item_text = strzone(item_text);
+		if (item_command)
+			item_command = strzone(item_command);
+		if (isvalid(item_command))
+			item_flags |= IF_SELECTABLE;
+	};
 	
 	virtual void() item_resized =
 	{
@@ -65,7 +75,7 @@ void(vector pos) mitem_hslider::item_draw =
 };
 float(vector pos, float scan, float char, float down) mitem_hslider::item_keypress =
 {
-	if (down&2)
+	if (down & 2)
 	{
 		//we have grabs, and mouse was released?
 		if (scan == K_MOUSE1 && !(down&1))
@@ -137,17 +147,23 @@ float(vector pos, float scan, float char, float down) mitem_hslider::item_keypre
 		ui.mgrabs = __NULL__;
 	return FALSE;
 };
-mitem_hslider(string text, string command, vector controls, vector sz) menuitemslider_spawn =
+void() mitem_hslider::item_remove =
 {
-	mitem_hslider n = spawn(mitem_hslider);
-	n.item_scale = sz_y;
-	n.item_text = text;
-	n.item_size = sz;
+	if (item_text)
+		strunzone(item_text);
+	if (item_command)
+		strunzone(item_command);
+	super::item_remove();
+};
 
-	n.item_slidercontrols = controls;
-
-	n.item_command = command;
-	if (n.isvalid(command))
-		n.item_flags |= IF_SELECTABLE;
-	return n;
+mitem_hslider(string text, string command, vector controls, vector sz) spawn_hslider =
+{
+	return spawn(mitem_hslider,
+		item_scale: sz_y,
+		item_text: strcat("^m", text, "^m"),
+		// item_text: text,
+		item_size: sz,
+		item_slidercontrols: controls,
+		item_command: command
+	);
 };

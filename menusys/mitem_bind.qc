@@ -11,23 +11,29 @@ class mitem_bind : mitem
 	void() mitem_bind =
 	{
 		item_scale = item_size[1];
-
 		item_flags |= IF_SELECTABLE;
-		
-		item_text = strzone(item_text);
-		item_command = strzone(item_command);
+		if (item_text) 
+		{
+			// set description text color to "alt"
+			item_text = strzone(strcat("^m", item_text));
+			// item_text = strzone(item_text);
+		}
+		if (item_command)
+			item_command = strzone(item_command);
 	};
 	virtual void() item_remove =
 	{
-		strunzone(item_text);
-		strunzone(item_command);
+		if (item_text)
+			strunzone(item_text);
+		if (item_command)
+			strunzone(item_command);
 	};
 };
-#define menuitembind_spawn(text,command,sz)	\
-	spawn(mitem_bind,			\
+#define spawn_bind(text,command,sz)	\
+	spawn(mitem_bind,				\
 		item_text:		text,		\
 		item_command:	command,	\
-		item_size:		sz		\
+		item_size:		sz			\
 		)
 
 void(vector pos) mitem_bind::item_draw =
@@ -49,12 +55,12 @@ void(vector pos) mitem_bind::item_draw =
 	else
 	{
 		ui.drawstring(pos, key1, '1 1 0' * self.item_scale, menuitem_textcolour(self), self.item_alpha, 0);
-		pos_x += stringwidth(key1, TRUE, '1 1 0'*self.item_scale);
+		pos_x += stringwidth(key1, (engine==E_QSS?!TRUE:TRUE), '1 1 0'*self.item_scale);
 
 		if (key2 != "")
 		{
 			ui.drawstring(pos, "  or  ", '1 1 0' * self.item_scale, menuitem_textcolour(self), self.item_alpha, 0);
-			pos_x += stringwidth("  or  ", TRUE, '1 1 0'*self.item_scale);
+			pos_x += stringwidth("  or  ", (engine==E_QSS?!TRUE:TRUE), '1 1 0'*self.item_scale);
 
 			ui.drawstring(pos, key2, '1 1 0' * self.item_scale, menuitem_textcolour(self), self.item_alpha, 0);
 //			pos_x += stringwidth(key2, TRUE, '1 1 0'*self.item_scale);

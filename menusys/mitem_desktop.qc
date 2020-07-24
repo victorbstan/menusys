@@ -7,13 +7,16 @@ typedef mitem mitem_desktop;
 #else
 class mitem_desktop : mitem_frame
 {
-	virtual float(vector pos, float scan, float char, float down)	item_keypress;
+	virtual float(vector pos, float scan, float char, float down) item_keypress;
 	virtual void(mitem newfocus, float flag) item_focuschange;
-	virtual void(vector pos) item_draw;		//draws the game, then calls mitem_frame::item_draw for children.
+	virtual void(vector pos) item_draw; // draws the game, then calls mitem_frame::item_draw for children.
 #ifndef MENU
-	virtual void(float seat, vector minpos, vector size) drawgame = __NULL__;	//if overridden, should call renderscene and then draw whatever hud it needs to. this will do splitscreen efficiently and automatically.
+	// if overridden, should call renderscene and then draw whatever hud it needs to.
+	// this will do splitscreen efficiently and automatically.
+	virtual void(float seat, vector minpos, vector size) drawgame = __NULL__;
 #endif
-	void() mitem_desktop;			//the constructor. uninteresting. just ensures the size defaults to fullscreen.
+	// the constructor. uninteresting. just ensures the size defaults to fullscreen.
+	void() mitem_desktop;
 };
 #endif
 
@@ -24,11 +27,25 @@ float sb_showscores;
 float drawfont;
 float(string fontname, string fontmaps, string sizes, float slot, optional float fix_scale, optional float fix_voffset) loadfont = #357;
 
+var string autocvar_cl_cursor = CURSORPATH;
+var string autocvar_cl_cursorbias = "0";
+var string autocvar_cl_cursor_size = "2";
+var string autocvar_cl_cursor_scale = "2"; // FTE console uses this
+// var string autocvar_cl_cursorsize = "2";
+
 void() mitem_desktop::mitem_desktop =
 {
-#define menu_font_win 		autocvar(menu_font_win, "cour")
-#define menu_font		autocvar(menu_font, "cour")
-#define menu_font_fallback	autocvar(gl_font, "")
+	cvar_set("cl_cursor", ((autocvar_cl_cursor!="")?autocvar_cl_cursor: CURSORPATH));
+	cvar_set("cl_cursorbias", ((cvar("cl_cursorbias") > 0) ? autocvar_cl_cursorbias : "0"));
+	cvar_set("cl_cursor_size", ((cvar("cl_cursor_size") > 1) ? autocvar_cl_cursor_size : "2")); // FTE
+	cvar_set("cl_cursor_scale", ((cvar("cl_cursor_scale") > 1) ? autocvar_cl_cursor_scale : "2")); // FTE
+	// cvar_set("cl_cursorsize", ((stof(autocvar_cl_cursorsize) > 2)?autocvar_cl_cursorsize:"2")); // QSS
+	// Usage example:
+	// setcursormode(TRUE, cvar_string("cl_cursor"), cvar("cl_cursorbias")*'1 1', cvar("cl_cursor_size"));
+
+	#define menu_font_win 		autocvar(menu_font_win, MENU_FONT_WIN)
+	#define menu_font			autocvar(menu_font, MENU_FONT)
+	#define menu_font_fallback	autocvar(gl_font, GL_FONT)
 	queryscreensize();
 
 	if (checkextension("DP_GFX_FONTS"))
@@ -188,7 +205,7 @@ void(float seat, vector minpos, vector size) mitem_desktop::drawgame_helper =
 	else
 	{
 		setviewprop(VF_LPLAYER, seat);
-		setproperty(VF_VIEWENTITY, player_localentnum);	
+		setproperty(VF_VIEWENTITY, player_localentnum);
 		addentities(MASK_VIEWMODEL);	//don't do mask_engine because that's already done
 	}
 //	if (dp_workarounds)
@@ -262,11 +279,6 @@ void(vector pos) mitem_desktop::item_draw =
 	}
 };
 
-
-var string autocvar_cl_cursor = "gfx/cursor.lmp";
-var float autocvar_cl_cursorsize = 32;
-var float autocvar_cl_cursorbias = 4;
-
 static var float oldgrabstate;	//to work around a DP bug (as well as unnecessary spam)
 
 void(float force) items_updategrabs =
@@ -279,9 +291,10 @@ void(float force) items_updategrabs =
 #ifdef MENU
 			setkeydest(2);
 			setmousetarget(2);
+			float cursorsize = cvar("cl_cursor_size")?cvar("cl_cursor_size"):cvar("cl_cursor_scale");
+			setcursormode(TRUE, cvar_string("cl_cursor"), cvar("cl_cursorbias")*'1 1', cursorsize);
 #else
 			setcursormode(TRUE);
-			//setcursormode(TRUE, autocvar_cl_cursor, autocvar_cl_cursorbias*'1 1', autocvar_cl_cursorscale);
 #endif
 		}
 	}
@@ -325,7 +338,7 @@ void(mitem_desktop desktop, vector screensize) items_draw =
 //		if (drawgetimagesize(autocvar_cl_cursor) == '0 0')
 //			ui.drawpic(ui.mousepos - autocvar_cl_cursorbias*'1 1', autocvar_cl_cursor, autocvar_cl_cursorsize*'1 1', '1 1 1', 1, 0);
 //		else
-			ui.drawcharacter(ui.mousepos - [stringwidth("+", TRUE, '4 4')*0.5, 4], '+', '8 8', '1 1 1', 1, 0);
+			ui.drawcharacter(ui.mousepos - [stringwidth("+", (engine==E_QSS?!TRUE:TRUE), '4 4')*0.5, 4], '+', '8 8', '1 1 1', 1, 0);
 	}
 
 #ifndef MENU
@@ -336,7 +349,7 @@ void(mitem_desktop desktop, vector screensize) items_draw =
 };
 
 #ifdef CSQC
-//items_keypress has quite strong dimorphism. These are meant to tailored to the target's available event notifications, rather than being really rather annoying.
+//items_keypress has quite strong dimorphism. These are meant to be tailored to the target's available event notifications, rather than being really rather annoying.
 csqconly float(mitem_desktop desktop, float evtype, float scanx, float chary, float devid) items_keypress =
 {
 	local float result = FALSE;
@@ -457,7 +470,7 @@ menuonly float(mitem_desktop desktop, float scan, float char, float down) items_
 				return result & 1;
 		}
 	}
-	
+
 	if (desktop && desktop.item_keypress)
 		result = desktop.item_keypress(desktop.item_position, scan, char, down);
 

@@ -57,26 +57,75 @@ __strip var float dp_workarounds;
 #define RS_Y_MAX_PARENT_MID	0x2000
 #define RS_Y_MAX_PARENT_MAX	0x4000
 
-//the 3d effect needs some sort of fake lighting values.
-//these are for bumps. invert for inset things.
-#define TD_TOP '0.8 0.8 0.8'
-#define TD_LFT '0.6 0.6 0.6'
-#define TD_RGT '0.2 0.2 0.2'
-#define TD_BOT '0.0 0.0 0.0'
-
-#ifndef MENUBACK_RGB
-#define MENUBACK_RGB '0.4 0.365 0.29'
-//#define MENUBACK_RGB '0.5 0.5 0.6'
-#endif
-#ifndef MENUBACK_ALPHA
-#define MENUBACK_ALPHA 0.8
-#endif
-
 //#ifdef TARGET_FTE
 //#pragma TARGET FTE
 //#endif
 
 //#define HEIRACHYDEBUG	//enable this and press f1 to print out the current menuitem tree
+
+// Color scheme/theme
+// text
+#define XRGB_TXT "^xFFF" 
+#define RGB_TXT '1 1 1' 
+#define XRGB_TXTB "^xFFD" 
+#define RGB_TXTB '1 1 0.875'
+// darker conchars variant
+#define XRGB_ALT "^xF86" 
+#define RGB_ALT '1 0.5 0.375'
+// notifications
+#define XRGB_DANGER "^xD32"
+#define RGB_DANGER '0.875 0.1875 0.125'
+#define XRGB_WARNING "^xD62"
+#define RGB_WARNING '0.875 0.375 0.125'
+#define XRGB_INFO "^x69A"
+#define RGB_INFO '0.375 0.5625 0.625'
+#define XRGB_SUCCESS "^xEB3"
+#define RGB_SUCCESS '0.9375 0.6875 0.1875'
+#define XRGB_MUTED "^xAA9"
+#define RGB_MUTED '0.625 0.625 0.5625'
+// interactivity
+#define XRGB_MFOCUS "^xF86"
+#define RGB_MFOCUS '1 0.5 0.375'
+#define XRGB_KFOCUS "^xF86"
+#define RGB_KFOCUS '1 0.5 0.375'
+#define XRGB_KMFOCUS "^xF86"
+#define RGB_KMFOCUS '1 0.5 0.375'
+// backgrounds & fills
+#define RGB_BGHOVERA '0.625 0.625 0.5625'
+#define RGB_BGHOVERB '0.625 0.5625 0.625'
+#define RGB_VSLIDER '0.625 0.625 0.5625'
+#define VSLIDER_ALPHA 0.2
+#define RGB_MENUBACK '0.25 0.1875 0.125'
+#define MENUBACK_ALPHA 0.8
+
+//the 3d effect needs some sort of fake lighting values.
+//these are for bumps. invert for inset things. (like in 1995)
+#define TD_TOP '0.8 0.8 0.8'
+#define TD_LFT '0.6 0.6 0.6'
+#define TD_RGT '0.2 0.2 0.2'
+#define TD_BOT '0.0 0.0 0.0'
+
+// sizes
+#define PADDING 4
+#define SPACING 1
+// does not define scroll bar width, but can be used for offsets
+#define SCRLY 8
+// traditional quake menu sizes
+#define MENU_WIDTH 320
+#define MENU_HEIGHT 200
+// text
+#define TXT_SMSZ 4
+#define TXT_NMSZ 8
+#define TXT_MDSZ 10
+#define TXT_LGSZ 12
+#define TXT_XLSZ 14
+#define TXT_XXLSZ 16
+// fonts
+#define MENU_FONT_WIN ""
+#define MENU_FONT ""
+#define GL_FONT ""
+// curosr
+#define CURSORPATH "menugfx/cursor.tga"
 
 class mitem_frame;
 .vector		mins;		//gravity mins
@@ -92,16 +141,16 @@ class mitem
 	virtual float(string key)										isvalid;
 	virtual void() 													item_remove;
 	virtual void() 													item_resized;
-	float 			item_flags;		//contains IF_ flags
+	float 		item_flags;			//contains IF_ flags
 	vector 		item_position;		//relative to the parent's client area. which is admittedly not well defined...
 	vector 		item_size;			//interaction bounding box.
-	float 			item_scale;		//text etc scale
+	float 		item_scale;			//text etc scale
 	vector 		item_rgb;			//colours!
-	float 			item_alpha;		//transparency value
+	float 		item_alpha;			//transparency value
 	string 		item_text;			//used as a unique identifier
 	string 		item_command;		//something to do when clicked. move out?
 	mitem_frame	item_parent;		//the item that contains us. make mitem_frame?
-	mitem 		item_next;		//the next child within the parent
+	mitem 		item_next;			//the next child within the parent
 
 	float			resizeflags;
 
@@ -112,10 +161,10 @@ class mitem
 //this struct is used to access the various drawing functions. this allows the functions to be replaced for worldspace stuff
 typedef struct uiinfo_s
 {
-	void(float min_x, float min_y, float max_x, float max_y)							setcliparea;
+	void(float min_x, float min_y, float max_x, float max_y)									setcliparea;
 	float(vector min, string imagename, vector size, vector col, float alph, float drawflag)	drawpic;
-	float(vector min, vector size, vector col, float alph, float drawflag)				drawfill;
-	float(vector min, float charcode, vector scale, vector col, float alph, float drawflag)	drawcharacter;
+	float(vector min, vector size, vector col, float alph, float drawflag)						drawfill;
+	float(vector min, float charcode, vector scale, vector col, float alph, float drawflag)		drawcharacter;
 	float(vector min, string text, vector scale, vector col, float alph, float drawflag)		drawstring;
 
 	mitem kgrabs;		//kfocused or mfocused or both or none to say what sort of grabs is in effect.
@@ -206,11 +255,11 @@ void mitem_printnode(float depth, mitem root, string prefix)
 	mitem ch;
 	string col = "";
 	if (root.item_flags & IF_KFOCUSED && root.item_flags & IF_MFOCUSED)
-		col = "^2";
+		col = XRGB_KMFOCUS;
 	else if (root.item_flags & IF_KFOCUSED)
-		col = "^5";
+		col = XRGB_KFOCUS;
 	else if (root.item_flags & IF_MFOCUSED)
-		col = "^3";
+		col = XRGB_MFOCUS;
 
 	print(sprintf("%s%s%i:%s%s\n", col, strpad(depth, ""), root, prefix, root.item_text));
 
@@ -317,23 +366,25 @@ vector(mitem it) menuitem_textcolour =
 	local vector col;
 	col = it.item_rgb;
 	if (!(it.item_flags & IF_SELECTABLE) && it.item_keypress && it.item_command != "")
-		col *= 0.2;
+		col *= 0.2; // darken
 	else
 	{
 		if (it.item_flags & IF_MFOCUSED)
-			col_z = 0;
+			col = RGB_MFOCUS;
 		if (it.item_flags & IF_KFOCUSED)
-			col_x = 0;
+			col = RGB_KFOCUS;
 	}
 	return col;
 };
+
 void(vector pos) mitem::item_draw =
 {
 	vector col;
-	pos_x += this.item_size[0] / 2 - stringwidth(this.item_text, TRUE, '1 1 0'*this.item_scale) - 8;
+	pos_x += this.item_size[0] / 2 - stringwidth(this.item_text, (engine==E_QSS?!TRUE:TRUE), '1 1 0'*this.item_scale) - 8;
 	col = menuitem_textcolour(this);
 	ui.drawstring(pos, this.item_text, '1 1 0' * this.item_scale, col, this.item_alpha, 0);
 };
+
 void() mitem::item_remove =
 {
 	local mitem ch;
@@ -387,7 +438,7 @@ void() mitem::mitem =
 	if (!this.item_scale)
 		this.item_scale = 1;
 	if (!this.item_rgb)
-		this.item_rgb = '1 1 1';
+		this.item_rgb = RGB_TXT;
 	if (!this.item_alpha)
 		this.item_alpha = 1;
 

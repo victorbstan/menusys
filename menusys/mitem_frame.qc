@@ -14,26 +14,26 @@ class mitem_vslider : mitem
 	float val;
 	float minv;
 	float maxv;
-	float stride;	//size of one 'notch'
+	float stride; //size of one 'notch'
 };
 
 class mitem_frame : mitem
 {
-	virtual void(mitem newfocus, float changedflag)				item_focuschange;
-	virtual float(vector pos, float scan, float char, float down)	item_keypress;
-	virtual void()			item_resized;
-	virtual void(vector pos)	item_draw;
-	virtual void()			item_remove;
-	virtual void(mitem fromitem, string cmd)	item_execcommand;
+	virtual void(mitem newfocus, float changedflag) item_focuschange;
+	virtual float(vector pos, float scan, float char, float down) item_keypress;
+	virtual void() item_resized;
+	virtual void(vector pos) item_draw;
+	virtual void() item_remove;
+	virtual void(mitem fromitem, string cmd) item_execcommand;
 
-	mitem 		item_children;
-	mitem 		item_mactivechild;
-	mitem 		item_kactivechild;
-	mitem		item_exclusive;
+	mitem item_children;
+	mitem item_mactivechild;
+	mitem item_kactivechild;
+	mitem item_exclusive;
 
-	mitem_vslider	vslider;	//displayed if any client item's max[y] > our item_size[y]
-	vector 	item_framesize;	//x=sides, y=top, z=bottom
-	float frame_stdheight;	//adjust RS_Y_MIN_PARENT_MID to pinch inwards when the frame is smaller than this. Child items crossing the mid-point must size gracefully (like subframes).
+	mitem_vslider vslider; //displayed if any client item's max[y] > our item_size[y]
+	vector item_framesize; //x=sides, y=top, z=bottom
+	float frame_stdheight; //adjust RS_Y_MIN_PARENT_MID to pinch inwards when the frame is smaller than this. Child items crossing the mid-point must size gracefully (like subframes).
 	float frame_hasscroll;
 
 	static mitem(string title) findchildtext;
@@ -64,7 +64,7 @@ void(mitem ch, vector parentsize) mitem_parentresized =
 		ch.item_position[0] = ch.mins[0];
 
 	if (f & RS_X_FRACTION)
-		ch.item_position[0] = parentsize[0] * ch.maxs[0];
+		ch.item_size[0] = parentsize[0] * ch.maxs[0];
 	else if (f & RS_X_MAX_PARENT_MIN)
 		ch.item_size[0] = ch.maxs[0] - ch.item_position[0];
 	else if (f & RS_X_MAX_PARENT_MID)
@@ -94,7 +94,7 @@ void(mitem ch, vector parentsize) mitem_parentresized =
 		ch.item_position[1] = ch.mins[1];
 
 	if (f & RS_Y_FRACTION)
-		ch.item_position[1] = parentsize[1] * ch.maxs[1];
+		ch.item_size[1] = parentsize[1] * ch.maxs[1];
 	else if (f & RS_Y_MAX_PARENT_MIN)
 		ch.item_size[1] = ch.maxs[1] - ch.item_position[1];
 	else if (f & RS_Y_MAX_PARENT_MID)
@@ -159,7 +159,7 @@ void(mitem newitem, float originflags, vector originmin, vector originmax) mitem
 	local vector parentsize = [item_size[0] - item_framesize[0]*2, item_size[1] - (item_framesize[1] + item_framesize[2])];
 	mitem_parentresized(newitem, parentsize);
 	newitem.item_resized();
-	
+
 	item_flags |= IF_CLIENTMOVED;	//make sure it happens.
 
 //	if (!item_kactivechild && (newitem.item_flags & IF_SELECTABLE))
@@ -180,7 +180,7 @@ void(mitem newitem, vector pos) mitem_frame::adda =
 
 	mitem_parentresized(newitem, parentsize);
 	newitem.item_resized();
-	
+
 	item_flags |= IF_CLIENTMOVED;	//make sure it happens.
 
 //	if (!item_kactivechild && (newitem.item_flags & IF_SELECTABLE))
@@ -211,7 +211,7 @@ void(mitem newitem, float originflags, vector originmin, vector originmax) mitem
 	newitem.maxs = originmax;
 	mitem_parentresized(newitem, parentsize);
 	newitem.item_resized();
-	
+
 	item_flags |= IF_CLIENTMOVED;	//make sure it happens.
 
 //	if (!item_kactivechild && (newitem.item_flags & IF_SELECTABLE))
@@ -261,7 +261,7 @@ void(mitem newitem, float ypos) mitem_frame::addc =
 		}
 	}
 	newitem.item_resized();
-	
+
 	item_flags |= IF_CLIENTMOVED;	//make sure it happens.
 
 //	if (!item_kactivechild && (newitem.item_flags & IF_SELECTABLE))
@@ -274,7 +274,7 @@ void(mitem newitem, vector min, vector max) mitem_frame::addm =
 	this.add(newitem, RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, min, max);
 };
 
-//updates this.item_activechild, and calls focus notifications to ensure things get the message. 
+//updates this.item_activechild, and calls focus notifications to ensure things get the message.
 //flag should be IF_MFOCUSED or IF_KFOCUSED
 void(mitem newfocus, float flag) mitem_frame::item_focuschange =
 {
@@ -374,32 +374,35 @@ float(vector pos, float scan, float char, float down) mitem_vslider::item_keypre
 };
 void(vector pos) mitem_vslider::item_draw =
 {
+	item_alpha = VSLIDER_ALPHA;
+	item_rgb = RGB_VSLIDER;
+
 	float f;
 	float w = item_size[0];
 	float h = item_size[1];
 	float isize = w;
-	
+
 	vector v = dp_workarounds?'0 0 0':drawgetimagesize("scrollbars/slider.tga");
 
 	if (v != '0 0 0')
 	{
-		ui.drawpic(pos, "scrollbars/arrow_up.tga", [w, w], '1 1 1', item_alpha, 0);	//top
+		ui.drawpic(pos, "scrollbars/arrow_up.tga", [w, w], item_rgb, item_alpha, 0);	//top
 		pos_y += w;
 		h -= w*2;
-		ui.drawpic(pos + [0, h], "scrollbars/arrow_down.tga", [w, w], '1 1 1', item_alpha, 0);	//bottom
-		ui.drawpic(pos, "scrollbars/slidebg.tga", [w, h], '1 1 1', item_alpha, 0);	//back-middle
-	
+		ui.drawpic(pos + [0, h], "scrollbars/arrow_down.tga", [w, w], item_rgb, item_alpha, 0);	//bottom
+		ui.drawpic(pos, "scrollbars/slidebg.tga", [w, h], item_rgb, item_alpha, 0);	//back-middle
+
 		isize = (v_y * w) / (v_x);
 		if (isize > h/2)
 			isize = h/2;
 	}
 	else
 	{
-//		ui.drawfill(pos, [w, w], '1 1 1', item_alpha, 0);	//top
+//		ui.drawfill(pos, [w, w], item_rgb, item_alpha, 0);	//top
 //		pos_y += w;
 //		h -= w*2;
-//		ui.drawfill(pos + [0, h], [w, w], '1 1 1', item_alpha, 0);	//bottom
-		ui.drawfill(pos, [w, h], '0.5 0.5 0.5', item_alpha, 0);	//back-middle
+//		ui.drawfill(pos + [0, h], [w, w], item_rgb, item_alpha, 0);	//bottom
+		ui.drawfill(pos, [w, h], item_rgb/2, item_alpha, 0);	//back-middle
 	}
 
 	if (ui.mgrabs == this)
@@ -413,9 +416,9 @@ void(vector pos) mitem_vslider::item_draw =
 
 	h -= isize;
 	if (v != '0 0 0')
-		ui.drawpic(pos + [0, h*f], "scrollbars/slider.tga", [w, isize], '1 1 1', item_alpha, 0);	//back-middle
+		ui.drawpic(pos + [0, h*f], "scrollbars/slider.tga", [w, isize], item_rgb, item_alpha, 0);	//back-middle
 	else
-		ui.drawfill(pos + [0, h*f], [w, isize], '1 1 1', item_alpha, 0);	//back-middle
+		ui.drawfill(pos + [0, h*f], [w, isize], item_rgb, item_alpha, 0);	//back-middle
 };
 void() mitem_vslider::mitem_vslider =
 {
@@ -458,7 +461,7 @@ static mitem(mitem_frame menu, float upwards, mitem item) menu_findnextitem =
 {
 	mitem_frame frame;
 	mitem citem;
-	
+
 	if (item && (item.item_flags & IF_ISFRAME))
 	{
 		frame = (mitem_frame)item;
@@ -466,7 +469,7 @@ static mitem(mitem_frame menu, float upwards, mitem item) menu_findnextitem =
 		if (citem)
 			return citem;
 	}
-	
+
 	for(;;)
 	{
 		if (!item)
@@ -480,12 +483,12 @@ static mitem(mitem_frame menu, float upwards, mitem item) menu_findnextitem =
 		}
 		else
 			item = menu_simplenextitem(item, upwards);
-		
+
 		if (!item)
 		{	//we reached the end of the list, let the parent frame try its next
 			return __NULL__;
 		}
-		
+
 		if (item.item_flags & IF_ISFRAME)
 		{	//if the next item is a frame, try and select its first element instead
 			frame = (mitem_frame)item;
@@ -499,7 +502,7 @@ static mitem(mitem_frame menu, float upwards, mitem item) menu_findnextitem =
 		if (item.item_flags & IF_SELECTABLE)
 			return item;
 	}
-	
+
 };
 static void(mitem item) menu_deselectitem =
 {
@@ -511,7 +514,7 @@ static void(mitem item) menu_deselectitem =
 		if (frame.item_kactivechild)
 			menu_deselectitem(frame.item_kactivechild);
 	}
-	item.item_focuschange(__NULL__, IF_KFOCUSED);	//deselect the previous one	
+	item.item_focuschange(__NULL__, IF_KFOCUSED);	//deselect the previous one
 };
 static void(mitem item) menu_selectitem =
 {
@@ -549,7 +552,7 @@ float(vector pos, float scan, float char, float down) mitem_frame::item_keypress
 	{
 		if (item_exclusive)
 			ch = item_exclusive;
-		else 
+		else
 			ch = item_mactivechild;
 		if (down)	//keyboard focus follows on mouse click.
 		{

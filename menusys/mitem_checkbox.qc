@@ -42,28 +42,47 @@ class mitem_check : mitem
 				ui.drawstring(pos + '4 0', "^{e083}", '1 1 0' * this.item_scale, rgb, this.item_alpha, 0);
 		}
 	};
+	
 	void() mitem_check =
 	{
+		if (item_text)
+			item_text = strzone(item_text);
+		if (item_command)
+			item_command = strzone(item_command);
 		if (!item_scale)
-			item_scale = 8;
+			item_scale = TXT_NMSZ;
 		if (!item_size_y)
 			item_size_y = item_scale;
 		if (isvalid(item_command))
 			item_flags |= IF_SELECTABLE;
 	};
-	
+		
 	virtual void() item_resized =
 	{
 		if (isvalid(item_command))
-			item_flags |= IF_SELECTABLE;		
+			item_flags |= IF_SELECTABLE;
 		else
 			item_flags &= ~IF_SELECTABLE;
 		super::item_resized();
 	};
 };
 
-//optional, can spawn direcly
-mitem_check(string text, string command, vector sz) menuitemcheck_spawn =
+void() mitem_check::item_remove =
 {
-	return spawn(mitem_check, item_scale: sz_y, item_text: text, item_size: sz, item_command: command);
+	if (item_text)
+		strunzone(item_text);
+	if (item_command)
+		strunzone(item_command);
+	super::item_remove();
+};
+
+//optional, can spawn direcly
+mitem_check(string text, string command, vector sz) spawn_check =
+{
+	return spawn(mitem_check, 
+		item_scale: sz_y, 
+		item_text:strcat("^m", text, "^m"), 
+		item_size: sz, 
+		item_command: command
+	);
 };

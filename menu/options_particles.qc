@@ -29,7 +29,7 @@ class particlesmenu : mitem_frame
 			}
 		}
 	};
-	virtual void(mitem fromitem, string cmd)	item_execcommand =
+	virtual void(mitem fromitem, string cmd) item_execcommand =
 	{
 		float sc = tokenize(thelist);
 		for (float i = 0; i < sc; i++)
@@ -70,41 +70,97 @@ string(string fname, string dflt) GetFirstLineComment =
 
 nonstatic void(mitem_desktop desktop) M_Options_Particles =
 {
-	float y = -8;
-	float h;
+	float menux = MENU_WIDTH;
+	float menuy = MENU_HEIGHT;
+	float padding = PADDING;
+	float spacing = SPACING;
+	float qplaquewidth = 32;
+	float plaquepadding = 24;
+	float titleoffset = -12;
 
-	//create the menu, give it focus, and make sure its displayed over everything else.
-	mitem_exmenu m = spawn(mitem_exmenu, item_text:_("Particles Options"), item_flags:IF_SELECTABLE, item_command:"m_options");
-	desktop.add(m, RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, '0 0', '0 0');
-	desktop.item_focuschange(m, IF_KFOCUSED);
-	m.totop();
+	// Main menu
+	
+	// no dupes please.
+	local mitem_exmenu mm;
+	mm = (mitem_exmenu)desktop.findchildtext(_("Particles"));
+	if (mm) { mm.totop(); return; }
+	// create a fullscreen frame
+	mm = spawn(mitem_exmenu, item_text:_("Particles"), item_flags:IF_SELECTABLE|IF_NOCURSOR, item_command:"m_options");
+	desktop.add(mm, RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, '0 0', '0 0');
+	desktop.item_focuschange(mm, IF_KFOCUSED);
+	mm.totop();
 
-	//figure out the size of the stuff
-//	h = sizeof(binds) / sizeof(binds[0]);
-//	h *= 8;
-	h = 200;
-	h *= 0.5;	//and halve it
+	// Frame menu
 
-	//draw title art above the options
-	mitem_pic banner = spawn(mitem_pic, item_text:"gfx/ttl_cstm.lmp", item_size_y:24, item_flags:IF_CENTERALIGN);
-	m.add(banner, RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, [banner.item_size_x*-0.5, -h-32], [banner.item_size_x*0.5, -h-8]);
+	mitem_frame m = spawn(mitem_frame, item_flags:IF_SELECTABLE|IF_NOCURSOR, frame_hasscroll:FALSE);
+	mm.add(
+		m,
+		RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, // top-left|bottom-right relation
+		[menux*-0.5, menuy*-0.5], // top-left
+		[menux*0.5, menuy*0.5] // bottom-right
+	);
 
-	//spawn a container frame for the actual options. this provides a scrollbar if we have too many items.
-	particlesmenu fr = spawn(particlesmenu, item_flags: IF_SELECTABLE, frame_hasscroll:TRUE);
-	m.add(fr, RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN, [0, -h], [0, h*2]);
+	// Title
+	
+	mitem_pic banner = spawn(mitem_pic, item_text:"gfx/p_option.lmp", item_size_y:24, item_flags:IF_CENTERALIGN);
+	m.add(
+		banner,
+		RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MID|RS_Y_MAX_OWN_MIN,
+		[(banner.item_size_x*-0.5)+titleoffset, padding], [banner.item_size_x*0.5, 24]
+	);
+
+	// Content
+
+	// spawn a container frame for the actual options. this provides a scrollbar if we have too many items.
+	mitem_frame ffr = spawn(mitem_frame, item_flags: IF_SELECTABLE, frame_hasscroll:TRUE,
+		item_framesize_x: padding, // sides
+		item_framesize_y: padding, // top
+		item_framesize_z: padding // bottom
+	);
+	m.add(
+		ffr,
+		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, // top-left|bottom-right relation
+		[0, banner.item_size_y+padding], // top-left
+		[0, 0] // bottom-right
+	);
+
+	// Options
+
+	float posy = 0;
+	float posx = 0;
+	float maxposx = -SCRLY-padding;
+	float optionswidth = menux-SCRLY;
+	vector optionsize = [optionswidth, TXT_NMSZ];
+
+	// Headline
+	ffr.addc(spawn_headline("Particles"), posy); posy+=TXT_MDSZ+padding;
+	
+	// Special frame for particles option
+	particlesmenu fr = spawn(particlesmenu, item_flags: IF_SELECTABLE, frame_hasscroll:FALSE);
+	ffr.add(
+		fr, 
+		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, 
+		[0, 0], // top-left
+		[0, 0] // bottom-right
+	);
+
+	float fl = RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN;
 
 	//FIXME: this stuff should be listed in order of selection, to reflect the priorities given to the various effects.
-
 	//FIXME: these should not be listed if its a no-compat/no-legacy build. this'll do for now, but its a bit wrong
 	if (checkextension("FTE_PART_NAMESPACE_EFFECTINFO"))
 	{
-		fr.add(spawn(mitem_text, item_text:"Classic Particles",	item_command:"classic", item_scale:8, item_flags:IF_CENTERALIGN), RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN, [0, y+=8], '0 8');
-		fr.add(spawn(mitem_text, item_text:"High Quality",	item_command:"high", item_scale:8, item_flags:IF_CENTERALIGN), RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN, [0, y+=8], '0 8');
-		fr.add(spawn(mitem_text, item_text:"TimeServ's Shaft", item_command:"tsshaft", item_scale:8, item_flags:IF_CENTERALIGN), RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN, [0, y+=8], '0 8');
+		fr.add(spawn(mitem_text, item_text:"Classic Particles",	item_command:"classic", item_scale:TXT_NMSZ, item_flags:IF_CENTERALIGN), 
+			fl, [posx, posy], [0, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
+		fr.add(spawn(mitem_text, item_text:"High Quality",	item_command:"high", item_scale:TXT_NMSZ, item_flags:IF_CENTERALIGN), 
+			fl, [posx, posy], [0, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
+		fr.add(spawn(mitem_text, item_text:"TimeServ's Shaft", item_command:"tsshaft", item_scale:TXT_NMSZ, item_flags:IF_CENTERALIGN), 
+			fl, [posx, posy], [0, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
 	
 		string efi = GetFirstLineComment("effectinfo.txt", "Effectinfo");
-		if (efi)
-			fr.add(spawn(mitem_text, item_text:efi, item_command:"effectinfo", item_scale:8, item_flags:IF_CENTERALIGN), RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN, [0, y+=8], '0 8');
+		if (efi) {
+			fr.add(spawn(mitem_text, item_text:efi, item_command:"effectinfo", item_scale:TXT_NMSZ, item_flags:IF_CENTERALIGN), 
+				fl, [posx, posy], [0, TXT_NMSZ]); posy += TXT_NMSZ+spacing; }
 	}
 
 	float fs;
@@ -114,8 +170,9 @@ nonstatic void(mitem_desktop desktop) M_Options_Particles =
 		string fname = search_getfilename(fs, i);
 		string iname = substring(fname, 10, -5);
 		string dname = GetFirstLineComment(fname, iname);
-		if (dname && !fr.findchildcmd(iname))
-			fr.add(spawn(mitem_text, item_text:dname, item_command:iname, item_scale:8, item_flags:IF_CENTERALIGN), RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN, [0, y+=8], '0 8');
+		if (dname && !fr.findchildcmd(iname)) {
+			fr.add(spawn(mitem_text, item_text:dname, item_command:iname, item_scale:TXT_NMSZ, item_flags:IF_CENTERALIGN), 
+				fl, [posx, posy], [0, TXT_NMSZ]); posy += TXT_NMSZ+spacing; }
 	}
 	search_end(fs);
 	fs = search_begin("particles/*/*.cfg", TRUE, TRUE);	
@@ -124,13 +181,17 @@ nonstatic void(mitem_desktop desktop) M_Options_Particles =
 		string fname = search_getfilename(fs, i);
 		string iname = substring(fname, 10, -5);
 		string dname = GetFirstLineComment(fname, iname);
-		if (dname && !fr.findchildcmd(iname))
-			fr.add(spawn(mitem_text, item_text:dname, item_command:iname, item_scale:8, item_flags:IF_CENTERALIGN), RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN, [0, y+=8], '0 8');
+		if (dname && !fr.findchildcmd(iname)) {
+			fr.add(spawn(mitem_text, item_text:dname, item_command:iname, item_scale:TXT_NMSZ, item_flags:IF_CENTERALIGN), 
+				fl, [posx, posy], [0, TXT_NMSZ]); posy += TXT_NMSZ+spacing; }
 	}
 	search_end(fs);
 
 	fr.UpdateSelections();
-	
-	//and give us a suitable menu tint too, just because.
+
+	// extra spacing for drop-downs
+	fr.add(spawn_mitem_spacer(16, -1), 
+		fl, [posx, posy], [maxposx, 24]);
+
 	addmenuback(m);
 };

@@ -115,7 +115,7 @@ mitem_checkbox.qc:class mitem_check : mitem
 	item_text: the description of the setting
 	item_command: the name of the cvar to toggle
 
-	optional factory: mitem_check(string text, string command, vector sz) menuitemcheck_spawn;
+	optional factory: mitem_check(string text, string command, vector sz) spawn_check;
 
 mitem_colours.qc:class mitem_colours : mitem
 	A simple colour picker. supports only hue.
@@ -128,7 +128,7 @@ mitem_combo.qc:class mitem_combo : mitem
 	multiple choice widget.
 	item_text: the description of the setting
 	mstrlist: a list of the valid settings, in "\"value\" \"description\" \"value\" \"description\"" notation.
-	FIXME: must spawn through: mitem_combo(string text, string command, vector sz, string valuelist) menuitemcombo_spawn;
+	FIXME: must spawn through: mitem_combo(string text, string command, vector sz, string valuelist) spawn_combo;
 
 mitem_combo.qc:class mitem_combo_popup : mitem
 	internal friend class of the combo.

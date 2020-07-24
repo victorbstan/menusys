@@ -39,9 +39,9 @@ void(vector pos, float idx) mitem_updategrid::grid_draw =
 
 	vector col = item_rgb;
 	if (item_flags & IF_MFOCUSED && idx == grid_mactive)
-		col_z = 0;
+		col = RGB_MFOCUS;
 	if (item_flags & IF_KFOCUSED && idx == grid_kactive)
-		col_x = 0;
+		col = RGB_KFOCUS;
 
 	string status = getpackagemanagerinfo(idx, GPMI_INSTALLED);
 	string action = getpackagemanagerinfo(idx, GPMI_ACTION);

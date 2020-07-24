@@ -11,14 +11,20 @@ Adds a background tint to a (typically) exmenu parent.
 In FTE, we use built-in stuff to give a sepia effect.
 In DP, we just tint it black.
 */
+
+static float offset_l = MENU_WIDTH/2*-1;
+static float offset_r = MENU_WIDTH/2;
+
+
 nonstatic void(mitem_frame m) addmenuback =
 {
+	float ssx = ui.screensize.x;
 	if (iscachedpic("menutint"))	//fte internal hacks! meh, admit it. its cool.
 		m.add(spawn (mitem_pic, item_text:"menutint", item_alpha:0.5),
-												RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, [0, 0], [0, 0]);
+			RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, [0, 0], [0, 0]);
 	else
 		m.add(spawn (mitem_fill, item_rgb:'0 0 0.01', item_alpha:0.5),
-												RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, [0, 0], [0, 0]);
+			RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, [0, 0], [0, 0]);
 };
 
 /*
@@ -59,53 +65,56 @@ nonstatic void(mitem_desktop desktop) M_Main =
 	local float y;
 	local mitem_exmenu m;
 
+	// Main menu
+
 	//no dupes please.
 	m = (mitem_exmenu)desktop.findchildtext(_("Main Menu"));
-	if (m)
-	{
-		m.totop();
-		return;
-	}
-
+	if (mm) { mm.totop(); return; }
 	//create a fullscreen frame
-	m = spawn(mitem_exmenu, item_text:_("Main Menu"), item_flags:IF_SELECTABLE);
+	m = spawn(mitem_exmenu, item_text:_("Main Menu"), item_flags:IF_SELECTABLE, item_command:"togglemenu");
 	desktop.add(m, RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, '0 0', '0 0');
 	desktop.item_focuschange(m, IF_KFOCUSED);
 	m.totop();
 
-//	m.item_flags |= IF_NOKILL;
-//	m.adda(menuitempic_spawn ("gfx/qplaque.lmp", 	'32 144'), 	'16 4');
+	//	m.item_flags |= IF_NOKILL;
+	//	m.adda(spawn_pic ("gfx/qplaque.lmp", 	'32 144'), 	'16 4');
 
 	y = 7*-16/2;
 
 	//draw title art above the options
 	mitem_pic banner = spawn(mitem_pic, item_text:"gfx/ttl_main.lmp", item_size_y:24, item_flags:IF_CENTERALIGN);
-	m.add(banner, RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, [(160-banner.item_size_x)*0.5, y-32], [(160+banner.item_size_x)*0.5, y-8]);
-
+	m.add(
+		banner,
+		RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID,
+		[banner.item_size_x*-0.5, y-32], [banner.item_size_x*0.5,  y-8]
+	);
 
 //a macro, in a desperate attempt at readability
-#define menuitemtext_cladd16(m,t,c,y) m.addm(spawn(mitem_text, item_text:t, item_command:c, item_scale:16, item_flags:IF_CENTERALIGN), [0, y], [160, y+16])
+#define menuitemtext_cladd16(m,t,c,y) m.addm(spawn(mitem_text, item_text:t, item_command:c, item_scale:16, item_flags:IF_CENTERALIGN), [offset_l, y], [offset_r, y+16])
 
-	if (clientstate() == 2)				{menuitemtext_cladd16(m, _("Return To Game"), 			"m_pop",			y); y += 16;}
-	if (clientstate() == 2)				{menuitemtext_cladd16(m, isserver?_("End Game"):_("Disconnect"),"m_pop;disconnect",	y); y += 16;}
-	if (isserver() != 1 && checkbuiltin2(gethostcacheindexforkey,ISMENUQC))	{menuitemtext_cladd16(m, _("Join Server"),			"m_pop;m_servers",	y); y += 16;}
-	if (checkcommand2("map", TRUE))					{menuitemtext_cladd16(m, _("New Game"),				"m_pop;m_newgame",	y); y += 16;}
-	if (checkcommand2("menu_demo", FALSE))				{menuitemtext_cladd16(m, _("Demos"),				"m_pop;menu_demo",	y); y += 16;}
-	if (checkcommand2("save", TRUE) && (isserver()||dp_workarounds))	{menuitemtext_cladd16(m, _("Save"),				"m_pop;m_save",		y); y += 16;}
-	if (checkcommand2("load", TRUE))					{menuitemtext_cladd16(m, _("Load"),				"m_pop;m_load",		y); y += 16;}
-	if (checkcommand2("cef", FALSE))					{menuitemtext_cladd16(m, _("Browser"),				"m_pop;cef google.com",	y); y += 16;}
-	if (checkcommand2("xmpp", FALSE))					{menuitemtext_cladd16(m, _("Social"),				"m_pop;xmpp",		y); y += 16;}
-	if (checkcommand2("irc", FALSE))					{menuitemtext_cladd16(m, _("IRC"),				"m_pop;irc /info",	y); y += 16;}
-	/*if (checkbuiltin2(getpackagemanagerinfo,FALSE))			{menuitemtext_cladd16(m, _("Updates+Packages"),			"m_pop;m_updates",	y); y += 16;}
-	else*/ if (checkcommand2("menu_download", FALSE))			{menuitemtext_cladd16(m, _("Updates+Packages"),			"m_pop;menu_download",	y); y += 16;}
-	if (checkcommand2("qi", FALSE))					{menuitemtext_cladd16(m, _("Quake Injector"),			"m_pop;qi",		y); y += 16;}
-	if (checkbuiltin2(getgamedirinfo,TRUE))					{menuitemtext_cladd16(m, _("Mods"),				"m_pop;m_mods",		y); y += 16;}
-										{menuitemtext_cladd16(m, _("Options"),				"m_pop;m_options",	y); y += 16;}
-										{menuitemtext_cladd16(m, _("Quit"), 				"m_pop;m_quit",		y); y += 16;}
+	if (clientstate() == 2) {menuitemtext_cladd16(m, _("Return To Game"), "m_pop", y); y += 16;}
+	if (clientstate() == 2) {menuitemtext_cladd16(m, isserver?_("End Game"):_("Disconnect"),"m_pop;disconnect", y); y += 16;}
+	if (checkcommand2("map", TRUE)) {menuitemtext_cladd16(m, _("New Game"), "m_pop;m_newgame",	y); y += 16;}
+	if (checkcommand2("load", TRUE)) {menuitemtext_cladd16(m, _("Load"), "m_pop;m_load", y); y += 16;}
+	if (checkcommand2("save", TRUE) && (isserver()||dp_workarounds)) {menuitemtext_cladd16(m, _("Save"), "m_pop;m_save", y); y += 16;}
+	if (isserver() != 1 && checkbuiltin2(gethostcacheindexforkey,ISMENUQC)) {menuitemtext_cladd16(m, _("Multiplayer"), "m_pop;m_servers", y); y += 16;}
+	if (checkbuiltin2(getgamedirinfo,TRUE)) {menuitemtext_cladd16(m, _("Mods"), "m_pop;m_mods", y); y += 16;}
+	if (checkcommand2("menu_demo", FALSE)) {menuitemtext_cladd16(m, _("Demos"), "m_pop;menu_demo", y); y += 16;}
+	// Extras
+	if (checkcommand2("cef", FALSE)) {menuitemtext_cladd16(m, _("Browser"), "m_pop;cef google.com", y); y += 16;}
+	if (checkcommand2("xmpp", FALSE)) {menuitemtext_cladd16(m, _("Social"), "m_pop;xmpp", y); y += 16;}
+	if (checkcommand2("irc", FALSE)) {menuitemtext_cladd16(m, _("IRC"), "m_pop;irc /info", y); y += 16;}
+	if (checkbuiltin2(getpackagemanagerinfo,FALSE)) {menuitemtext_cladd16(m, _("Updates+Packages"), "m_pop;m_updates", y); y += 16;}
+	if (checkcommand2("menu_download", FALSE)) {menuitemtext_cladd16(m, _("Updates+Packages"), "m_pop;menu_download", y); y += 16;}
+	// Quit
+	if (checkcommand2("qi", FALSE)) {menuitemtext_cladd16(m, _("Quake Injector"), "m_pop;qi", y); y += 16;}
+
+	{menuitemtext_cladd16(m, _("Options"), "m_pop;m_options", y); y += 16;}
+	{menuitemtext_cladd16(m, _("Quit"), "m_pop;m_quit", y); y += 16;}
 
 	//spinny quad/pent, for the luls
-	local string it = (random()<0.9)?"progs/quaddama.mdl":"progs/invulner.mdl";
-	m.add(spawn (mitem_spinnymodel, item_text: it), RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, [-160, 12*-16/2], [0, 12*16/2]);
+	// local string it = (random()<0.9)?"progs/quaddama.mdl":"progs/invulner.mdl";
+	// m.add(spawn (mitem_spinnymodel, item_text: it), RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, [offset_l, 12*-16/2], [0, 12*16/2]);
 
-	addmenuback(m);
+	// addmenuback(m);
 };

@@ -85,7 +85,7 @@ This line:
 	addmenuback(m);
 quite simply just creates a widgit on the menu that darkens the background (insertion order affects draw order, this should be last-ish, so that it is drawn BEFORE any of the other widgits, such that it darkens everything other than the menu.
 Lines like this:
-	fr.add(menuitemcombo_spawn(_("Video Width"),	"vid_width",					'280 8', _(
+	fr.add(spawn_combo(_("Video Width"),	"vid_width",					'280 8', _(
 						"0	\"Default\" "
 						"640	\"640\" "
 						"800	\"800\" "
@@ -93,16 +93,16 @@ Lines like this:
 						"1280 \"1280\" "
 						"1920	\"1920\" "
 						)),	fl, [0, pos], [0, 8]); pos += 8;
-just adds a single widgit into the frame's area (its the same add method as before, with the same RS_ flags in the fl argument), so I only really need to explain menuitemcombo_spawn here.
-menuitemcombo_spawn's first argument is the text to put next to it. The _("") weirdness provides some internationalisation thing that I'm far too lazy to go into right now (ask divverent or something for tools to use this properly).
+just adds a single widgit into the frame's area (its the same add method as before, with the same RS_ flags in the fl argument), so I only really need to explain spawn_combo here.
+spawn_combo's first argument is the text to put next to it. The _("") weirdness provides some internationalisation thing that I'm far too lazy to go into right now (ask divverent or something for tools to use this properly).
 The second argument is the 'cvar' that its attached to (actually, you can subclass the parent item and handle the get+set events yourself).
 The third is the size of the widget. Generally they should be wide enough for both the text and the value. And about 8 vpixels high.
 And finally, the fourth argument is the list of possible values, and the text that should be shown if that value is selected. Easy, right?
 Alternatively, this line:
-	fr.add(menuitemslider_spawn(_("View Size"),	"viewsize",				'50 120 10', '280 8'),	fl, [0, pos], [0, 8]); pos += 8;
+	fr.add(spawn_hslider(_("View Size"),	"viewsize",				'50 120 10', '280 8'),	fl, [0, pos], [0, 8]); pos += 8;
 spawns a 'slider' opject. Its basically the same as combos, except that the 3rd argument is the mix, max, and step-size values. Note that min+max can be inverted if you want (you should also negate the graduation in this case).
 And this line:
-	fr.add(menuitemcheck_spawn(_("Show Framerate"),	dp("showfps", "show_fps"), 	'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
+	fr.add(spawn_check(_("Show Framerate"),	dp("showfps", "show_fps"), 	'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
 is how you add a checkbox. There is no 'third' argument in this case, just that fourth (okay, so it does have a third, but shush).
 The 'dp' function you see there is part of how my code handles cvar differences between DP and other engines. If cvar_type reports that the first cvar exists, then it uses that. Otherwise it uses the second. Simple.
 Unfortunately this only detects whether a cvar exists or not, and can't handle different values very well, which is what the vid_fullscreen hack is all about. Yes, that sort of thing can be really awkward...

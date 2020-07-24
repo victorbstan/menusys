@@ -8,6 +8,16 @@ class mitem_colours : mitem
 {
 	virtual void(vector pos) item_draw;
 	virtual float(vector pos, float scan, float char, float down) item_keypress;
+
+	void() mitem_colours =
+	{
+		if (item_text)
+			item_text = strzone(item_text);
+		if (item_command)
+			item_command = strzone(item_command);
+		if (isvalid(item_command))
+			item_flags |= IF_SELECTABLE;
+	};
 	
 	virtual void() item_resized =
 	{
@@ -235,13 +245,11 @@ float(vector pos, float scan, float char, float down) mitem_colours::item_keypre
 };
 mitem_colours(string text, string command, vector sz) menuitemcolour_spawn =
 {
-	mitem_colours n = spawn(mitem_colours);
-	n.item_scale = sz_y;
-	n.item_text = text;
-	n.item_size = sz;
-
-	n.item_command = command;
-	n.item_flags |= IF_SELECTABLE;
-	return n;
+	return spawn(mitem_colours,
+		item_text: strcat("^m", text, "^m"),
+		item_command: command,
+		item_size: sz,
+		item_scale: sz_y
+	);
 };
 

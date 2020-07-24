@@ -27,7 +27,7 @@ class mitem_menu : mitem_frame
 	{
 		item_text = strzone(item_text);
 		item_scale = 8;
-		item_rgb = MENUBACK_RGB;
+		item_rgb = RGB_MENUBACK;
 		item_alpha = MENUBACK_ALPHA;
 
 		if (item_framesize == '0 0 0')
@@ -303,11 +303,11 @@ void(vector pos) mitem_menu::item_draw =
 		this::drawgrabhandle(pos, drag);
 
 	ui.drawfill(pos, efsize, item_rgb, item_alpha, 0);
-	local vector col = '1 1 1';
+	local vector col = RGB_TXT;
 	if (item_flags & IF_KFOCUSED)
-		col_x = 0;
+		col = RGB_KFOCUS;
 	if ((item_flags & IF_MFOCUSED) && mouseinbox(pos, [efsize_x-item_framesize[1], item_framesize[1]]))
-		col_z = 0;
+		col = RGB_MFOCUS;
 	inset = (item_framesize[1]-item_scale)*0.5;
 	ui.drawstring(pos + '1 1'*inset, item_text, item_scale*'1 1', col, 1, 0);
 	if (!(item_flags & IF_NOKILL))
