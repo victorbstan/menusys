@@ -50,7 +50,7 @@ class mitem_filli : mitem
 		}
 	};
 
-	virtual mitem(string ht, float htyo=-16, float hts=16) s_hover_text =
+	virtual mitem(string ht, float htyo=-16, float hts=TXT_NMSZ) s_hover_text =
 	{
 		hover_text = strzone(ht);
 		hovtyoffset = htyo;

@@ -15,7 +15,6 @@ class mitem_playerpreview : mitem_spinnymodel
 			else
 				setcustomskin(self, "", sprintf("q1upper \"%s\"\nq1lower \"%s\"\nqwskin \"%s\"\n", cvar_string("topcolor"), cvar_string("bottomcolor"), cvar_string("skin")));
 		}
-
 		super::item_draw(pos);
 	};
 };
