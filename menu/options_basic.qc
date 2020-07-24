@@ -207,18 +207,20 @@ nonstatic void(mitem_desktop desktop) M_Options_Basic =
 	{
 		fr.add(spawn_combo(_("Player Skin"), "skin", optionsize, skinopts()), 
 			fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
+		// disabled in QSS
+		fr.add(menuitemcolour_spawn(_("Upper Colour"), "topcolor", engine==E_QSS, optionsize), 
+			fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
+		fr.add(menuitemcolour_spawn(_("Lower Colour"), "bottomcolor", engine==E_QSS, optionsize),
+			fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
 	}
-	fr.add(menuitemcolour_spawn(_("Upper Colour"), "topcolor", engine==E_QSS, optionsize), 
-		fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
-	fr.add(menuitemcolour_spawn(_("Lower Colour"), "bottomcolor", engine==E_QSS, optionsize),
-		fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
-	
+
 	posy += padding*2;
 
-	fr.add(spawn_check (_("Always Run"), "cl_run", optionsize),
+	fr.add(spawn_check (_("Always Run"), cv2("cl_run", "cl_alwaysrun"), optionsize),
 		fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
-	fr.add(spawn_check (_("Invert Mouse"), "m_pitchsign", optionsize),
-		fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
+	if (engine!=E_QSS) {
+		fr.add(spawn_check (_("Invert Mouse"), "m_pitchsign", optionsize),
+			fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing; }
 	fr.add(spawn_hslider(_("Sensitivity"), "sensitivity", '3 20 1', optionsize),
 		fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
 	fr.add(spawn_hslider(_("Fov"), "fov", '80 130 5', optionsize), 

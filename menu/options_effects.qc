@@ -93,13 +93,16 @@ nonstatic void(mitem_desktop desktop) M_Options_Effects =
 		"nll \"Nearest (Smooth mips)\""
 		//"lln \"Linear (Linear mips, Unsmooth)\""
 	)), fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
-	fr.add(spawn_combo(_("Anistrophy"), "gl_texture_anisotropic_filtering", optionsize, _(
-		"0 \"Off\""
-		"2 \"2\""
-		"4 \"4\""
-		"8 \"8\""
-		"16 \"16\""
-	)),	fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
+	if (engine != E_QSS)
+	{
+		fr.add(spawn_combo(_("Anistrophy"), "gl_texture_anisotropic_filtering", optionsize, _(
+			"0 \"Off\""
+			"2 \"2\""
+			"4 \"4\""
+			"8 \"8\""
+			"16 \"16\""
+		)),	fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
+	}
 	fr.add(spawn_check(_("Lightmaps Only"), "r_lightmap", optionsize),
 		fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
 	fr.add(spawn_check(_("High Res Textures"), "gl_load24bit", optionsize), 

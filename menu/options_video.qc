@@ -161,7 +161,7 @@ nonstatic void(mitem_desktop desktop) M_Options_Video =
 		fr.add(spawn_check(_("Resizable"), "vid_resizable", optionsize),
 			fl, [posx, posy], [maxposx, TXT_NMSZ]), posy+=TXT_NMSZ+spacing; }
 	
-	fr.add(spawn_combo(_("Anti-Aliasing"), cv2("vid_samples", "vid_multisample"), optionsize,
+	fr.add(spawn_combo(_("MSAA"), cv3("vid_samples"/*dp*/, "vid_fsaa"/*qs*/, "vid_multisample"/*fte*/), optionsize,
 		"0 \"Off\""
 		"2 \"2x\""
 		"4 \"4x\""
@@ -184,7 +184,7 @@ nonstatic void(mitem_desktop desktop) M_Options_Video =
 		fr.add(spawn_combo(_("Console Zoom"), "scr_conscale", optionsize, scaleoptions), 
 			fl, [posx, posy], [maxposx, TXT_NMSZ]), posy+=TXT_NMSZ+spacing; }
 	if (cvar_type("scr_sbarscale")) {
-		fr.add(spawn_combo(_("Status Bar (Sbar) Zoom"), "scr_sbarscale", optionsize, scaleoptions), 
+		fr.add(spawn_combo(_("Sbar Zoom"), "scr_sbarscale", optionsize, scaleoptions), 
 			fl, [posx, posy], [maxposx, TXT_NMSZ]), posy+=TXT_NMSZ+spacing; }
 	if (cvar_type("scr_menuscale")) {
 		fr.add(spawn_combo(_("Menu Zoom"), "scr_menuscale", optionsize, scaleoptions), 

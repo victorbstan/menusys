@@ -102,8 +102,11 @@ nonstatic void(mitem_desktop desktop) M_Options =
 	if (checkcommand2("fps_preset", FALSE)) {
 		fr.add(spawn(mitem_text, item_text:"^mGraphical Presets", item_command:"m_pop;m_preset", item_scale:TXT_NMSZ), 
 			fl, [bsx, by], [0, TXT_NMSZ]); by += TXT_NMSZ+spacing; }
-	fr.add(spawn(mitem_text, item_text:"^mGame Configs", item_command:"m_pop;m_configs", item_scale:TXT_NMSZ), 
-		fl, [bsx, by], [0, TXT_NMSZ]); by += TXT_NMSZ+spacing;
+	if (engine!=E_QSS) // disabled by choice, feature is availabe in QSS -- VBS
+	{
+		fr.add(spawn(mitem_text, item_text:"^mGame Configs", item_command:"m_pop;m_configs", item_scale:TXT_NMSZ), 
+			fl, [bsx, by], [0, TXT_NMSZ]); by += TXT_NMSZ+spacing;
+	}
 	fr.add(spawn(mitem_text, item_text:"^mBasic Setup", item_command:"m_pop;m_basicopts",	item_scale:TXT_NMSZ), 
 		fl, [bsx, by], [0, TXT_NMSZ]); by += TXT_NMSZ+spacing;
 	fr.add(spawn(mitem_text, item_text:"^mKeys", item_command:"m_pop;m_keys", item_scale:TXT_NMSZ), 
@@ -114,9 +117,12 @@ nonstatic void(mitem_desktop desktop) M_Options =
 		fl, [bsx, by], [0, TXT_NMSZ]); by += TXT_NMSZ+spacing;
 	fr.add(spawn(mitem_text, item_text:"^mEffects", item_command:"m_pop;m_effects", item_scale:TXT_NMSZ), 
 		fl, [bsx, by], [0, TXT_NMSZ]); by += TXT_NMSZ+spacing;
-	if (checkcommand2("r_particledesc", FALSE)) {
-		fr.add(spawn(mitem_text, item_text:"^mParticles", item_command:"m_pop;m_particles", item_scale:TXT_NMSZ), 
-			fl, [bsx, by], [0, TXT_NMSZ]); by += TXT_NMSZ+spacing; }
+	if (engine!=E_QSS) // disabled by choice, feature is availabe in QSS -- VBS
+	{
+		if (checkcommand2("r_particledesc", FALSE)) {
+			fr.add(spawn(mitem_text, item_text:"^mParticles", item_command:"m_pop;m_particles", item_scale:TXT_NMSZ), 
+				fl, [bsx, by], [0, TXT_NMSZ]); by += TXT_NMSZ+spacing; }
+	}
 	if (checkcommand2("ezhud_nquake", FALSE)) {
 		fr.add(spawn(mitem_text, item_text:"^mHud", item_command:"m_pop;m_hud", item_scale:TXT_NMSZ), 
 			fl, [bsx, by], [0, TXT_NMSZ]); by += TXT_NMSZ+spacing; }
