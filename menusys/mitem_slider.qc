@@ -160,7 +160,7 @@ mitem_hslider(string text, string command, vector controls, vector sz) spawn_hsl
 {
 	return spawn(mitem_hslider,
 		item_scale: sz_y,
-		item_text: strcat("^m", text, "^m"),
+		item_text: strcat("^m", text),
 		// item_text: text,
 		item_size: sz,
 		item_slidercontrols: controls,

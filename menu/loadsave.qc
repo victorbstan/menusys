@@ -211,11 +211,11 @@ void(mitem_desktop desktop, float mode) M_LoadSave =
 
 		// Add section divider
 		if (savenames[i] == "quicksave")
-			l = strcat("^m", "QUICK SAVE", "^m");
+			l = strcat("^m", "QUICK SAVE");
 		else if (savenames[i] == "autosave")
-			l = strcat("^m", "AUTO SAVE", "^m");
+			l = strcat("^m", "AUTO SAVE");
 		else if (savenames[i] == "normalsave")
-			l = strcat("^m", "MY SAVES", "^m");
+			l = strcat("^m", "MY SAVES");
 
 		// line item
 		fr.add(

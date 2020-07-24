@@ -110,7 +110,7 @@ mitem_edit(string text, string command, vector sz) spawn_edit =
 {
 	return spawn(mitem_edit,
 		item_scale: sz_y,
-		item_text: strcat("^m", text, "^m"),
+		item_text: strcat("^m", text),
 		item_size: sz,
 		spos: 10000000,	//will be clipped so meh
 		item_command: command,

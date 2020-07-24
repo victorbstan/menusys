@@ -370,7 +370,7 @@ float(vector pos, float scan, float char, float down) mitem_combo::item_keypress
 mitem_combo(string text, string command, vector sz, string valuelist) spawn_combo =
 {
 	return spawn(mitem_combo,
-		item_text: strcat("^m", text, "^m"),
+		item_text: strcat("^m", text),
 		item_command: command,
 		item_size: sz,
 		mstrlist: valuelist,
