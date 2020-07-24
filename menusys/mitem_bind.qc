@@ -2,6 +2,7 @@
 key binding item.
 interactable - queries binds for a command, and accepts new scan codes to bind for its given command.
 */
+
 class mitem_bind : mitem
 {
 	virtual void(vector pos) item_draw;

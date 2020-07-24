@@ -127,6 +127,13 @@ __strip var float dp_workarounds;
 // curosr
 #define CURSORPATH "menugfx/cursor.tga"
 
+enum
+{
+	E_FTE,
+	E_QSS,
+} engine; //For use ONLY with known possible cvar values.
+
+
 class mitem_frame;
 .vector		mins;		//gravity mins
 .vector		maxs;		//gravity mins
