@@ -37,8 +37,8 @@ void() mitem_desktop::mitem_desktop =
 {
 	cvar_set("cl_cursor", ((autocvar_cl_cursor!="")?autocvar_cl_cursor: CURSORPATH));
 	cvar_set("cl_cursorbias", ((cvar("cl_cursorbias") > 0) ? autocvar_cl_cursorbias : "0"));
-	cvar_set("cl_cursor_size", ((cvar("cl_cursor_size") > 1) ? autocvar_cl_cursor_size : "2")); // FTE
-	cvar_set("cl_cursor_scale", ((cvar("cl_cursor_scale") > 1) ? autocvar_cl_cursor_scale : "2")); // FTE
+	cvar_set("cl_cursor_size", ((cvar("cl_cursor_size") > 1) ? autocvar_cl_cursor_size : "2"));
+	cvar_set("cl_cursor_scale", ((cvar("cl_cursor_scale") > 1) ? autocvar_cl_cursor_scale : "2"));
 	// cvar_set("cl_cursorsize", ((stof(autocvar_cl_cursorsize) > 2)?autocvar_cl_cursorsize:"2")); // QSS
 	// Usage example:
 	// setcursormode(TRUE, cvar_string("cl_cursor"), cvar("cl_cursorbias")*'1 1', cvar("cl_cursor_size"));
@@ -287,15 +287,23 @@ void(float force) items_updategrabs =
 	{
 		if (!oldgrabstate || force)
 		{
+			float cursorsize = cursorsize = cvar("cl_cursor_size")?cvar("cl_cursor_size"):cvar("cl_cursor_scale");
 			oldgrabstate = TRUE;
 #ifdef MENU
 			setkeydest(2);
-			setmousetarget(2);
-			float cursorsize = cvar("cl_cursor_size")?cvar("cl_cursor_size"):cvar("cl_cursor_scale");
-			setcursormode(TRUE, cvar_string("cl_cursor"), cvar("cl_cursorbias")*'1 1', cursorsize);
+			if (!checkbuiltin(setcursormode))
+				setmousetarget(2); //legacy junk
+			else
+			{
+				setcursormode(TRUE, cvar_string("cl_cursor"), cvar("cl_cursorbias")*'1 1', cursorsize);
+			}
 #else
 			setcursormode(TRUE);
 #endif
+			if (checkextension("FTE_QC_HARDWARECURSORS"))
+				setcursormode(TRUE, cvar_string("cl_cursor"), cvar("cl_cursorbias")*'1 1', cursorsize);
+			else
+				setcursormode(TRUE);	//because DP sucks.
 		}
 	}
 	else if (oldgrabstate || force)
@@ -303,10 +311,11 @@ void(float force) items_updategrabs =
 		oldgrabstate = FALSE;
 #ifdef MENU
 		setkeydest(0);
-		setmousetarget(1);
-#else
-		setcursormode(FALSE);
+		if (!checkbuiltin(setcursormode))
+			setmousetarget(1);
+		else
 #endif
+			setcursormode(FALSE);
 	}
 };
 
@@ -334,7 +343,7 @@ void(mitem_desktop desktop, vector screensize) items_draw =
 	items_updategrabs(FALSE);
 	if (dp_workarounds && oldgrabstate)
 	{
-//		//hopefully dp isn't broken and reports non-zero sizes for files that failed.
+//		//hopefully dp isn't broken and reports zero sizes for files that failed...
 //		if (drawgetimagesize(autocvar_cl_cursor) == '0 0')
 //			ui.drawpic(ui.mousepos - autocvar_cl_cursorbias*'1 1', autocvar_cl_cursor, autocvar_cl_cursorsize*'1 1', '1 1 1', 1, 0);
 //		else

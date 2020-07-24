@@ -143,9 +143,13 @@ nonstatic void(mitem_desktop desktop) M_Options_Video =
 	if (!dp_workarounds)
 	{
 		fr.add(spawn_combo(_("Display Mode"), "vid_fullscreen", optionsize,
-			"0 \"Windowed\" "
-			"1 \"Fullscreen\" "
-			"2 \"Borderless Windowed\" "
+			engine==E_FTE?
+			"0 \"Windowed\""
+			"1 \"Fullscreen\""
+			"2 \"Borderless Windowed\""
+			:
+			"0 \"Windowed\""
+			"1 \"Fullscreen\""
 		), fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
 	}
 	else 
@@ -169,7 +173,7 @@ nonstatic void(mitem_desktop desktop) M_Options_Video =
 
 	static const string scaleoptions = _(
 		"0 \"Default\""
-		"1 \"x1\""
+		"1.5 \"x1.5\""
 		"2 \"x2\""
 		"4 \"x4\""
 	);
@@ -219,16 +223,17 @@ nonstatic void(mitem_desktop desktop) M_Options_Video =
 		fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
 	fr.add(spawn_hslider(_("Contrast"), "contrast", '0.7 2 0.1', optionsize), 
 		fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
-	fr.add(spawn_hslider(_("Brightness"), "brightness", '0 0.4 0.05', optionsize), 
-		fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
-	fr.add(spawn_combo(_("Hardware Gamma"), "vid_hardwaregamma", optionsize,
-		"0 \"Off\" "
-		"1 \"Auto\" "
-		"2 \"Soft\" "
-		"3 \"Hard\" "
-		"4 \"Scene Only\" "
-	), fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
-
+	if (engine!=E_QSS) {
+		fr.add(spawn_hslider(_("Brightness"), "brightness", '0 0.4 0.05', optionsize), 
+			fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
+		fr.add(spawn_combo(_("Hardware Gamma"), "vid_hardwaregamma", optionsize,
+			"0 \"Off\" "
+			"1 \"Auto\" "
+			"2 \"Soft\" "
+			"3 \"Hard\" "
+			"4 \"Scene Only\" "
+		), fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
+	}
 	posy+=padding;
 
 	// extra spacing for drop-downs

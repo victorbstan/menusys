@@ -1,5 +1,11 @@
 static class audiomenu : mitem_exmenu
 {
+	virtual float(string key) isvalid =
+	{
+		if (key == "sndspeed")
+			return super::isvalid(key) && stof(super::get("snd_mixspeed"))==44100;
+		return super::isvalid(key);
+	};
 	virtual string(string key) get =
 	{
 		if (key == "s_device" || key == "cl_voip_capturedevice")
@@ -102,18 +108,26 @@ nonstatic void(mitem_desktop desktop) M_Options_Audio =
 	
 	float fl = RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN;
 
+	if (engine!=E_QSS)
 	fr.add(spawn_combo(_("Sound Device"), "s_device", optionsize, cvar_string("_s_device_opts")), 
 		fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
 	fr.add(spawn_hslider(_("Master Volume"),"volume", '0.0 1 0.1', optionsize), 
 		fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
 	fr.add(spawn_hslider(_("Ambient Volume"), "ambient_level", '0 0.5 0.05', optionsize), 
 		fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
+	if (engine!=E_QSS)
 	fr.add(spawn_hslider(_("Self Volume"), "s_localvolume", '0 1 0.1', optionsize), 
 		fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
 	fr.add(spawn_hslider(_("Music Volume"), "bgmvolume", '0 0.5 0.05', optionsize), 
 		fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
+	if (engine!=E_QSS)
 	fr.add(spawn_hslider(_("Channels"), "s_numspeakers", '1 6 1', optionsize), 
 		fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
+	if (engine==E_QSS)
+	fr.add(spawn_combo(_("Audio Filtering"), "sndspeed", optionsize, _(
+		"\"\"	\"Off\" "
+		"11025	\"On\" "
+		)),	fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
 	fr.add(spawn_combo(_("Audio Quality"), "s_khz", optionsize, _(
 		"8 \"8000hz (telephone)\" "
 		"11.025 \"11025hz (vanilla)\" "
@@ -124,10 +138,12 @@ nonstatic void(mitem_desktop desktop) M_Options_Audio =
 		//"96	\"96000hz (blu-ray quality)\" "
 		//"192	\"192000hz (professional quality)\" "
 	)),	fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
+	if (engine!=E_QSS)
 	fr.add(spawn_check(_("Doppler"), "s_doppler", optionsize), 
 		fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
 	fr.add(spawn_check(_("8bit audio"), "s_loadas8bit", optionsize), 
 		fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
+	if (engine!=E_QSS)
 	fr.add(spawn_check(_("Swap Speakers"), "s_swapstereo", optionsize), 
 		fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
 	fr.add(spawn_hslider(_("Latency"), "s_mixahead", '0.1 0.3 0.01', optionsize), 
@@ -135,13 +151,16 @@ nonstatic void(mitem_desktop desktop) M_Options_Audio =
 	fr.add(spawn_check(_("Disable Sound"), "nosound", optionsize), 
 		fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
 	//ambient fade
+	if (engine!=E_QSS)
 	fr.add(spawn_check(_("Static Sounds"), "cl_staticsounds", optionsize), 
 		fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
+	if (engine!=E_QSS)
 	fr.add(spawn_check(_("Mix in Background"),"s_inactive", optionsize), 
 		fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
 
 	by += padding;
 
+	if (engine!=E_QSS)
 	fr.add(spawn_combo(_("Microphone Device"), "cl_voip_capturedevice", optionsize, cvar_string("_cl_voip_capturedevice_opts")), 
 		fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
 	fr.add(spawn_hslider(_("VOIP Playback Vol"),"cl_voip_play", '0 2 0.1', optionsize), 
@@ -159,6 +178,7 @@ nonstatic void(mitem_desktop desktop) M_Options_Audio =
 	//ducking
 	//noise cancelation
 	fr.add(spawn_combo(_("VOIP Codec"), "cl_voip_codec", optionsize, _(
+		"\"\" \"Auto\""
 		"0 \"speex (narrow 11khz)\""
 		//"1 \"raw (wasteful)\""
 		"2 \"opus\""

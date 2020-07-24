@@ -191,9 +191,12 @@ static void(
 // NOTE: only keyboard interaction works?
 nonstatic void(mitem_desktop desktop) M_Reset =
 {
+	string cmd = "m_pop;cvarreset *;exec default.cfg;m_options;";
+	if (!checkcommand2("cvarreset", FALSE))
+		cmd = "m_pop;resetall;exec default.cfg;m_options;";
 	M_SimplePrompt(desktop, 
 		"Reset All Settings?", 
-		strcat(XRGB_DANGER, "Yes"), "m_pop;cvarreset *;exec default.cfg;m_options;", 
+		strcat(XRGB_DANGER, "Yes"), cmd, 
 		strcat(XRGB_TXT, "Cancel"), "m_pop;m_options;"
 	);
 };

@@ -150,12 +150,15 @@ nonstatic void(mitem_desktop desktop) M_Options_Particles =
 	//FIXME: these should not be listed if its a no-compat/no-legacy build. this'll do for now, but its a bit wrong
 	if (checkextension("FTE_PART_NAMESPACE_EFFECTINFO"))
 	{
-		fr.add(spawn(mitem_text, item_text:"Classic Particles",	item_command:"classic", item_scale:TXT_NMSZ, item_flags:IF_CENTERALIGN), 
+		fr.add(spawn(mitem_text, item_text:"Classic Particles", item_command:"classic", item_scale:TXT_NMSZ, item_flags:IF_CENTERALIGN), 
 			fl, [posx, posy], [0, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
-		fr.add(spawn(mitem_text, item_text:"High Quality",	item_command:"high", item_scale:TXT_NMSZ, item_flags:IF_CENTERALIGN), 
-			fl, [posx, posy], [0, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
-		fr.add(spawn(mitem_text, item_text:"TimeServ's Shaft", item_command:"tsshaft", item_scale:TXT_NMSZ, item_flags:IF_CENTERALIGN), 
-			fl, [posx, posy], [0, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
+		if (engine==E_FTE)
+		{
+			fr.add(spawn(mitem_text, item_text:"High Quality", item_command:"high", item_scale:TXT_NMSZ, item_flags:IF_CENTERALIGN), 
+				fl, [posx, posy], [0, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
+			fr.add(spawn(mitem_text, item_text:"TimeServ's Shaft", item_command:"tsshaft", item_scale:TXT_NMSZ, item_flags:IF_CENTERALIGN), 
+				fl, [posx, posy], [0, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
+		}
 	
 		string efi = GetFirstLineComment("effectinfo.txt", "Effectinfo");
 		if (efi) {

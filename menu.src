@@ -1,24 +1,25 @@
 #pragma progs_dat "../menu.dat"
 
+
 //#pragma target fte
 
-#define MENU		//select the module
+#define MENU //select the module
 
 #includelist
-fteextensions.qc	//also sets up system defs
-menusys/mitems.qc		//root item type
-menusys/mitems_common.qc	//basic types
-menusys/mitem_desktop.qc	//other sort of root item
-menusys/mitem_exmenu.qc	//fullscreen/exclusive menus
-menusys/mitem_edittext.qc	//simple text editor
-menusys/mitem_tabs.qc		//tabs
-menusys/mitem_colours.qc	//colour picker
-menusys/mitem_checkbox.qc	//checkbox (boolean thingies)
-menusys/mitem_slider.qc	//scrollbars
-menusys/mitem_combo.qc	//multiple-choice thingies
-menusys/mitem_bind.qc		//key binding thingie
+fteextensions.qc				//also sets up system defs
+menusys/mitems.qc				//root item type
+menusys/mitems_common.qc		//basic types
+menusys/mitem_desktop.qc		//other sort of root item
+menusys/mitem_exmenu.qc			//fullscreen/exclusive menus
+menusys/mitem_edittext.qc		//simple text editor
+menusys/mitem_tabs.qc			//tabs
+menusys/mitem_colours.qc		//colour picker
+menusys/mitem_checkbox.qc		//checkbox (boolean thingies)
+menusys/mitem_slider.qc			//scrollbars
+menusys/mitem_combo.qc			//multiple-choice thingies
+menusys/mitem_bind.qc			//key binding thingie
 menusys/mitem_spinnymodel.qc	//menu art
-menusys/mitem_conchars.qc //renders conchars table with hex id
+menusys/mitem_conchars.qc 		//renders conchars table with hex id
 #endlist
 
 enum

@@ -23,8 +23,8 @@ nonstatic void(mitem_desktop desktop) M_Quit =
 	pos = 16*-1;
 
 	//draw title art above the options
-//	mitem_pic banner = spawn(mitem_pic, item_text:"gfx/p_option.lmp", item_size_y:24, item_flags:IF_CENTERALIGN);
-//	m.add(banner, RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, [(offset_l-banner.item_size_x)*0.5, pos-32], [(offset_r+banner.item_size_x)*0.5, pos-8]);
+	// mitem_pic banner = spawn(mitem_pic, item_text:"gfx/p_option.lmp", item_size_y:24, item_flags:IF_CENTERALIGN);
+	// m.add(banner, RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, [(offset_l-banner.item_size_x)*0.5, pos-32], [(offset_r+banner.item_size_x)*0.5, pos-8]);
 
 	if (cvars_haveunsaved())
 	{
@@ -43,10 +43,9 @@ nonstatic void(mitem_desktop desktop) M_Quit =
 	{
 		localcmd("quit\n");
 
-		// m.add(spawn(mitem_text, item_text:"Really Quit?", item_scale:16, item_flags:IF_CENTERALIGN), RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, [offset_l, pos-(8+16)], [0, pos-8]);	pos += 16;
-
-		// m.add(spawn(mitem_text, item_text:"Yes, I'm late for work.", item_command:"m_pop;quit", item_scale:16, item_flags:IF_CENTERALIGN), RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, [offset_l, pos], [0, pos+16]);	pos += 16;
-		// m.add(spawn(mitem_text, item_text:"No, keep playing!", item_command:"m_pop;m_main", item_scale:16, item_flags:IF_CENTERALIGN), RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, [offset_l, pos], [0, pos+16]);	pos += 16;
+		// m.add(spawn(mitem_text, item_text:"Really Quit?", item_scale:16, item_flags:IF_CENTERALIGN), RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, [-160, pos-(8+16)], [0, pos-8]);	pos += 16;
+		// m.add(spawn(mitem_text, item_text:"Yes, I'm late for work.", item_command:"m_pop;quit", item_scale:16, item_flags:IF_CENTERALIGN), RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, [-160, pos], [0, pos+16]);	pos += 16;
+		// m.add(spawn(mitem_text, item_text:"No, keep playing!", item_command:"m_pop;m_main", item_scale:16, item_flags:IF_CENTERALIGN), RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, [-160, pos], [0, pos+16]);	pos += 16;
 	}
 
 	//random art for style
