@@ -108,87 +108,97 @@ nonstatic void(mitem_desktop desktop) M_Options_Audio =
 	
 	float fl = RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN;
 
-	if (engine!=E_QSS)
-	fr.add(spawn_combo(_("Sound Device"), "s_device", optionsize, cvar_string("_s_device_opts")), 
-		fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
+	if (engine!=E_QSS) {
+		fr.add(spawn_combo(_("Sound Device"), "s_device", optionsize, cvar_string("_s_device_opts")), 
+			fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing; }
 	fr.add(spawn_hslider(_("Master Volume"),"volume", '0.0 1 0.1', optionsize), 
 		fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
 	fr.add(spawn_hslider(_("Ambient Volume"), "ambient_level", '0 0.5 0.05', optionsize), 
 		fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
-	if (engine!=E_QSS)
-	fr.add(spawn_hslider(_("Self Volume"), "s_localvolume", '0 1 0.1', optionsize), 
-		fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
+	if (engine!=E_QSS) {
+		fr.add(spawn_hslider(_("Self Volume"), "s_localvolume", '0 1 0.1', optionsize), 
+			fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing; }
 	fr.add(spawn_hslider(_("Music Volume"), "bgmvolume", '0 0.5 0.05', optionsize), 
 		fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
-	if (engine!=E_QSS)
-	fr.add(spawn_hslider(_("Channels"), "s_numspeakers", '1 6 1', optionsize), 
-		fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
-	if (engine==E_QSS)
-	fr.add(spawn_combo(_("Audio Filtering"), "sndspeed", optionsize, _(
-		"\"\"	\"Off\" "
-		"11025	\"On\" "
+	if (engine!=E_QSS) {
+		fr.add(spawn_hslider(_("Channels"), "s_numspeakers", '1 6 1', optionsize), 
+			fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing; }
+	if (engine==E_QSS) 
+	{
+		fr.add(spawn_combo(_("Audio Filtering"), "sndspeed", optionsize, _(
+			"\"\"	\"Off\" "
+			"11025	\"On\" "
+			)),	fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing; 
+	}
+	if (engine!=E_QSS) 
+	{
+		fr.add(spawn_combo(_("Audio Quality"), "s_khz", optionsize, _(
+			"8 \"8000hz (telephone)\" "
+			"11.025 \"11025hz (vanilla)\" "
+			"22.05 \"22050hz\" "
+			"44.1 \"44100hz (cd)\" "
+			"48 \"48000hz (dvd)\" "
+			//higher values are probably pointless when source data doesn't go that high, so not going to list them.
+			//"96	\"96000hz (blu-ray quality)\" "
+			//"192	\"192000hz (professional quality)\" "
 		)),	fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
-	fr.add(spawn_combo(_("Audio Quality"), "s_khz", optionsize, _(
-		"8 \"8000hz (telephone)\" "
-		"11.025 \"11025hz (vanilla)\" "
-		"22.05 \"22050hz\" "
-		"44.1 \"44100hz (cd)\" "
-		"48 \"48000hz (dvd)\" "
-		//higher values are probably pointless when source data doesn't go that high, so not going to list them.
-		//"96	\"96000hz (blu-ray quality)\" "
-		//"192	\"192000hz (professional quality)\" "
-	)),	fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
-	if (engine!=E_QSS)
-	fr.add(spawn_check(_("Doppler"), "s_doppler", optionsize), 
-		fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
-	fr.add(spawn_check(_("8bit audio"), "s_loadas8bit", optionsize), 
-		fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
-	if (engine!=E_QSS)
-	fr.add(spawn_check(_("Swap Speakers"), "s_swapstereo", optionsize), 
-		fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
-	fr.add(spawn_hslider(_("Latency"), "s_mixahead", '0.1 0.3 0.01', optionsize), 
-		fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
+	}
+	if (engine!=E_QSS) 
+	{
+		fr.add(spawn_check(_("Doppler"), "s_doppler", optionsize), 
+			fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
+		fr.add(spawn_check(_("8bit audio"), "s_loadas8bit", optionsize), 
+			fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
+	}
+	if (engine!=E_QSS) 
+	{
+		fr.add(spawn_check(_("Swap Speakers"), "s_swapstereo", optionsize), 
+			fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
+		fr.add(spawn_hslider(_("Latency"), "s_mixahead", '0.1 0.3 0.01', optionsize), 
+			fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
+	}
 	fr.add(spawn_check(_("Disable Sound"), "nosound", optionsize), 
 		fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
 	//ambient fade
-	if (engine!=E_QSS)
+	if (engine!=E_QSS) {
 	fr.add(spawn_check(_("Static Sounds"), "cl_staticsounds", optionsize), 
-		fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
-	if (engine!=E_QSS)
-	fr.add(spawn_check(_("Mix in Background"),"s_inactive", optionsize), 
-		fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
+		fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing; }
+	if (engine!=E_QSS) {
+		fr.add(spawn_check(_("Mix in Background"),"s_inactive", optionsize), 
+			fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing; }
 
 	by += padding;
 
 	if (engine!=E_QSS)
-	fr.add(spawn_combo(_("Microphone Device"), "cl_voip_capturedevice", optionsize, cvar_string("_cl_voip_capturedevice_opts")), 
-		fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
-	fr.add(spawn_hslider(_("VOIP Playback Vol"),"cl_voip_play", '0 2 0.1', optionsize), 
-		fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
-	fr.add(spawn_check(_("VOIP Test"), "cl_voip_test", optionsize), 
-		fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
-	fr.add(spawn_hslider(_("VOIP Record Vol"), "cl_voip_micamp", '0 4 0.1', optionsize), 
-		fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
-	fr.add(spawn_combo(_("VOIP Mode"), "cl_voip_send", optionsize, _(
-		"0 \"Push-To-Talk\" 1"
-		"\"Voice Activation\""
-		"2 \"Continuous\""
-	)), fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
-	//VAD threshhold
-	//ducking
-	//noise cancelation
-	fr.add(spawn_combo(_("VOIP Codec"), "cl_voip_codec", optionsize, _(
-		"\"\" \"Auto\""
-		"0 \"speex (narrow 11khz)\""
-		//"1 \"raw (wasteful)\""
-		"2 \"opus\""
-		"3 \"speex (narrow 8khz)\""
-		"4 \"speex (wide 16khz)\""
-		"5 \"speex (ultrawide 32khz)\""
-	)), fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
-
-	fr.add(spawn_hslider(_("Opus bitrate"), "cl_voip_bitrate", '0.5 128 0.5', optionsize), 
-		fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
+	{
+		fr.add(spawn_combo(_("Microphone Device"), "cl_voip_capturedevice", optionsize, cvar_string("_cl_voip_capturedevice_opts")), 
+			fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
+		fr.add(spawn_hslider(_("VOIP Playback Vol"),"cl_voip_play", '0 2 0.1', optionsize), 
+			fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
+		fr.add(spawn_check(_("VOIP Test"), "cl_voip_test", optionsize), 
+			fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
+		fr.add(spawn_hslider(_("VOIP Record Vol"), "cl_voip_micamp", '0 4 0.1', optionsize), 
+			fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
+		fr.add(spawn_combo(_("VOIP Mode"), "cl_voip_send", optionsize, _(
+			"0 \"Push-To-Talk\" 1"
+			"\"Voice Activation\""
+			"2 \"Continuous\""
+		)), fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
+		//VAD threshhold
+		//ducking
+		//noise cancelation
+		fr.add(spawn_combo(_("VOIP Codec"), "cl_voip_codec", optionsize, _(
+			"\"\" \"Auto\""
+			"0 \"speex (narrow 11khz)\""
+			//"1 \"raw (wasteful)\""
+			"2 \"opus\""
+			"3 \"speex (narrow 8khz)\""
+			"4 \"speex (wide 16khz)\""
+			"5 \"speex (ultrawide 32khz)\""
+		)), fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
+		fr.add(spawn_hslider(_("Opus bitrate"), "cl_voip_bitrate", '0.5 128 0.5', optionsize), 
+			fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
+	}
 
 	by += padding; 
 
