@@ -80,9 +80,9 @@ void() mitem_check::item_remove =
 mitem_check(string text, string command, vector sz) spawn_check =
 {
 	return spawn(mitem_check, 
-		item_scale: sz_y, 
 		item_text:strcat("^m", text), 
-		item_size: sz, 
-		item_command: command
+		item_size: sz,
+		item_command: command,
+		item_scale: sz_y
 	);
 };

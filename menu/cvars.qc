@@ -139,7 +139,7 @@ float(vector pos, float scan, float char, float down, float idx) mitem_cvargrid:
 			float valuepos = pos_x+(item_size_x/2)+1;
 			cursorpos = strlen(newval);
 			if (ui.mousepos[0] > valuepos-8)
-				while (cursorpos>0 && ui.mousepos[0] < valuepos+stringwidth(substring(newval, 0, cursorpos), (engine==E_QSS?!TRUE:TRUE), '1 1 0'*item_scale))
+				while (cursorpos>0 && ui.mousepos[0] < valuepos+stringwidth(substring(newval, 0, cursorpos), (engine==E_QSS?FALSE:TRUE), '1 1 0'*item_scale))
 					cursorpos--;
 		}
 	}
@@ -258,7 +258,6 @@ void(mitem_desktop desktop) M_Menu_Cvars =
 
 	// center h and v
 	mitem_frame m = spawn(mitem_frame, item_flags:IF_SELECTABLE, frame_hasscroll:FALSE);
-	// cvarsmenu m = spawn(cvarsmenu, item_flags:IF_SELECTABLE, frame_hasscroll:FALSE);
 	mm.add(m,
 		RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, // top-left|bottom-right relation
 		[menux*-0.5, menuy*-0.5], // top-left
@@ -274,8 +273,8 @@ void(mitem_desktop desktop) M_Menu_Cvars =
 		[banner.item_size_x*-0.5, padding], // top-left
 		[banner.item_size_x*0.5, banner.item_size_y]); // bottom-right
 
-	// spawn a container frame for the actual options. this provides a scrollbar if we have too many items.
-	cvarsmenu fr = spawn(cvarsmenu, item_flags: IF_SELECTABLE, frame_hasscroll:TRUE,
+	// spawn a container frame for the actual options.
+	cvarsmenu fr = spawn(cvarsmenu, item_flags: IF_SELECTABLE, frame_hasscroll:FALSE,
 		item_framesize_x: padding, // sides
 		item_framesize_y: padding, // top
 		item_framesize_z: padding // bottom
@@ -296,32 +295,36 @@ void(mitem_desktop desktop) M_Menu_Cvars =
 
 	fr.addc(spawn_headline("Advanced"), posy); posy+=TXT_MDSZ+padding;
 
+	// posy += padding;
+
 	// Toggles & Filters at the top
 
-	float togglesheight = TXT_MDSZ;
-	// left side
-	fr.add(spawn_check("Modified Only", "*modified", [menux-(padding*2), TXT_NMSZ]), 
+	fr.add(spawn_check("Modified Only", "*modified", [menux/2-(padding*2), TXT_NMSZ]), 
 		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN, 
-		[posx, togglesheight+padding], [(menux)-(padding*2), TXT_NMSZ]);
+		[posx, posy], [(menux)-(padding*2), TXT_NMSZ]); posy+=TXT_NMSZ+SPACING;
 	
-	// right side
-	fr.add(spawn_edit("Cvar Filter", "*filter", [menux-(padding*2), TXT_NMSZ]), 
+	fr.add(spawn_edit("Cvar Filter", "*filter", [menux/2-(padding*2), TXT_NMSZ]), 
 		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN, 
-		[posx, padding], [(menux)-(padding*2), TXT_NMSZ]); 
+		[posx, posy], [(menux)-(padding*2), TXT_NMSZ]); posy+=TXT_NMSZ+padding;
 
 	// Grid
 
 	//spawn our grid for the actual options. this provides a scrollbar if we have too many items.\
-	float gridheight = 100;
+	float gridheight = engine==E_FTE?100:128;
 	fr.grid = spawn(mitem_cvargrid, item_flags: IF_SELECTABLE, item_scale: 6);
 	fr.add(fr.grid, RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN, 
-		[0, padding*2+togglesheight*2], [menux-(padding*2), gridheight]);
+		[0, posy], [menux-(padding*2), gridheight]); posy+=gridheight+padding;
 
-	// description at bottom of page
-	// can't seem to be able to set text size for textfields?
-	fr.add(spawn(mitem_label, item_text: "*desc", item_flags: 0, item_scale: 6), 
-		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN, 
-		[0, padding*4+togglesheight*2+gridheight], [menux-(padding*2), 24]);
+	// I wish QSS could show the description text for cvars, but it can't...
+	if (engine==E_FTE)
+	{
+		// description at bottom of page
+		// can't seem to be able to set text size for textfields?
+		fr.add(spawn(mitem_label, item_text: "*desc", item_flags: 0, item_scale: 6), 
+			RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN, 
+			[0, posy], [menux-(padding*2), 24]);
+	}
+	
 
 	fr.updatefilters();
 	
