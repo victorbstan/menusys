@@ -122,18 +122,15 @@ static string(string savename) scansave =
 	if (l)
 	{
 		l = strreplace("_", " ", l);
-
-		// EXTRA VBS
-
-		// get modificaton date
-		filepath = sprintf("%s.sav", savename); // correct path
-		searchhandle sh = search_begin(filepath, 0, 0);
-		if (sizeof(sh) > 0) {
-			string moddt = search_getfilemtime(sh,0); // get date time
-			// "%Y-%m-%d %H:%M:%S"
-			print(moddt); // DEBUG
-		}
-		search_end(sh);
+		
+		// TODO: get modificaton date - VBS
+		// filepath = sprintf("%s.sav", savename); // correct path
+		// searchhandle sh = search_begin(filepath, 0, 0);
+		// if (sizeof(sh) > 0) {
+		// 	string moddt = search_getfilemtime(sh,0); // get date time
+		// 	// "%Y-%m-%d %H:%M:%S"
+		// }
+		// search_end(sh);
 	}
 
 	return l;

@@ -295,8 +295,6 @@ void(mitem_desktop desktop) M_Menu_Cvars =
 
 	fr.addc(spawn_headline("Advanced"), posy); posy+=TXT_MDSZ+padding;
 
-	// posy += padding;
-
 	// Toggles & Filters at the top
 
 	fr.add(spawn_check("Modified Only", "*modified", [menux/2-(padding*2), TXT_NMSZ]), 

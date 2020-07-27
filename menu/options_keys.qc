@@ -137,7 +137,6 @@ void(mitem_desktop desktop) M_Options_Keys =
 			{
 				if (n != "")
 				{
-					print("HELLO");
 					mitem it = spawn_text(n, "", TXT_NMSZ);
 					it.item_flags &= ~IF_SELECTABLE;
 					fr.add(it, 
@@ -147,7 +146,6 @@ void(mitem_desktop desktop) M_Options_Keys =
 			}
 			else
 			{
-				print(sprintf("n: %s, c: %s\n", n, c));
 				fr.add(spawn_bind(n, c, optionsize), 
 					RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN, 
 					[posx, posy], [0, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
