@@ -21,28 +21,28 @@
 
 __strip var float dp_workarounds;
 
-#define IF_SELECTABLE		(1<<0)	//can accept KFOCUSED/MFOCUSED and key events etc. cannot be selected otherwise.
-#define IF_INTERACT		(1<<1)	//generic interaction flag for use by the widgets themselves.
-#define IF_RESIZABLE		(1<<2)	//may be resized, either by parent (it takes the full space) or by user.
-#define IF_MFOCUSED		(1<<3)	//mouse is currently sitting over it
-#define IF_KFOCUSED		(1<<4)	//has keyboard focus
-#define IF_NOKILL		(1<<5)	//kill button is disabled. move to frame/menu?
-#define IF_DRAGGABLE		(1<<6)	//can be dragged. this is stupid.
-#define IF_DROPPABLE		(1<<7)	//dragged items can be dropped on this item.
-#define IF_CLIENTMOVED		(1<<8)	//recalc required client dimensions (and toggle scrollbars if needed). move to frame?
-#define IF_CENTERALIGN		(1<<9)	//
-#define IF_RIGHTALIGN		(1<<10)	//
-#define IF_NOCURSOR		(1<<11)	//when mgrabbed, the cursor will not be shown
-#define IF_ISFRAME		(1<<12)	//is derived from mitem_frame (helps debugging recurion).
+#define IF_SELECTABLE			(1<<0)	//can accept KFOCUSED/MFOCUSED and key events etc. cannot be selected otherwise.
+#define IF_INTERACT				(1<<1)	//generic interaction flag for use by the widgets themselves.
+#define IF_RESIZABLE			(1<<2)	//may be resized, either by parent (it takes the full space) or by user.
+#define IF_MFOCUSED				(1<<3)	//mouse is currently sitting over it
+#define IF_KFOCUSED				(1<<4)	//has keyboard focus
+#define IF_NOKILL				(1<<5)	//kill button is disabled. move to frame/menu?
+#define IF_DRAGGABLE			(1<<6)	//can be dragged. this is stupid.
+#define IF_DROPPABLE			(1<<7)	//dragged items can be dropped on this item.
+#define IF_CLIENTMOVED			(1<<8)	//recalc required client dimensions (and toggle scrollbars if needed). move to frame?
+#define IF_CENTERALIGN			(1<<9)	//
+#define IF_RIGHTALIGN			(1<<10)	//
+#define IF_NOCURSOR				(1<<11)	//when mgrabbed, the cursor will not be shown
+#define IF_ISFRAME				(1<<12)	//is derived from mitem_frame (helps debugging recurion).
 #define IF_FOCUSFOLLOWSMOUSE 	(1<<13)	//on frames, child keyboard focus (mostly) follows the mouse cursor. not like windows, but handy on things with lots of buttons. annoying on the desktop. move to frame?
-#define IF_INVISIBLE		(1<<14)
+#define IF_INVISIBLE			(1<<14)
 
 #define RS_X_MIN_PARENT_MIN	0x0000
 #define RS_X_MIN_PARENT_MID	0x0001
 #define RS_X_MIN_PARENT_MAX	0x0002
-#define RS_X_FRACTION			0x0004
+#define RS_X_FRACTION		0x0004
 
-#define RS_X_MAX_OWN_MIN		0x0000
+#define RS_X_MAX_OWN_MIN	0x0000
 #define RS_X_MAX_PARENT_MIN	0x0010
 #define RS_X_MAX_PARENT_MID	0x0020
 #define RS_X_MAX_PARENT_MAX	0x0040
@@ -50,9 +50,9 @@ __strip var float dp_workarounds;
 #define RS_Y_MIN_PARENT_MIN	0x0000
 #define RS_Y_MIN_PARENT_MID	0x0100
 #define RS_Y_MIN_PARENT_MAX	0x0200
-#define RS_Y_FRACTION			0x0400
+#define RS_Y_FRACTION		0x0400
 
-#define RS_Y_MAX_OWN_MIN		0x0000
+#define RS_Y_MAX_OWN_MIN	0x0000
 #define RS_Y_MAX_PARENT_MIN	0x1000
 #define RS_Y_MAX_PARENT_MID	0x2000
 #define RS_Y_MAX_PARENT_MAX	0x4000
