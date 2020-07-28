@@ -56,12 +56,12 @@ void(vector pos) mitem_bind::item_draw =
 	else
 	{
 		ui.drawstring(pos, key1, '1 1 0' * self.item_scale, menuitem_textcolour(self), self.item_alpha, 0);
-		pos_x += stringwidth(key1, (engine==E_QSS?FALSE:TRUE), '1 1 0'*self.item_scale);
+		pos_x += stringwidth(key1, TRUE, '1 1 0'*self.item_scale);
 
 		if (key2 != "")
 		{
 			ui.drawstring(pos, "  or  ", '1 1 0' * self.item_scale, menuitem_textcolour(self), self.item_alpha, 0);
-			pos_x += stringwidth("  or  ", (engine==E_QSS?FALSE:TRUE), '1 1 0'*self.item_scale);
+			pos_x += stringwidth("  or  ", TRUE, '1 1 0'*self.item_scale);
 
 			ui.drawstring(pos, key2, '1 1 0' * self.item_scale, menuitem_textcolour(self), self.item_alpha, 0);
 //			pos_x += stringwidth(key2, TRUE, '1 1 0'*self.item_scale);

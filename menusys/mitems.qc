@@ -202,8 +202,6 @@ var uiinfo_t ui =
 	drawstring
 };
 
-
-
 void() queryscreensize =
 {
 #ifdef MENU
@@ -244,7 +242,6 @@ float(vector minp, vector sz) mouseinbox =
 
 	return TRUE;
 };
-
 
 void(mitem ch, vector parentsize) mitem_parentresized;
 
@@ -387,7 +384,7 @@ vector(mitem it) menuitem_textcolour =
 void(vector pos) mitem::item_draw =
 {
 	vector col;
-	pos_x += this.item_size[0] / 2 - stringwidth(this.item_text, (engine==E_QSS?FALSE:TRUE), '1 1 0'*this.item_scale) - 8;
+	pos_x += this.item_size[0] / 2 - stringwidth(this.item_text, TRUE, '1 1 0'*this.item_scale) - 8;
 	col = menuitem_textcolour(this);
 	ui.drawstring(pos, this.item_text, '1 1 0' * this.item_scale, col, this.item_alpha, 0);
 };

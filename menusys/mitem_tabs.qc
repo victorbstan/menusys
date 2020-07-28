@@ -48,7 +48,7 @@ void(vector pos) mitem_tabs::item_draw =
 	//to highlight the active tab, we draw the top line 1 pixel higher, and no bottom line
 	for (ch = item_children; ch; ch = ch.item_next)
 	{
-		w = stringwidth(ch.item_text, (engine==E_QSS?FALSE:TRUE), '8 8') + 8;
+		w = stringwidth(ch.item_text, TRUE, '8 8') + 8;
 
 		ui.drawfill(tpos + '0 1', [1, 15], TD_LFT, item_alpha, 0);
 		ui.drawfill(tpos + [w-1, 1], [1, 14], TD_RGT, item_alpha, 0);
@@ -105,7 +105,7 @@ float(vector pos, float scan, float char, float down) mitem_tabs::item_keypress 
 		//to highlight the active tab, we draw the top line 1 pixel higher, and no bottom line
 		for (ch = this.item_children; ch; ch = ch.item_next)
 		{
-			sz_x = stringwidth(ch.item_text, (engine==E_QSS?FALSE:TRUE), '8 8') + 8;
+			sz_x = stringwidth(ch.item_text, TRUE, '8 8') + 8;
 			if (mouseinbox(tpos, sz))
 			{
 				item_focuschange(ch, IF_KFOCUSED);	//give the tab full focus.

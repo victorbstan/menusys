@@ -22,7 +22,7 @@ class mitem_levelsoption : mitem_text
 		if (item_flags & IF_KFOCUSED)
 			ui.drawfill(pos, item_size, '1 0 0', sin(cltime)*0.125+0.150, 0);
 
-		float w = stringwidth(item_text, (engine==E_QSS?FALSE:TRUE), '1 1 0'*item_scale);
+		float w = stringwidth(item_text, TRUE, '1 1 0'*item_scale);
 		ui.drawstring(pos + [(item_size_x-w)/2, 0], item_text, '1 1 0' * item_scale, menuitem_textcolour(this), item_alpha, 0);
 	};
 

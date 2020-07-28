@@ -262,12 +262,12 @@ class mitem_text : mitem
 		float w;
 		if (item_flags & IF_CENTERALIGN)
 		{
-			w = stringwidth(item_text, (engine==E_QSS?FALSE:TRUE), '1 1 0'*item_scale);
+			w = stringwidth(item_text, TRUE, '1 1 0'*item_scale);
 			ui.drawstring(pos + [(item_size_x-w)/2, 0], item_text, '1 1 0' * item_scale, rgb, item_alpha, 0);
 		}
 		else if (item_flags & IF_RIGHTALIGN)
 		{
-			w = stringwidth(item_text, (engine==E_QSS?FALSE:TRUE), '1 1 0'*item_scale);
+			w = stringwidth(item_text, TRUE, '1 1 0'*item_scale);
 			ui.drawstring(pos + [(item_size_x-w), 0], item_text, '1 1 0' * item_scale, rgb, item_alpha, 0);
 		}
 		else
@@ -314,7 +314,7 @@ mitem(string text, string command, float height) spawn_text =
 		item_scale:height, 
 		item_text:text, 
 		item_command:command, 
-		item_size:[stringwidth(text, (engine==E_QSS?FALSE:TRUE), '1 1 0'*height), height, 0]
+		item_size:[stringwidth(text, TRUE, '1 1 0'*height), height, 0]
 	);
 };
 mitem(string text, float height=TXT_NMSZ) spawn_headline =
@@ -323,7 +323,7 @@ mitem(string text, float height=TXT_NMSZ) spawn_headline =
 		item_scale:height, 
 		item_text: text, 
 		item_rgb: RGB_MUTED,
-		item_size:[stringwidth(text, (engine==E_QSS?FALSE:TRUE), '1 1 0'*height), height, 0]
+		item_size:[stringwidth(text, TRUE, '1 1 0'*height), height, 0]
 	);
 };
 
@@ -462,7 +462,7 @@ class mitem_button : mitem
 		ui.drawfill(pos + [this.item_size[0]-1, 1], [1, this.item_size[1] - 1], TD_RGT, this.item_alpha, 0);
 		ui.drawfill(pos + [0, this.item_size[1]-1], [this.item_size[0], 1], TD_BOT, this.item_alpha, 0);
 
-		pos_x += (this.item_size[0] - stringwidth(this.item_text, (engine==E_QSS?FALSE:TRUE), '1 1 0'*this.item_scale)) * 0.5;
+		pos_x += (this.item_size[0] - stringwidth(this.item_text, TRUE, '1 1 0'*this.item_scale)) * 0.5;
 		pos_y += (this.item_size[1] - this.item_scale)*0.5;
 		ui.drawstring(pos, this.item_text, '1 1 0' * this.item_scale, menuitem_textcolour(this), this.item_alpha, 0);
 	};

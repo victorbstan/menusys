@@ -90,7 +90,7 @@ void(vector pos, float idx) mitem_cvargrid::grid_draw =
 		col *= 0.5;
 
 	vector valuepos = [pos_x+item_size_x/2, pos_y];
-	pos_x = valuepos_x - stringwidth(text, (engine==E_QSS?FALSE:TRUE), '1 1 0'*this.item_scale) - 8;
+	pos_x = valuepos_x - stringwidth(text, TRUE, '1 1 0'*this.item_scale) - 8;
 	valuepos_x += 1;
 	ui.drawstring(pos, text, '1 1 0' * item_scale, col, item_alpha, 0);
 	ui.drawstring(valuepos, value, '1 1 0' * item_scale, col, item_alpha, 0);
@@ -139,7 +139,7 @@ float(vector pos, float scan, float char, float down, float idx) mitem_cvargrid:
 			float valuepos = pos_x+(item_size_x/2)+1;
 			cursorpos = strlen(newval);
 			if (ui.mousepos[0] > valuepos-8)
-				while (cursorpos>0 && ui.mousepos[0] < valuepos+stringwidth(substring(newval, 0, cursorpos), (engine==E_QSS?FALSE:TRUE), '1 1 0'*item_scale))
+				while (cursorpos>0 && ui.mousepos[0] < valuepos+stringwidth(substring(newval, 0, cursorpos), TRUE, '1 1 0'*item_scale))
 					cursorpos--;
 		}
 	}
