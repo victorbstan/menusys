@@ -22,6 +22,8 @@ class mitem_combo : mitem_edit
 	float firstrow;
 	float visrows;
 
+	virtual void() item_remove;
+
 	void() mitem_combo =
 	{
 		if (item_text)
@@ -53,7 +55,7 @@ class mitem_combo_popup : mitem
 
 	mitem_combo 		pcombo;
 	mitem_vslider		pslider;
-	float			slidercache;
+	float				slidercache;
 
 	virtual void() item_remove =
 	{
@@ -67,13 +69,12 @@ class mitem_combo_popup : mitem
 
 void() mitem_combo::item_remove =
 {
-	if (item_text)
-		strunzone(item_text);
-	if (item_command)
-		strunzone(item_command);
 	mitem_combo_popup p = cpopup;
 	if (p)
 		p.item_remove();
+	// super does strunzoneing
+	item_text = __NULL__;
+	item_command = __NULL__;
 	if (mstrlist)
 		strunzone(mstrlist);
 	super::item_remove();
@@ -141,7 +142,8 @@ void(mitem newfocus, float flag) mitem_combo::item_focuschange =
 };
 void(mitem newfocus, float flag) mitem_combo_popup::item_focuschange =
 {
-	pcombo.item_focuschange(newfocus, flag);
+	// if (newfocus != (mitem_combo_popup)this && (flag & IF_KFOCUSED))
+		pcombo.item_focuschange(newfocus, flag);
 };
 void(vector pos) mitem_combo_popup::item_draw =
 {
@@ -248,7 +250,12 @@ void(vector pos) mitem_combo_popup::item_draw =
 	}
 
 	//reset the clip area
-	ui.setcliparea(ui.drawrectmin[0], ui.drawrectmin[1], ui.drawrectmax[0] - ui.drawrectmin[0], ui.drawrectmax[1] - ui.drawrectmin[1]);
+	ui.setcliparea(
+		ui.drawrectmin[0], 
+		ui.drawrectmin[1], 
+		ui.drawrectmax[0] - ui.drawrectmin[0], 
+		ui.drawrectmax[1] - ui.drawrectmin[1]
+	);
 };
 float(vector pos, float scan, float char, float down) mitem_combo_popup::item_keypress =
 {
