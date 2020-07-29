@@ -142,8 +142,7 @@ void(mitem newfocus, float flag) mitem_combo::item_focuschange =
 };
 void(mitem newfocus, float flag) mitem_combo_popup::item_focuschange =
 {
-	// if (newfocus != (mitem_combo_popup)this && (flag & IF_KFOCUSED))
-		pcombo.item_focuschange(newfocus, flag);
+	pcombo.item_focuschange(newfocus, flag);
 };
 void(vector pos) mitem_combo_popup::item_draw =
 {
