@@ -31,7 +31,6 @@ var string autocvar_cl_cursor = CURSORPATH;
 var string autocvar_cl_cursorbias = "0";
 var string autocvar_cl_cursor_size = "2";
 var string autocvar_cl_cursor_scale = "2"; // FTE console uses this
-// var string autocvar_cl_cursorsize = "2";
 
 void() mitem_desktop::mitem_desktop =
 {
@@ -39,9 +38,6 @@ void() mitem_desktop::mitem_desktop =
 	cvar_set("cl_cursorbias", ((cvar("cl_cursorbias") > 0) ? autocvar_cl_cursorbias : "0"));
 	cvar_set("cl_cursor_size", ((cvar("cl_cursor_size") > 1) ? autocvar_cl_cursor_size : "2"));
 	cvar_set("cl_cursor_scale", ((cvar("cl_cursor_scale") > 1) ? autocvar_cl_cursor_scale : "2"));
-	// cvar_set("cl_cursorsize", ((stof(autocvar_cl_cursorsize) > 2)?autocvar_cl_cursorsize:"2")); // QSS
-	// Usage example:
-	// setcursormode(TRUE, cvar_string("cl_cursor"), cvar("cl_cursorbias")*'1 1', cvar("cl_cursor_size"));
 
 	#define menu_font_win 		autocvar(menu_font_win, MENU_FONT_WIN)
 	#define menu_font			autocvar(menu_font, MENU_FONT)
@@ -486,5 +482,3 @@ menuonly float(mitem_desktop desktop, float scan, float char, float down) items_
 	return result;
 };
 #endif
-
-
