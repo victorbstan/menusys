@@ -26,19 +26,19 @@ class options_video : mitem_exmenu
 
 	virtual float(string key) isvalid =
 	{
-		if (key == "vid_mode")
+		if (key == cv2("vid_mode", "vid_describemodes"))
 			return super::isvalid("vid_width") && super::isvalid("vid_height");
 		return super::isvalid(key);
 	};
 	virtual string(string key) get =
 	{
-		if (key == "vid_mode")
+		if (key == cv2("vid_mode", "vid_describemodes"))
 			return videomode;
 		return super::get(key);
 	};
 	virtual void(string key, string newval) set =
 	{
-		if (key == "vid_mode")
+		if (key == cv2("vid_mode", "vid_describemodes"))
 		{
 			string old = videomode;
 			videomode = strzone(newval);
@@ -70,7 +70,7 @@ nonstatic void(mitem_desktop desktop) M_Options_Video =
 	mm = (mitem_exmenu)desktop.findchildtext(_("Video Options"));
 	if (mm) { mm.totop(); return; }
 	// create a fullscreen frame
-	mm = spawn(mitem_exmenu, item_text:_("Video Options"), item_flags:IF_SELECTABLE|IF_NOCURSOR, item_command:"m_options");
+	mm = spawn(options_video, item_text:_("Video Options"), item_flags:IF_SELECTABLE|IF_NOCURSOR, item_command:"m_options");
 	desktop.add(mm, RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, '0 0', '0 0');
 	desktop.item_focuschange(mm, IF_KFOCUSED);
 	mm.totop();
@@ -167,8 +167,8 @@ nonstatic void(mitem_desktop desktop) M_Options_Video =
 		"4 \"4x\""
 	), fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
 
-	if (cvar_type("vid_mode")) {
-		fr.add(spawn_combo(_("Video Mode"), "vid_mode", optionsize, PrepareVideoModes()), 
+	if (cv2("vid_mode", "vid_describemodes")) {
+		fr.add(spawn_combo(_("Video Mode"), cv2("vid_mode", "vid_describemodes"), optionsize, PrepareVideoModes()), 
 			fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;	}
 
 	static const string scaleoptions = _(
@@ -189,7 +189,7 @@ nonstatic void(mitem_desktop desktop) M_Options_Video =
 	if (cvar_type("scr_menuscale")) {
 		fr.add(spawn_combo(_("Menu Zoom"), "scr_menuscale", optionsize, scaleoptions), 
 			fl, [posx, posy], [maxposx, TXT_NMSZ]), posy+=TXT_NMSZ+spacing; }
-	fr.add(spawn_combo(_("Colour Depth"), cv2("vid_bitsperpixel", "vid_bpp"),optionsize, _(
+	fr.add(spawn_combo(_("Colour Depth"), cv2("vid_bitsperpixel", "vid_bpp"), optionsize, _(
 		"16 \"16bit (No Win10)\"" //r5g6b5, or so. unsupported on win10.
 		"24 \"24bit (Default)\"" //rgba8 - we don't count the alpha.
 		"30 \"30bit (No Nvidia)\"" //rgb10a2 - we don't count the alpha. unsupported on nvidia.
