@@ -81,16 +81,16 @@ nonstatic void(mitem_desktop desktop) M_Options_Effects =
 	// 	fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
 	fr.add(spawn_combo(_("Texture Mode"), "gl_texturemode", optionsize, _(
 		"GL_NEAREST	\"Nearest\""
-		"GL_NEAREST_MIPMAP_NEAREST \"Nearest (Nearest mips)\""
-		"GL_NEAREST_MIPMAP_LINEAR \"Nearest (Linear mips)\""
+		"GL_NEAREST_MIPMAP_NEAREST \"Nearest MN\""
+		"GL_NEAREST_MIPMAP_LINEAR \"Nearest ML\""
 		"GL_LINEAR \"Linear\" "
-		"GL_LINEAR_MIPMAP_NEAREST \"Linear (Nearest mips)\""
-		"GL_LINEAR_MIPMAP_LINEAR \"Linear (Linear mips)\""
-		"n.l \"Nearest (Smooth)\""
+		"GL_LINEAR_MIPMAP_NEAREST \"Linear MN\""
+		"GL_LINEAR_MIPMAP_LINEAR \"Linear ML\""
+		"n.l \"Nearest Smooth\""
 		//"l.n \"Linear (Unsmooth)\""
 		//"nnl \"Nearest (Nearest mips, Smooth)\""
 		//"lnn \"Linear (Nearest mips, Unsmooth)\""
-		"nll \"Nearest (Smooth mips)\""
+		"nll \"Nearest Smooth Mips\""
 		//"lln \"Linear (Linear mips, Unsmooth)\""
 	)), fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
 	if (engine != E_QSS)
@@ -132,9 +132,9 @@ nonstatic void(mitem_desktop desktop) M_Options_Effects =
 			fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
 		fr.add(spawn_check(_("Relief Mapping"), "r_glsl_offsetmapping", optionsize), 
 			fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
-		fr.add(spawn_check(_("Rt. Dynamic Light"), "r_shadow_realtime_dlight", optionsize), 
+		fr.add(spawn_check(_("RT. Dynamic Light"), "r_shadow_realtime_dlight", optionsize), 
 			fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
-		fr.add(spawn_check(_("Rt. World Light"), "r_shadow_realtime_world", optionsize), 
+		fr.add(spawn_check(_("RT. World Light"), "r_shadow_realtime_world", optionsize), 
 			fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
 		fr.add(spawn_combo(_("Water Effects"), "r_waterstyle", optionsize, _(
 			"1 \"Classic\""
