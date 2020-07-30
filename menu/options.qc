@@ -5,16 +5,16 @@ class mitem_playerpreview : mitem_spinnymodel
 {
 	virtual void(vector pos) item_draw =
 	{
-		if (checkbuiltin2(setcustomskin, FALSE))
-		{
-			//if you wanted to get more advanced, you could use q3 skins here.
-			if (cvar("noskins")==1)
-				setcustomskin(self, "", sprintf("q1upper \"%s\"\nq1lower \"%s\"\n\n", cvar_string("topcolor"), cvar_string("bottomcolor")));
-			else if (cvar_string("cl_teamskin") != "")
-				setcustomskin(self, "", sprintf("q1upper \"%s\"\nq1lower \"%s\"\nqwskin \"%s\"\n", cvar_string("topcolor"), cvar_string("bottomcolor"), cvar_string("cl_teamskin")));
-			else
-				setcustomskin(self, "", sprintf("q1upper \"%s\"\nq1lower \"%s\"\nqwskin \"%s\"\n", cvar_string("topcolor"), cvar_string("bottomcolor"), cvar_string("skin")));
-		}
+		// if (checkbuiltin2(setcustomskin, FALSE))
+		// {
+		// 	//if you wanted to get more advanced, you could use q3 skins here.
+		// 	if (cvar("noskins")==1)
+		// 		setcustomskin(self, "", sprintf("q1upper \"%s\"\nq1lower \"%s\"\n\n", cvar_string("topcolor"), cvar_string("bottomcolor")));
+		// 	else if (cvar_string("cl_teamskin") != "")
+		// 		setcustomskin(self, "", sprintf("q1upper \"%s\"\nq1lower \"%s\"\nqwskin \"%s\"\n", cvar_string("topcolor"), cvar_string("bottomcolor"), cvar_string("cl_teamskin")));
+		// 	else
+		// 		setcustomskin(self, "", sprintf("q1upper \"%s\"\nq1lower \"%s\"\nqwskin \"%s\"\n", cvar_string("topcolor"), cvar_string("bottomcolor"), cvar_string("skin")));
+		// }
 		super::item_draw(pos);
 	};
 };
@@ -108,7 +108,7 @@ nonstatic void(mitem_desktop desktop) M_Options =
 	}
 	fr.add(spawn(mitem_text, item_text:"^mBasic Setup", item_command:"m_pop;m_basicopts",	item_scale:TXT_NMSZ), 
 		fl, [bsx, by], [0, TXT_NMSZ]); by += TXT_NMSZ+spacing;
-	fr.add(spawn(mitem_text, item_text:"^mKeys", item_command:"m_pop;m_keys", item_scale:TXT_NMSZ), 
+	fr.add(spawn(mitem_text, item_text:"^mControls", item_command:"m_pop;m_keys", item_scale:TXT_NMSZ), 
 		fl, [bsx, by], [0, TXT_NMSZ]); by += TXT_NMSZ+spacing;
 	fr.add(spawn(mitem_text, item_text:"^mAudio", item_command:"m_pop;m_audio", item_scale:TXT_NMSZ), 
 		fl, [bsx, by], [0, TXT_NMSZ]); by += TXT_NMSZ+spacing;
@@ -155,7 +155,7 @@ nonstatic void(mitem_desktop desktop) M_Options =
 		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, 
 		[0, 0], [-menux/2+qplaquewidth, 0]);
 	
-	addmenuback(m);
+	addmenuback(mm);
 };
 
 // Rest settings prompt

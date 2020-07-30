@@ -93,6 +93,6 @@ nonstatic void(mitem_desktop desktop) M_Configs =
 	//random art for style
 	// m.addm(spawn (mitem_spinnymodel, item_text: "progs/g_rock2.mdl", zbias:-16), [offset_l-60, 12*-16/2], [-60, 12*16/2]);
 
-	addmenuback(m);
+	addmenuback(mm);
 };
 

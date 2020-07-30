@@ -313,6 +313,6 @@ void(mitem_desktop desktop) M_Levels =
 	float y=0;
 	y += listmodsandlevels(fr, y);
 
-	addmenuback(m);
+	addmenuback(mm);
 };
 

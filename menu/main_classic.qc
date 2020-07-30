@@ -9,7 +9,7 @@ In DP, we just tint it black.
 */
 nonstatic void(mitem_frame m) addmenuback =
 {
-	m.add(spawn (mitem_fill, item_rgb:'0 0 0.01', item_alpha:0.5),
+	m.add(spawn (mitem_fill, item_rgb:-1, item_alpha:MENUBACK_ALPHA),
 		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, [0, 0], [0, 0]);
 };
 
@@ -126,5 +126,5 @@ nonstatic void(mitem_desktop desktop) M_Main =
 	// local string it = (random()<0.9)?"progs/quaddama.mdl":"progs/invulner.mdl";
 	// m.add(spawn (mitem_spinnymodel, item_text: it), RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, [offset_l, 12*-16/2], [0, 12*16/2]);
 
-	addmenuback(m);
+	addmenuback(mm);
 };

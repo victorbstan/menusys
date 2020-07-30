@@ -206,5 +206,5 @@ nonstatic void(mitem_desktop desktop) M_Options_Audio =
 	fr.add(spawn_mitem_spacer(16, -1), 
 		fl, [bx, by], [maxposx, 24]);
 
-	addmenuback(m);
+	addmenuback(mm);
 };

@@ -167,5 +167,5 @@ void(mitem_desktop desktop) M_Options_Keys =
 		}
 	}
 	
-	addmenuback(m);
+	addmenuback(mm);
 };

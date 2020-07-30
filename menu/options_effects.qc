@@ -165,6 +165,6 @@ nonstatic void(mitem_desktop desktop) M_Options_Effects =
 	fr.add(spawn_mitem_spacer(16, -1), 
 		fl, [posx, posy], [maxposx, 24]);
 	
-	addmenuback(m);
+	addmenuback(mm);
 };
 

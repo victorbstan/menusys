@@ -224,8 +224,7 @@ void(mitem_desktop desktop, float mode) M_LoadSave =
 		y+=itemscale+2; // a little padding for the next line item
 	}
 
-	// m.addm(spawn(mitem_savepreview), [-320, -240], [320, 240]);
-	addmenuback(m);
+	addmenuback(mm);
 };
 
 void(mitem_desktop desktop) M_Load =

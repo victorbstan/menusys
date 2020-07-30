@@ -327,5 +327,5 @@ void(mitem_desktop desktop) M_Menu_Cvars =
 	fr.updatefilters();
 	
 	//and give us a suitable menu tint too, just because.
-	addmenuback(m);
+	addmenuback(mm);
 };

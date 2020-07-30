@@ -80,10 +80,7 @@ void(mitem_desktop desktop, float mode) M_HelpOrdering =
 		m.addm(spawn(mitem_pic, item_text:"gfx/help0.lmp"), '-160 -100', '160 100');
 	}
 
-	
-
-	// m.addm(spawn(mitem_savepreview), [-320, -240], [320, 240]);
-	addmenuback(m);
+	addmenuback(mm);
 };
 
 // define "fake" pages, points back to same class

@@ -86,5 +86,5 @@ nonstatic void(mitem_desktop desktop) M_Single =
 	// local string it = (random()<0.9)?"progs/quaddama.mdl":"progs/invulner.mdl";
 	// m.add(spawn (mitem_spinnymodel, item_text: it), RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, [offset_l, 12*-16/2], [0, 12*16/2]);
 
-	addmenuback(m);
+	addmenuback(mm);
 };

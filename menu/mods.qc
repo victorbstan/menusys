@@ -72,6 +72,5 @@ void(mitem_desktop desktop) M_Menu_Mods =
 	if (!mod)
 		fr.add(spawn(mitem_text, item_text:"No mods detected", item_scale:16, item_flags:0), RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN, [0, mod*16], [0, 16]);
 	
-	//and give us a suitable menu tint too, just because.
 	addmenuback(m);
 };

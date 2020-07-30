@@ -142,5 +142,5 @@ nonstatic void(mitem_desktop desktop) M_Preset =
 	//random art for style
 	// m.addm(spawn (mitem_spinnymodel, item_text: "progs/suit.mdl"), [offset_l, 12*-16/2], [0, 12*16/2]);
 
-	addmenuback(m);
+	addmenuback(mm);
 };
