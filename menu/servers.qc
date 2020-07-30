@@ -395,35 +395,53 @@ nonstatic void(mitem_desktop desktop) M_Servers =
 		mitem_vslider sl = spawn(mitem_vslider, stride:4, item_flags:IF_SELECTABLE);
 		mitem_servers ls = spawn(mitem_servers, slider:sl);
 	
-		m.add(ls, RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, '0 0', '-16 -68');
-		m.add(spawn(mitem_servers_players, listing:ls),	RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, [8*20, -8*8], [0, -8*0]);
-		m.add(sl,	RS_X_MIN_PARENT_MAX|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, [-16, 8], [0, -68]);
+		m.add(ls, 
+			RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, 
+			'0 0', '-16 -68');
+		m.add(spawn(mitem_servers_players, listing:ls),	
+			RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, 
+			[8*20, -8*8], [0, -8*0]);
+		m.add(sl,
+			RS_X_MIN_PARENT_MAX|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, 
+			[-8, 8], [0, -68]);
 
 		//only add checkboxes for field names accepted by this engine.
-		if (gethostcacheindexforkey("ping") >= 0)
+		if (gethostcacheindexforkey("ping") >= 0) {
 			m.add(spawn_check(_("Ping"), "sb_showping", [8*8, 8]), 
-			RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX, [0, -8*8], [8*20, -8*7]);
-		if (gethostcacheindexforkey("cname") >= 0)
+				RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX, 
+				[0, -8*8], [8*20, -8*7]); }
+		if (gethostcacheindexforkey("cname") >= 0) {
 			m.add(spawn_check(_("Address"), "sb_showaddress", [8*8, 8]),
-			RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX, [0, -8*7], [8*20, -8*6]);
-		if (gethostcacheindexforkey("map") >= 0)
+				RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX, 
+				[0, -8*7], [8*20, -8*6]); }
+		if (gethostcacheindexforkey("map") >= 0) {
 			m.add(spawn_check(_("Map"), "sb_showmap", [8*8, 8]),
-			RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX, [0, -8*6], [8*20, -8*5]);
-		if (gethostcacheindexforkey("gamedir") >= 0 || gethostcacheindexforkey("mod") >= 0)
+				RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX, 
+				[0, -8*6], [8*20, -8*5]); }
+		if (gethostcacheindexforkey("gamedir") >= 0 || gethostcacheindexforkey("mod") >= 0) {
 			m.add(spawn_check(_("Gamedir"), "sb_showgamedir", [8*8, 8]),
-			RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX, [0, -8*5], [8*20, -8*4]);
-		if (gethostcacheindexforkey("numplayers") >= 0)
+				RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX, 
+				[0, -8*5], [8*20, -8*4]); }
+		if (gethostcacheindexforkey("numplayers") >= 0) {
 			m.add(spawn_check(_("NumPlayers"), "sb_shownumplayers", [8*8, 8]),
-			RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX, [0, -8*4], [8*20, -8*3]);
-		if (gethostcacheindexforkey("maxplayers") >= 0)
+				RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX, 
+				[0, -8*4], [8*20, -8*3]); }
+		if (gethostcacheindexforkey("maxplayers") >= 0) {
 			m.add(spawn_check(_("MaxPlayers"), "sb_showmaxplayers", [8*8, 8]),
-			RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX, [0, -8*3], [8*20, -8*2]);
-		if (gethostcacheindexforkey("fraglimit") >= 0)
+				RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX, 
+				[0, -8*3], [8*20, -8*2]); }
+		if (gethostcacheindexforkey("fraglimit") >= 0) {
 			m.add(spawn_check(_("Fraglimit"), "sb_showfraglimit", [8*8, 8]),
-			RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX, [0, -8*2], [8*20, -8*1]);
-		if (gethostcacheindexforkey("timelimit") >= 0)
+				RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX, 
+				[0, -8*2], [8*20, -8*1]); }
+		if (gethostcacheindexforkey("timelimit") >= 0) {
 			m.add(spawn_check(_("Timelimit"), "sb_showtimelimit", [8*8, 8]),
-			RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX, [0, -8*1], [8*20, -8*0]);
+				RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX, 
+				[0, -8*1], [8*20, -8*0]); }
+	
+		addmenuback(m);
 	}
+
+	addmenuback(o);
 };
 

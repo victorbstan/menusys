@@ -34,7 +34,7 @@ var string autocvar_cl_cursor_scale = "2"; // FTE console uses this
 
 void() mitem_desktop::mitem_desktop =
 {
-	cvar_set("cl_cursor", ((autocvar_cl_cursor!="")?autocvar_cl_cursor: CURSORPATH));
+	cvar_set("cl_cursor", ((autocvar_cl_cursor!="") ? autocvar_cl_cursor : CURSORPATH));
 	cvar_set("cl_cursorbias", ((cvar("cl_cursorbias") > 0) ? autocvar_cl_cursorbias : "0"));
 	cvar_set("cl_cursor_size", ((cvar("cl_cursor_size") > 1) ? autocvar_cl_cursor_size : "2"));
 	cvar_set("cl_cursor_scale", ((cvar("cl_cursor_scale") > 1) ? autocvar_cl_cursor_scale : "2"));

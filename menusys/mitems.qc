@@ -91,12 +91,12 @@ __strip var float dp_workarounds;
 #define XRGB_KMFOCUS "^xF86"
 #define RGB_KMFOCUS '1 0.5 0.375'
 // backgrounds & fills
-#define RGB_BGHOVERA '0.625 0.625 0.5625'
-#define RGB_BGHOVERB '0.625 0.5625 0.625'
+#define RGB_BGHOVERA '0.1 0.1 0.1'
+#define RGB_BGHOVERB '0.15 0.15 0.15'
 #define RGB_VSLIDER '0.625 0.625 0.5625'
 #define VSLIDER_ALPHA 0.2
 #define RGB_MENUBACK '0.25 0.1875 0.125'
-#define MENUBACK_ALPHA 0.8
+#define MENUBACK_ALPHA 0.5
 
 //the 3d effect needs some sort of fake lighting values.
 //these are for bumps. invert for inset things. (like in 1995)
@@ -320,8 +320,8 @@ float(string key) mitem::isvalid =
 	//walk through to the parent for menu parents to track all this.
 	if (this.item_parent)
 		return this.item_parent.isvalid(key);
-	else	//no parent, just assume its a cvar.
-		return cvar_type(key);
+	else	//no parent, just assume its a cvar or command.
+		return cvar_type(key)?cvar_type(key):checkcommand(key);
 };
 
 
