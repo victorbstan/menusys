@@ -1,6 +1,7 @@
 // defined until the official support is released
 string(searchhandle handle, float num) search_getpackagename = #0;
 
+// NOTE: deprecated
 class mitem_levelsoption : mitem_text
 {
 	string slot;
@@ -109,7 +110,7 @@ float (string gamedir, mitem_frame fr, float y) listlevelsfor =
 		string fname = "";
 		string pkname = "";
 		string pkrootdir = "";
-		string mapname = "";
+		string lmapname = "";
 		string lvlcmd = "";
 		string mapinfo = "";
 		float li;
@@ -118,7 +119,7 @@ float (string gamedir, mitem_frame fr, float y) listlevelsfor =
 			fname = __NULL__;
 			pkname = __NULL__;
 			pkrootdir = __NULL__;
-			mapname = __NULL__;
+			lmapname = __NULL__;
 			lvlcmd = __NULL__;
 			mapinfo = __NULL__;
 
@@ -127,10 +128,10 @@ float (string gamedir, mitem_frame fr, float y) listlevelsfor =
 
 			// parse name out of filepath
 			tokenizebyseparator(argv(tokenizebyseparator(fname, "/")-1), "."); 
-			mapname = strzone(argv(0));
+			lmapname = strzone(argv(0));
 
 			// exclude some files that may also be .bsp but are not maps
-			if (strtolower(substring(mapname, 0, 2)) == "b_")
+			if (strtolower(substring(lmapname, 0, 2)) == "b_")
 				continue;
 
 			if (checkbuiltin2(search_getpackagename, FALSE)) 
@@ -149,12 +150,12 @@ float (string gamedir, mitem_frame fr, float y) listlevelsfor =
 			}
 		
 			if not(mapinfo)
-				mapinfo = strzone(mapname);
+				mapinfo = strzone(lmapname);
 			else
-				mapinfo = strzone(strcat(mapname, " ", XRGB_TXTB, mapinfo));
+				mapinfo = strzone(strcat(lmapname, " ", XRGB_TXTB, mapinfo));
 
 			// command to load the level
-			lvlcmd = strzone(strcat("m_pop; map ", mapname, ";\n"));
+			lvlcmd = strzone(strcat("m_pop; map ", lmapname, ";\n"));
 			// render level info line
 			fr.add(
 				spawn(mitem_text, item_text:mapinfo, item_command:lvlcmd, item_scale:levelnamescale, 
@@ -167,7 +168,7 @@ float (string gamedir, mitem_frame fr, float y) listlevelsfor =
 		}
 		strunzone(fname);
 		strunzone(pkname);
-		strunzone(mapname);
+		strunzone(lmapname);
 		strunzone(lvlcmd);
 		strunzone(pkrootdir);
 		strunzone(mapinfo);
@@ -202,7 +203,12 @@ float(mitem_frame fr, float y) listmodsandlevels =
 		modcmd = getgamedirinfo(idirs, GGDI_LOADCOMMAND);
 		// string icon = getgamedirinfo(idirs, GGDI_ICON);
 
-		gamedir = strzone(strtolower(gamedir));
+		gamedir = strtolower(gamedir);
+		if (engine == E_FTE) {
+			if (gamedir == "qw" || gamedir == "fte" || gamedir == "")
+				gamedir = "id1";
+		}
+		gamedir = strzone(gamedir);
 
 		// basic dir name filtering for undesireable characters
 		float hasperiodinname = tokenizebyseparator(gamedir, ".") > 1;
@@ -215,7 +221,13 @@ float(mitem_frame fr, float y) listmodsandlevels =
 			desc = sprintf("^m%s ^h%s", desc, gamedir); //include the gamedir, faded somewhat.
 		desc = strzone(desc);
 
-		if not(modcmd) //for dp users, if they somehow run this
+		// print(modcmd);print("\n");
+		if (engine == E_FTE) {
+			if (modcmd == "qw" || modcmd == "fte" || modcmd == "")
+				// modcmd = "id1";
+				modcmd = sprintf("gamedir id1");
+		}
+		if not(modcmd)
 			modcmd = sprintf("gamedir %s", gamedir);
 		// command to load the mod and open the levels menu again
 		modcmd = strcat("m_pop;", modcmd, "; m_levels;\n");
@@ -235,19 +247,18 @@ float(mitem_frame fr, float y) listmodsandlevels =
 
 		// Get loaded mods
 
-		string currentgame = "";
 		float modscount = tokenizebyseparator(cvar_string("game"), ";");
-		// gets last mod loaded
+		// list levels for each mod
+		string currentgame = "";
 		for (float i = 0; i < modscount; i++)
 		{
-			currentgame = strzone(strtolower(argv(i)));
+			currentgame = strzone(argv(i));
 			if (currentgame == "")
 				return y;
 			if (currentgame == gamedir) 
 				y = listlevelsfor(gamedir, fr, y);
 		}
 		strunzone(currentgame);
-		
 	}
 	strunzone(gamedir);
 	strunzone(desc);
