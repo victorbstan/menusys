@@ -1,9 +1,6 @@
 //FIXME: maxclients is a QW thing. NQ engines use maxplayers (which requires a disconnect to apply)
 static string newgameinfo;
 
-static float offset_l = (MENU_WIDTH/2*-1);
-static float offset_r = (MENU_WIDTH/2);
-
 class mitem_newgame : mitem_exmenu
 {
 	virtual string(string key) get =
