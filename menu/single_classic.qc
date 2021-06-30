@@ -78,7 +78,7 @@ nonstatic void(mitem_desktop desktop) M_Single =
 		[bsx, bsy], msize);
 
 	// "Levels" menu image, from MarkV
-	m.add(spawn(mitem_pic, item_text:"/menugfx/levels.lmp"),
+	m.add(spawn(mitem_pic, item_text:"menugfx/levels.lmp"),
 		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN,
 		[bsx, bsy+msize.y-4], [120, 20]);
 
