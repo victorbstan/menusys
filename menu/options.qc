@@ -72,12 +72,9 @@ nonstatic void(mitem_desktop desktop) M_Options =
 
 	// Content
 
-	// buttons start location
-	float modelsize = 100;
-	float menuoffset = modelsize-plaquepadding;
-	float bsx = qplaquewidth+plaquepadding+padding*2;
-	// float bsx = menuoffset;
-	float bsy = banner.item_size_y+(padding*2);
+	// option buttons start location
+	// float bsx = qplaquewidth+plaquepadding+padding*2; // with 3d model
+	float bsx = qplaquewidth+padding; // without 3d model
 	float by = 0;
 
 	// spawn a container frame for the actual options. this provides a scrollbar if we have too many items.
@@ -93,7 +90,7 @@ nonstatic void(mitem_desktop desktop) M_Options =
 		[0, 0] // bottom-right
 	);
 	
-	bsx += 48; // some extra padding to give more space for the 3d character to show through
+	// bsx += 48; // some extra padding to give more space for the 3d character to show through
 	by += padding;
 
 	// show the options.
@@ -145,15 +142,10 @@ nonstatic void(mitem_desktop desktop) M_Options =
 		fr.add(spawn(mitem_text, item_text:strcat("^d", XRGB_SUCCESS, "Save Settings"), item_command:"cfg_save", item_scale:TXT_MDSZ), 
 			fl, [bsx, by], [0, TXT_MDSZ]); by += TXT_MDSZ+spacing; }
 
-	//random art for style
-	// m.addm(spawn (mitem_spinnymodel, item_text: "progs/suit.mdl"), [0, 12*-16/2], [160, 12*16/2]);
-
-	// by += padding;
-
-	// Player model
-	m.add(spawn (mitem_playerpreview, item_text: "progs/player.mdl", firstframe:0, framecount:6, shootframe:119, shootframes:6), 
-		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, 
-		[0, 0], [-menux/2+qplaquewidth, 0]);
+	// Player model (DISABLED: crashes if game id1 isn't initialized. Too lazy to fix...)
+	// m.add(spawn (mitem_playerpreview, item_text: "progs/player.mdl", firstframe:0, framecount:6, shootframe:119, shootframes:6), 
+	// 	RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, 
+	// 	[0, 0], [-menux/2+qplaquewidth, 0]);
 	
 	addmenuback(mm);
 };
