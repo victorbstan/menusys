@@ -221,10 +221,8 @@ float(mitem_frame fr, float y) listmodsandlevels =
 			desc = sprintf("^m%s ^h%s", desc, gamedir); //include the gamedir, faded somewhat.
 		desc = strzone(desc);
 
-		// print(modcmd);print("\n");
 		if (engine == E_FTE) {
 			if (modcmd == "qw" || modcmd == "fte" || modcmd == "")
-				// modcmd = "id1";
 				modcmd = sprintf("gamedir id1");
 		}
 		if not(modcmd)
