@@ -211,8 +211,10 @@ float(mitem_frame fr, float y) listmodsandlevels =
 		gamedir = strzone(gamedir);
 
 		// basic dir name filtering for undesireable characters
-		float hasperiodinname = tokenizebyseparator(gamedir, ".") > 1;
-		if (substring(gamedir, 0, 1) == "." || substring(gamedir, 0, 2) == ".." || hasperiodinname > 0)
+		// NOTE: disabled as it prevented valid directories, with periods in name, from being displayed
+		//float hasperiodinname = tokenizebyseparator(gamedir, ".") > 1;
+		//if (substring(gamedir, 0, 1) == "." || substring(gamedir, 0, 2) == ".." || hasperiodinname > 0)
+		if (substring(gamedir, 0, 1) == "." || substring(gamedir, 0, 2) == "..")
 			continue;
 		
 		if (desc=="")
