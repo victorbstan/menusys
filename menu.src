@@ -20,6 +20,7 @@ menusys/mitem_combo.qc			//multiple-choice thingies
 menusys/mitem_bind.qc			//key binding thingie
 menusys/mitem_spinnymodel.qc	//menu art
 menusys/mitem_conchars.qc 		//renders conchars table with hex id
+menu/classic_widgets.qc			//classic Quake image-menu controls
 #endlist
 
 enum
@@ -134,6 +135,7 @@ void() m_init =
 		engine = E_FTE;
 
 	desktop = spawn(mitem_desktop);
+	classic_menudots_precache();
 
 	if (checkbuiltin(registercommand))
 	{
@@ -167,8 +169,6 @@ void() m_init =
 	else
 		print("No hardware cursors\n");
 
-	if (clientstate() == 1)	//disconnected==1, supposedly
-		m_toggle(1);
 };
 void(string cstr) GameCommand =
 {

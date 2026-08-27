@@ -67,7 +67,7 @@ nonstatic void(mitem_desktop desktop) M_Main =
 
 	// Frame menu
 
-	mitem_frame m = spawn(mitem_frame, item_flags:IF_SELECTABLE|IF_NOCURSOR, frame_hasscroll:FALSE);
+	mitem_frame m = spawn(mitem_frame, item_flags:IF_SELECTABLE|IF_NOCURSOR|IF_FOCUSFOLLOWSMOUSE, frame_hasscroll:FALSE);
 	mm.add(
 		m,
 		RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, // top-left|bottom-right relation
@@ -94,15 +94,15 @@ nonstatic void(mitem_desktop desktop) M_Main =
 
 	// Button overlay hotspots spawn
 	float alpha = -1;
-	mitem_filli btn1 = spawn(mitem_filli, item_command:"m_pop;m_single", 
+	mitem_classicbutton btn1 = spawn(mitem_classicbutton, item_command:"m_pop;m_single",
 		item_size:'10 10', item_rgb:'255 0 0', item_alpha:alpha); // single player
-	mitem_filli btn2 = spawn(mitem_filli, item_command:"m_pop;m_multi", 
+	mitem_classicbutton btn2 = spawn(mitem_classicbutton, item_command:"m_pop;m_multi",
 		item_size:'10 10', item_rgb:'255 0 0', item_alpha:alpha); // multiplayer
-	mitem_filli btn3 = spawn(mitem_filli, item_command:"m_pop;m_options", 
+	mitem_classicbutton btn3 = spawn(mitem_classicbutton, item_command:"m_pop;m_options",
 		item_size:'10 10', item_rgb:'255 0 0', item_alpha:alpha); // options
-	mitem_filli btn4 = spawn(mitem_filli, item_command:"m_pop;m_help", 
+	mitem_classicbutton btn4 = spawn(mitem_classicbutton, item_command:"m_pop;m_help",
 		item_size:'10 10', item_rgb:'255 0 0', item_alpha:alpha); // help/ordering
-	mitem_filli btn5 = spawn(mitem_filli, item_command:"m_pop;m_quit", 
+	mitem_classicbutton btn5 = spawn(mitem_classicbutton, item_command:"m_pop;m_quit",
 		item_size:'10 10', item_rgb:'255 0 0', item_alpha:alpha); // quit
 
 	// buttons start location
@@ -121,6 +121,9 @@ nonstatic void(mitem_desktop desktop) M_Main =
 	m.add(spawn(mitem_pic, item_text:"gfx/mainmenu.lmp"), 
 		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN,
 		[bsx, bsy], [240, 112]);
+
+	mm.item_focuschange(m, IF_KFOCUSED);
+	m.item_focuschange(btn1, IF_KFOCUSED);
 
 	//spinny quad/pent, for the luls
 	// local string it = (random()<0.9)?"progs/quaddama.mdl":"progs/invulner.mdl";
