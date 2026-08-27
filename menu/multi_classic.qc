@@ -23,7 +23,7 @@ nonstatic void(mitem_desktop desktop) M_Multi =
 
 	// Frame menu
 
-	mitem_frame m = spawn(mitem_frame, item_flags:IF_SELECTABLE|IF_NOCURSOR, frame_hasscroll:FALSE);
+	mitem_frame m = spawn(mitem_frame, item_flags:IF_SELECTABLE|IF_NOCURSOR|IF_FOCUSFOLLOWSMOUSE, frame_hasscroll:FALSE);
 	mm.add(
 		m,
 		RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, // top-left|bottom-right relation
@@ -51,11 +51,11 @@ nonstatic void(mitem_desktop desktop) M_Multi =
 
 	// Button overlay hotspots spawn
 	float alpha = -1;
-	mitem_filli btn1 = spawn(mitem_filli, item_command:"m_pop;m_servers", 
+	mitem_classicbutton btn1 = spawn(mitem_classicbutton, item_command:"m_pop;m_servers",
 		item_size:'10 10', item_rgb:'255 0 0', item_alpha:alpha); // join
-	mitem_filli btn2 = spawn(mitem_filli, item_command:"m_pop;m_newgame mp", // TODO: proper mp menu
+	mitem_classicbutton btn2 = spawn(mitem_classicbutton, item_command:"m_pop;m_newgame mp", // TODO: proper mp menu
 		item_size:'10 10', item_rgb:'255 0 0', item_alpha:alpha); // new game
-	mitem_filli btn3 = spawn(mitem_filli, item_command:"m_pop;m_basicopts", // TODO: proper mp setup menu
+	mitem_classicbutton btn3 = spawn(mitem_classicbutton, item_command:"m_pop;m_basicopts", // TODO: proper mp setup menu
 		item_size:'10 10', item_rgb:'255 0 0', item_alpha:alpha); // setup
 		
 	// buttons start location
@@ -73,6 +73,9 @@ nonstatic void(mitem_desktop desktop) M_Multi =
 	m.add(spawn(mitem_pic, item_text:"gfx/mp_menu.lmp"), 
 		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN,
 		[bsx, bsy], msize);
+
+	mm.item_focuschange(m, IF_KFOCUSED);
+	m.item_focuschange(btn1, IF_KFOCUSED);
 
 	//spinny quad/pent, for the luls
 	// local string it = (random()<0.9)?"progs/quaddama.mdl":"progs/invulner.mdl";
