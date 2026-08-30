@@ -28,7 +28,11 @@ class mitem_classicbutton : mitem_filli
 		default: break;
 		}
 
-		ui.drawpic(pos + [-18, 0], pic, [16, 24], '1 1 1', 1, 0);
+		vector picsize = drawgetimagesize(pic);
+		if (picsize_x <= 0 || picsize_y <= 0)
+			picsize = [16, 24];
+
+		ui.drawpic(pos + [-18, 0], pic, picsize, '1 1 1', 1, 0);
 	};
 };
 
