@@ -81,17 +81,35 @@ void(mitem_desktop desktop) M_Pop =
 #undef cmd
 
 mitem_desktop desktop;
+float startupmenu_pending;
 void() m_shutdown = {};
 void(vector screensize) m_draw =
 {
 	if (dp_workarounds)
 		cltime = gettime(0);
+
+	// Defer the initial menu decision until the client reaches a definitive
+	// state. LibreQuake can spend several frames loading its startup scripts,
+	// so clearing this on the first frame can leave a normal launch at the
+	// console. Startup commands such as +map still cancel it once connected.
+	if (startupmenu_pending)
+	{
+		if (clientstate() == 1 && !desktop.item_kactivechild)
+		{
+			startupmenu_pending = FALSE;
+			M_Main(desktop);
+		}
+		else if (clientstate() == 2)
+			startupmenu_pending = FALSE;
+	}
+
 	items_draw(desktop, screensize);
 };
 void(float scan, float chr) m_keydown = {items_keypress(desktop, scan, chr, TRUE);};
 void(float scan, float chr) m_keyup = {items_keypress(desktop, scan, chr, FALSE);};
 void(float mode) m_toggle
 {	//mode is stupid. 1=enable,0=disable,-1=actually toggle.
+	startupmenu_pending = FALSE;
 	if (mode < 0)
 		mode = !desktop.item_kactivechild;
 	if (mode)
@@ -135,6 +153,7 @@ void() m_init =
 		engine = E_FTE;
 
 	desktop = spawn(mitem_desktop);
+	startupmenu_pending = TRUE;
 	classic_menudots_precache();
 
 	if (checkbuiltin(registercommand))

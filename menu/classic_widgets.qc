@@ -9,8 +9,6 @@ class mitem_classicbutton : mitem_filli
 {
 	virtual void(vector pos) item_draw =
 	{
-		super::item_draw(pos);
-
 		if (!(item_flags & IF_KFOCUSED))
 			return;
 

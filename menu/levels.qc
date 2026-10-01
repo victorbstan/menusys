@@ -48,7 +48,7 @@ class mitem_levelsoption : mitem_text
 };
 
 // get map description
-static string(string fname, string pkname) getmapdesciption =
+static string(string fname) getmapdesciption =
 {
 	float f = fopen(fname, FILE_READ);
 	if (f < 0) {
@@ -98,7 +98,7 @@ static string(string fname, string pkname) getmapdesciption =
 	return __NULL__;
 };
 
-float (string gamedir, mitem_frame fr, float y) listlevelsfor =
+float (mitem_frame fr, float y) listlevelsfor =
 {
 	float levelnamescale=TXT_NMSZ;
 
@@ -108,8 +108,6 @@ float (string gamedir, mitem_frame fr, float y) listlevelsfor =
 	if (mapsearchsize > 0)
 	{
 		string fname = "";
-		string pkname = "";
-		string pkrootdir = "";
 		string lmapname = "";
 		string lvlcmd = "";
 		string mapinfo = "";
@@ -117,8 +115,6 @@ float (string gamedir, mitem_frame fr, float y) listlevelsfor =
 		for(li=0;li<mapsearchsize;li++)
 		{
 			fname = __NULL__;
-			pkname = __NULL__;
-			pkrootdir = __NULL__;
 			lmapname = __NULL__;
 			lvlcmd = __NULL__;
 			mapinfo = __NULL__;
@@ -134,20 +130,11 @@ float (string gamedir, mitem_frame fr, float y) listlevelsfor =
 			if (strtolower(substring(lmapname, 0, 2)) == "b_")
 				continue;
 
-			if (checkbuiltin2(search_getpackagename, FALSE)) 
-			{
-				// extract mod name from package path (id1): "id1/pack0.pak"
-				pkname = strzone(search_getpackagename(sh,li));
-				
-				tokenizebyseparator(pkname, "/");
-				pkrootdir = strzone(argv(0));
-
-				if (gamedir != pkrootdir)
-					continue;
-
-				// get map description
-				mapinfo = getmapdesciption(fname, pkname);
-			}
+			// The active search path already contains exactly the maps the engine
+			// can load. Do not infer a game directory from the package filename:
+			// FTE may return an absolute Windows path here, which used to reject
+			// every BSP and leave only game-directory headings on this screen.
+			mapinfo = getmapdesciption(fname);
 		
 			if not(mapinfo)
 				mapinfo = strzone(lmapname);
@@ -167,10 +154,8 @@ float (string gamedir, mitem_frame fr, float y) listlevelsfor =
 			y+=levelnamescale+2; // padding for the next line item
 		}
 		strunzone(fname);
-		strunzone(pkname);
 		strunzone(lmapname);
 		strunzone(lvlcmd);
-		strunzone(pkrootdir);
 		strunzone(mapinfo);
 	}
 	search_end(sh);
@@ -235,30 +220,43 @@ float(mitem_frame fr, float y) listmodsandlevels =
 
 		if (gamedir == "")
 			continue;
+
+		// Work out whether this entry represents the active game before adding
+		// its heading. Reloading the active game needlessly tears down MenuQC
+		// and leaves the user at the console.
+		float iscurrent = FALSE;
+		string gamelist = cvar_string("game");
+		float modscount = tokenizebyseparator(gamelist, ";");
+		if (gamelist == "")
+		{
+			if (gamedir == "id1")
+				iscurrent = TRUE;
+		}
+		else
+		{
+			for (float i = 0; i < modscount; i++)
+			{
+				if (strtolower(argv(i)) == gamedir)
+				{
+					iscurrent = TRUE;
+					break;
+				}
+			}
+		}
 		
 		// render mod info line
 		fr.add(
-			spawn(mitem_text, item_text:desc, item_command:modcmd, item_scale:modnamescale),
+			spawn(mitem_text, item_text:desc, item_command:iscurrent?"":modcmd, item_scale:modnamescale),
 			RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN,
 			[0, y], // top left
 			[16, modnamescale]); // bottom right
 
 		y+=modnamescale+2; // padding for the next line item
 
-		// Get loaded mods
-
-		float modscount = tokenizebyseparator(cvar_string("game"), ";");
-		// list levels for each mod
-		string currentgame = "";
-		for (float i = 0; i < modscount; i++)
-		{
-			currentgame = strzone(argv(i));
-			if (currentgame == "")
-				return y;
-			if (currentgame == gamedir) 
-				y = listlevelsfor(gamedir, fr, y);
-		}
-		strunzone(currentgame);
+		// Only enumerate maps from the active game. Other headings switch game
+		// first, then reopen this screen from the new search path.
+		if (iscurrent)
+			y = listlevelsfor(fr, y);
 	}
 	strunzone(gamedir);
 	strunzone(desc);
@@ -322,7 +320,7 @@ void(mitem_desktop desktop) M_Levels =
 	);
 	
 	float y=0;
-	y += listmodsandlevels(fr, y);
+	y += listlevelsfor(fr, y);
 
 	addmenuback(mm);
 };

@@ -49,9 +49,9 @@ nonstatic void(mitem_desktop desktop) M_Main =
 	float menux = MENU_WIDTH;
 	float menuy = MENU_HEIGHT;
 	float padding = PADDING;
+	float leftpadding = 16;
 	float qplaquewidth = 32;
 	float plaquepadding = 24;
-	float titleoffset = -12;
 
 	// Main menu
 
@@ -79,15 +79,15 @@ nonstatic void(mitem_desktop desktop) M_Main =
 
 	m.add(spawn_pic("gfx/qplaque.lmp", '32 144'),
 		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN,
-		[padding, padding], [qplaquewidth, 144]);
+		[leftpadding, padding], [qplaquewidth, 144]);
 
 	// Title
 	
 	mitem_pic banner = spawn(mitem_pic, item_text:"gfx/ttl_main.lmp", item_size_y:24, item_flags:IF_CENTERALIGN);
 	m.add(
 		banner,
-		RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MID|RS_Y_MAX_OWN_MIN,
-		[(banner.item_size_x*-0.5)+titleoffset, padding], [banner.item_size_x*0.5, 24]
+		RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN,
+		[-banner.item_size_x*0.5, padding], [banner.item_size_x, 24]
 	);
 
 	// Content
@@ -106,7 +106,7 @@ nonstatic void(mitem_desktop desktop) M_Main =
 		item_size:'10 10', item_rgb:'255 0 0', item_alpha:alpha); // quit
 
 	// buttons start location
-	float bsx = qplaquewidth+padding+plaquepadding;
+	float bsx = qplaquewidth+leftpadding+plaquepadding;
 	float bsy = banner.item_size_y+(padding*2);
 	// position hotspots over relevant image button location
 	float by = bsy;
@@ -118,9 +118,10 @@ nonstatic void(mitem_desktop desktop) M_Main =
 	m.add(btn5, bposrel, [bsx, by], [240, 19]); by+=20; // quit
 
 	// Menu options image
-	m.add(spawn(mitem_pic, item_text:"gfx/mainmenu.lmp"), 
+	mitem_pic menuart = spawn(mitem_pic, item_text:"gfx/mainmenu.lmp");
+	m.add(menuart,
 		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN,
-		[bsx, bsy], [240, 112]);
+		[bsx, bsy], menuart.item_size);
 
 	mm.item_focuschange(m, IF_KFOCUSED);
 	m.item_focuschange(btn1, IF_KFOCUSED);

@@ -156,6 +156,9 @@ void(mitem_desktop desktop) M_Menu_Updates =
 {
 	mitem it;
 	float h = (480+240)/2;
+	float left = -160;
+	float split = 40;
+	float right = 160;
 
 	localcmd("pkg update\n");
 
@@ -171,13 +174,13 @@ void(mitem_desktop desktop) M_Menu_Updates =
 
 	//spawn our grid for the actual options. this provides a scrollbar if we have too many items.
 	m.grid = spawn(mitem_updategrid, item_flags: IF_SELECTABLE, item_scale: 8);
-	m.add(m.grid, RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, [-160, h*-0.5+32], [40, h*0.5]);
+	m.add(m.grid, RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, [left, h*-0.5+32], [split, h*0.5]);
 
 	it = spawn(mitem_label, item_text: "info", item_flags: 0, item_scale: 8);
-	m.add(it, RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MID, [40, h*-0.5+32], [0, h*0.5-16]);
+	m.add(it, RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, [split, h*-0.5+32], [right, h*0.5-16]);
 
 	it = spawn(mitem_button, item_text: "Apply", item_command: "pkg apply\n", item_flags: IF_SELECTABLE, item_scale: 8);
-	m.add(it, RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MID, [40+1, h*0.5-16+1], [0-1, h*0.5-1]);
+	m.add(it, RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, [split+1, h*0.5-16+1], [right-1, h*0.5-1]);
 
 	//and give us a suitable menu tint too, just because.
 	addmenuback(m);
