@@ -2,6 +2,7 @@
 key binding item.
 interactable - queries binds for a command, and accepts new scan codes to bind for its given command.
 */
+
 class mitem_bind : mitem
 {
 	virtual void(vector pos) item_draw;
@@ -11,23 +12,29 @@ class mitem_bind : mitem
 	void() mitem_bind =
 	{
 		item_scale = item_size[1];
-
 		item_flags |= IF_SELECTABLE;
-		
-		item_text = strzone(item_text);
-		item_command = strzone(item_command);
+		if (item_text)
+		{
+			// set description text color to "alt"
+			item_text = strzone(strcat("^m", item_text));
+			// item_text = strzone(item_text);
+		}
+		if (item_command)
+			item_command = strzone(item_command);
 	};
 	virtual void() item_remove =
 	{
-		strunzone(item_text);
-		strunzone(item_command);
+		if (item_text)
+			strunzone(item_text);
+		if (item_command)
+			strunzone(item_command);
 	};
 };
-#define menuitembind_spawn(text,command,sz)	\
-	spawn(mitem_bind,			\
+#define spawn_bind(text,command,sz)	\
+	spawn(mitem_bind,				\
 		item_text:		text,		\
 		item_command:	command,	\
-		item_size:		sz		\
+		item_size:		sz			\
 		)
 
 void(vector pos) mitem_bind::item_draw =

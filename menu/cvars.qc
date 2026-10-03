@@ -2,7 +2,7 @@
 
 class mitem_cvargrid : mitem_grid
 {
-	strbuf		grid_buf_names;	//left column (
+	strbuf grid_buf_names; //left column (
 	static void(strbuf newbuf) grid_setbuf =
 	{
 		if (grid_buf_names >= 0)
@@ -38,12 +38,13 @@ class mitem_cvargrid : mitem_grid
 		if (idx < 0 || idx >= grid_numchildren)
 			return __NULL__;
 		string v = bufstr_get(grid_buf_names, idx);
-		return cvar_description(v);
+		return strcat(XRGB_MUTED, cvar_description(v));
 	};
 	virtual void(vector pos, float idx) grid_draw;
 	virtual float(vector pos, float scan, float char, float down, float idx) grid_keypress;
 	virtual void(float olditem, float newitem) grid_selectionchanged;
 };
+
 void(vector pos, float idx) mitem_cvargrid::grid_draw =
 {
 	string text = bufstr_get(grid_buf_names, idx);
@@ -53,9 +54,9 @@ void(vector pos, float idx) mitem_cvargrid::grid_draw =
 
 	vector col = item_rgb;
 	if (item_flags & IF_MFOCUSED && idx == grid_mactive)
-		col_z = 0;
+		col = RGB_MFOCUS;
 	if (item_flags & IF_KFOCUSED && idx == grid_kactive)
-		col_x = 0;
+		col = RGB_KFOCUS;
 
 	flags = cvar_type(text);
 	if (!(flags&1))
@@ -65,16 +66,16 @@ void(vector pos, float idx) mitem_cvargrid::grid_draw =
 	if (flags & 4)	//private
 	{
 		if (!value)	//should always be true...
-			value = "???";
+			value = "*"; // chr2str(0xe010, 0xe011); // []
 		if (checkextension("FTE_EXTENDEDTEXTCODES"))
-			value = strcat("^&FE", value);	//yellow, so you know its valid is meaningless.
+			value = strcat(XRGB_WARNING, value);	// value is meaningless.
 	}
 	//8 means engine, or something
 	//16 just means it has a description. who even cares?
 	if (flags & 32)
 	{
 		if (checkextension("FTE_EXTENDEDTEXTCODES"))
-			value = strcat("^&F4", value);	//make it red so you know its pointless trying to change it.
+			value = strcat(XRGB_DANGER, value);	// pointless trying to change it.
 	}
 
 	if (idx == grid_kactive && cursorpos >= 0)
@@ -83,7 +84,7 @@ void(vector pos, float idx) mitem_cvargrid::grid_draw =
 		if (value == defvalue)
 			col *= 0.5;
 		if (((cltime*4)&1) && (item_flags & IF_KFOCUSED))
-			value = strcat(substring(value, 0, cursorpos), chr2str(0xe00b), substring(value, cursorpos+1, -1));	//replace the char with a box... ugly, whatever
+			value = strcat(substring(value, 0, cursorpos), chr2str(0xe00b), substring(value, cursorpos+1, -1)); //box
 	}
 	else if (value == defvalue)
 		col *= 0.5;
@@ -94,6 +95,7 @@ void(vector pos, float idx) mitem_cvargrid::grid_draw =
 	ui.drawstring(pos, text, '1 1 0' * item_scale, col, item_alpha, 0);
 	ui.drawstring(valuepos, value, '1 1 0' * item_scale, col, item_alpha, 0);
 };
+
 void(float olditem, float newitem) mitem_cvargrid::grid_selectionchanged =
 {
 	if (olditem == newitem)
@@ -106,6 +108,7 @@ void(float olditem, float newitem) mitem_cvargrid::grid_selectionchanged =
 	cursorpos = -1;	//stop editing now.
 	newval = "";
 };
+
 float(vector pos, float scan, float char, float down, float idx) mitem_cvargrid::grid_keypress =
 {
 	if (!down)
@@ -170,9 +173,6 @@ float(vector pos, float scan, float char, float down, float idx) mitem_cvargrid:
 	return TRUE;
 };
 
-
-
-
 class cvarsmenu : mitem_exmenu
 {
 	string filter;
@@ -192,9 +192,9 @@ class cvarsmenu : mitem_exmenu
 				if (cvar_string(v) == cvar_defstring(v))
 					bufstr_free(b, i);
 				else if (cvar_type(v)&32)
-					bufstr_free(b, i);	//also remove read-only cvars. we can't reset them or anything so there's no point listing them here.
+					bufstr_free(b, i); //also remove read-only cvars. we can't reset them or anything so there's no point listing them here.
 			}
-			buf_sort(b, 0, 0);	//sort the names, to clean up any gaps
+			buf_sort(b, 0, 0); //sort the names, to clean up any gaps
 		}
 
 		grid.grid_setbuf(b);
@@ -210,6 +210,7 @@ class cvarsmenu : mitem_exmenu
 			return grid.getdesc();
 		return super::get(key);
 	};
+
 	virtual void(string key, string newval) set =
 	{
 		if (key == "*filter")
@@ -225,6 +226,7 @@ class cvarsmenu : mitem_exmenu
 			return super::set(key, newval);
 		updatefilters();
 	};
+
 	virtual float(string key) isvalid =
 	{
 		if (key == "*filter")
@@ -237,34 +239,93 @@ class cvarsmenu : mitem_exmenu
 
 void(mitem_desktop desktop) M_Menu_Cvars =
 {
-	mitem it;
-	float h = (480+240)/2;
+	float menux = MENU_WIDTH;
+	float menuy = MENU_HEIGHT;
+	float padding = PADDING;
 
-	//create the menu, give it focus, and make sure its displayed over everything else.
-	cvarsmenu m = spawn(cvarsmenu, item_text:_("Mods List"), item_flags:IF_SELECTABLE, item_command:"m_main", frame_stdheight:h);
-	desktop.add(m, RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, '0 0', '0 0');
-	desktop.item_focuschange(m, IF_KFOCUSED);
-	m.totop();
+	// Main menu
 
-	//draw title art above the options
+	// no dupes please.
+	local mitem_exmenu mm;
+	mm = (mitem_exmenu)desktop.findchildtext(_("Cvars Edit"));
+	if (mm) { mm.totop(); return; }
+	mm = spawn(mitem_exmenu, item_text:_("Cvars Edit"), item_flags:IF_SELECTABLE, item_command:"m_options");
+	desktop.add(mm, RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, '0 0', '0 0');
+	desktop.item_focuschange(mm, IF_KFOCUSED);
+	mm.totop();
+
+	// Frame menu
+
+	// center h and v
+	mitem_frame m = spawn(mitem_frame, item_flags:IF_SELECTABLE, frame_hasscroll:FALSE);
+	mm.add(m,
+		RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, // top-left|bottom-right relation
+		[menux*-0.5, menuy*-0.5], // top-left
+		[menux*0.5, menuy*0.5] // bottom-right
+	);
+
+	// Content
+
+	// banner image
 	mitem_pic banner = spawn(mitem_pic, item_text:"gfx/ttl_cstm.lmp", item_size_y:24, item_flags:IF_CENTERALIGN);
-	m.add(banner, RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_OWN_MIN, [banner.item_size_x*-0.5, h*-0.5], [banner.item_size_x*0.5, 24]);
+	m.add(banner,
+		RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MID|RS_Y_MAX_OWN_MIN, // top-left|bottom-right relation
+		[banner.item_size_x*-0.5, padding], // top-left
+		[banner.item_size_x*0.5, banner.item_size_y]); // bottom-right
 
-	it = menuitemeditt_spawn("Cvar Filter", "*filter", '280 8');
-	m.add(it, RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_OWN_MIN, [-160, h*-0.5+32], [40, 8]);
+	// spawn a container frame for the actual options.
+	cvarsmenu fr = spawn(cvarsmenu, item_flags: IF_SELECTABLE, frame_hasscroll:FALSE,
+		item_framesize_x: padding, // sides
+		item_framesize_y: padding, // top
+		item_framesize_z: padding // bottom
+	);
+	m.add(fr,
+		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, // top-left|bottom-right relation
+		[0, banner.item_size_y+padding], // top-left
+		[0, 0] // bottom-right
+	);
 
-	it = menuitemcheck_spawn("Modified Only", "*modified", '280 8');
-	m.add(it, RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_OWN_MIN, [40, h*-0.5+32], [200, 8]);
+	float posy = 0;
+	float posx = 0;
+	float maxposx = -SCRLY-padding;
+	float optionswidth = menux-SCRLY;
+	vector optionsize = [optionswidth, TXT_NMSZ];
 
-	//spawn our grid for the actual options. this provides a scrollbar if we have too many items.
-	m.grid = spawn(mitem_cvargrid, item_flags: IF_SELECTABLE, item_scale: 8);
-	m.add(m.grid, RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_OWN_MIN|RS_Y_MAX_PARENT_MID, [-160, h*-0.5+48], [320, h*0.5-64]);
+	// Headline
 
-	it = spawn(mitem_label, item_text: "*desc", item_flags: 0, item_scale: 8);
-	m.add(it, RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_OWN_MIN|RS_Y_MAX_PARENT_MID, [-160, h*0.5-60], [320, h*0.5]);
+	fr.addc(spawn_headline("Advanced"), posy); posy+=TXT_MDSZ+padding;
 
-	m.updatefilters();
-	
+	// Toggles & Filters at the top
+
+	fr.add(spawn_check("Modified Only", "*modified", [menux/2-(padding*2), TXT_NMSZ]),
+		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN,
+		[posx, posy], [(menux)-(padding*2), TXT_NMSZ]); posy+=TXT_NMSZ+SPACING;
+
+	fr.add(spawn_edit("Cvar Filter", "*filter", [menux/2-(padding*2), TXT_NMSZ]),
+		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN,
+		[posx, posy], [(menux)-(padding*2), TXT_NMSZ]); posy+=TXT_NMSZ+padding;
+
+	// Grid
+
+	//spawn our grid for the actual options. this provides a scrollbar if we have too many items.\
+	float gridheight = engine==E_FTE?100:128;
+	fr.grid = spawn(mitem_cvargrid, item_flags: IF_SELECTABLE, item_scale: 6);
+	fr.add(fr.grid, RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN,
+		[0, posy], [menux-(padding*2), gridheight]); posy+=gridheight+padding;
+
+	// I wish QSS could show the description text for cvars, but it can't...
+	if (engine==E_FTE)
+	{
+		// description at bottom of page
+		// can't seem to be able to set text size for textfields?
+		fr.add(spawn(mitem_label, item_text: "*desc", item_flags: 0, item_scale: 6),
+			RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN,
+			[0, posy], [menux-(padding*2), 24]);
+	}
+
+
+	fr.updatefilters();
+
 	//and give us a suitable menu tint too, just because.
-	addmenuback(m);
+	addmenuback(mm);
 };

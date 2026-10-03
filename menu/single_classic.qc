@@ -1,0 +1,100 @@
+/*
+The main / root menu.
+*/
+nonstatic void(mitem_desktop desktop) M_Single =
+{
+	float menux = MENU_WIDTH;
+	float menuy = MENU_HEIGHT;
+	float padding = PADDING;
+	float leftpadding = 16;
+	float plaquepadding = 24;
+
+	// Main menu
+
+	// no dupes please.
+	local mitem_exmenu mm;
+	mm = (mitem_exmenu)desktop.findchildtext(_("Singleplayer Menu"));
+	if (mm) { mm.totop(); return; }
+	// create a fullscreen frame, target previous menu
+	mm = spawn(mitem_exmenu, item_text:_("Singleplayer Menu"), item_flags:IF_SELECTABLE , item_command:"m_main");
+	desktop.add(mm, RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, '0 0', '0 0');
+	desktop.item_focuschange(mm, IF_KFOCUSED);
+	mm.totop();
+
+	// Frame menu
+
+	mitem_frame m = spawn(mitem_frame, item_flags:IF_SELECTABLE|IF_NOCURSOR|IF_FOCUSFOLLOWSMOUSE, frame_hasscroll:FALSE);
+	mm.add(
+		m,
+		RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, // top-left|bottom-right relation
+		[menux*-0.5, menuy*-0.5], // top-left
+		[menux*0.5, menuy*0.5] // bottom-right
+	);
+
+	// Left plaque
+
+	float qplaquewidth = 32;
+	m.add(spawn_pic("gfx/qplaque.lmp", '32 144'),
+		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN,
+		[leftpadding, padding], [qplaquewidth, 144]);
+
+	// Title
+
+	mitem_pic banner = spawn(mitem_pic, item_text:"gfx/ttl_sgl.lmp", item_size_y:24, item_flags:IF_CENTERALIGN);
+	m.add(
+		banner,
+		RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN,
+		[-banner.item_size_x*0.5, padding], [banner.item_size_x, 24]
+	);
+
+	// Content
+
+	// Button overlay hotspots spawn
+	float alpha = -1;
+	mitem_classicbutton btn1 = spawn(mitem_classicbutton, item_command:"m_pop;m_newgame sp",
+		item_size:'10 10', item_rgb:'255 0 0', item_alpha:alpha); // new game
+	mitem_classicbutton btn2 = spawn(mitem_classicbutton, item_command:"m_pop;m_load",
+		item_size:'10 10', item_rgb:'255 0 0', item_alpha:alpha); // load
+	mitem_classicbutton btn3 = spawn(mitem_classicbutton, item_command:"m_pop;m_save",
+		item_size:'10 10', item_rgb:'255 0 0', item_alpha:alpha); // save
+	mitem_classicbutton btn4 = spawn(mitem_classicbutton, item_command:"m_pop;m_levels",  // m_levels
+		item_size:'10 10', item_rgb:'255 0 0', item_alpha:alpha); // levels
+	mitem_classicbutton btn5 = spawn(mitem_classicbutton, item_command:"m_pop;m_demos",
+		item_size:'10 10', item_rgb:'255 0 0', item_alpha:alpha);
+
+	// buttons start location
+	float bsx = qplaquewidth+leftpadding+plaquepadding;
+	float bsy = banner.item_size_y+(padding*2);
+	// position hotspots over relevant image button location
+	float by = bsy;
+	#define bposrel RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN
+	m.add(btn1, bposrel, [bsx, by], [240, 19]); by+=20; // new game
+	m.add(btn2, bposrel, [bsx, by], [240, 19]); by+=20; // load
+	m.add(btn3, bposrel, [bsx, by], [240, 19]); by+=20; // save
+	m.add(btn4, bposrel, [bsx, by], [240, 19]); by+=20; // levels
+	m.add(btn5, bposrel, [bsx, by], [240, 19]); // demos
+
+	// Menu options image
+	mitem_pic menuart = spawn(mitem_pic, item_text:"gfx/sp_menu.lmp");
+	vector msize = menuart.item_size;
+	m.add(menuart,
+		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN,
+		[bsx, bsy], msize);
+
+	// "Levels" menu image, from MarkV
+	mitem_pic levelsart = spawn(mitem_pic, item_text:classic_art("gfx/levels.lmp", "menugfx/levels.lmp"));
+	m.add(levelsart,
+		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN,
+		[bsx, bsy+60], levelsart.item_size);
+	mitem_pic demosart = spawn(mitem_pic, item_text:classic_art("gfx/demos.lmp", "menugfx/demos.lmp"));
+	m.add(demosart, bposrel, [bsx, bsy+80], demosart.item_size);
+
+	mm.item_focuschange(m, IF_KFOCUSED);
+	m.item_focuschange(btn1, IF_KFOCUSED);
+
+	//spinny quad/pent, for the luls
+	// local string it = (random()<0.9)?"progs/quaddama.mdl":"progs/invulner.mdl";
+	// m.add(spawn (mitem_spinnymodel, item_text: it), RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, [offset_l, 12*-16/2], [0, 12*16/2]);
+
+	addmenuback(mm);
+};

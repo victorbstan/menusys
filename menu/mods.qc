@@ -4,7 +4,7 @@ class mitem_pictext : mitem_text
 	virtual void(vector pos) item_draw =
 	{
 		if (pic)
-			drawpic(pos, pic, [item_size_y,item_size_y], '1 1 1', 1, 0); 
+			drawpic(pos, pic, [item_size_y,item_size_y], '1 1 1', 1, 0);
 		pos_x += item_size_y;
 		super::item_draw(pos);
 	};
@@ -54,9 +54,9 @@ void(mitem_desktop desktop) M_Menu_Mods =
 				desc = "Team Fortress";
 		}
 		if (desc=="")
-			desc = sprintf("%s/", gamedir);	//no description given, so make it clear that its an actual subdir name
+			desc = sprintf("%s", gamedir);	//no description given, so make it clear that its an actual subdir name
 		else
-			desc = sprintf("%s ^h(%s)", desc, gamedir);	//include the gamedir, faded somewhat.
+			desc = sprintf("%s ^h%s^h", desc, gamedir);	//include the gamedir, faded somewhat.
 		string cmd = getgamedirinfo(mod, GGDI_LOADCOMMAND);
 		if not(cmd)	//for dp users, if they somehow run this
 			cmd = sprintf("gamedir %s", gamedir);
@@ -64,14 +64,13 @@ void(mitem_desktop desktop) M_Menu_Mods =
 		string icon = getgamedirinfo(mod, GGDI_ICON);
 
 		//add some extra stuff to reset the menu
-		cmd = strcat("m_pop; ", cmd, "; togglemenu");
+		cmd = strcat("m_pop; ", cmd, "; togglemenu;\n");
 
 		fr.add(spawn(mitem_pictext, pic:icon, item_text:desc, item_command:cmd, item_scale:16, item_flags:0), RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN, [0, mod*16], [0, 16]);
 	}
 
 	if (!mod)
 		fr.add(spawn(mitem_text, item_text:"No mods detected", item_scale:16, item_flags:0), RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN, [0, mod*16], [0, 16]);
-	
-	//and give us a suitable menu tint too, just because.
+
 	addmenuback(m);
 };

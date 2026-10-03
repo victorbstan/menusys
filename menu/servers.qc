@@ -21,18 +21,18 @@ var float autocvar_sb_showmap = 1;
 var float autocvar_sb_showname = 1;
 
 //#define COLUMN(width, sortname, title, draw)
-#define COLUMN_NUMPLAYERS		COLUMN(2*8,	numplayers,	"Pl", 			ui.drawstring(pos, sprintf("%-2g", gethostcachenumber(field_numplayers, sv)), '8 8', col, 1, 0);)
-#define COLUMN_MAXPLAYERS		COLUMN(2*8,	maxplayers,	"MP", 		ui.drawstring(pos, sprintf("%-2g", gethostcachenumber(field_maxplayers, sv)), '8 8', col, 1, 0);)
-#define COLUMN_PING			COLUMN(4*8,	ping,			"Ping", 		ui.drawstring(pos, sprintf("%-4g", gethostcachenumber(field_ping, sv)), '8 8', col, 1, 0);)
-#define COLUMN_FRAGLIMIT		COLUMN(4*8,	fraglimit,		"FL",			ui.drawstring(pos, sprintf("%-3g", gethostcachenumber(field_fraglimit, sv)), '8 8', col, 1, 0);)
-#define COLUMN_TIMELIMIT		COLUMN(4*8,	timelimit,		"TL",			ui.drawstring(pos, sprintf("%-3g", gethostcachenumber(field_timelimit, sv)), '8 8', col, 1, 0);)
-#define COLUMN_GAMEDIR		COLUMN(8*8,	gamedir,		"Gamedir",	ui.drawstring(pos, sprintf("%-.8s", gethostcachestring(field_gamedir, sv)), '8 8', col, 1, 0);)
-#define COLUMN_ADDRESS		COLUMN(16*8,	address,		"Address",		ui.drawstring(pos, sprintf("%-.16s", gethostcachestring(field_address, sv)), '8 8', col, 1, 0);)
-#define COLUMN_MAP			COLUMN(8*8,	map,			"Map",		ui.drawstring(pos, sprintf("%-.8s", gethostcachestring(field_map, sv)), '8 8', col, 1, 0);)
-#define COLUMN_HOSTNAME		COLUMN(64*8,	name,		"Name",		ui.drawstring(pos, sprintf("%s", gethostcachestring(field_name, sv)), '8 8', col, 1, 0);)
+#define COLUMN_NUMPLAYERS COLUMN(2*8, numplayers, "Pl", ui.drawstring(pos, sprintf("%-2g", gethostcachenumber(field_numplayers, sv)), '8 8', col, 1, 0);)
+#define COLUMN_MAXPLAYERS COLUMN(2*8, maxplayers, "MP", ui.drawstring(pos, sprintf("%-2g", gethostcachenumber(field_maxplayers, sv)), '8 8', col, 1, 0);)
+#define COLUMN_PING COLUMN(4*8, ping, "Ping", ui.drawstring(pos, sprintf("%-4g", gethostcachenumber(field_ping, sv)), '8 8', col, 1, 0);)
+#define COLUMN_FRAGLIMIT COLUMN(4*8, fraglimit, "FL", ui.drawstring(pos, sprintf("%-3g", gethostcachenumber(field_fraglimit, sv)), '8 8', col, 1, 0);)
+#define COLUMN_TIMELIMIT COLUMN(4*8, timelimit, "TL", ui.drawstring(pos, sprintf("%-3g", gethostcachenumber(field_timelimit, sv)), '8 8', col, 1, 0);)
+#define COLUMN_GAMEDIR COLUMN(8*8, gamedir, "Gamedir", ui.drawstring(pos, sprintf("%-.8s", gethostcachestring(field_gamedir, sv)), '8 8', col, 1, 0);)
+#define COLUMN_ADDRESS COLUMN(16*8, address, "Address", ui.drawstring(pos, sprintf("%-.16s", gethostcachestring(field_address, sv)), '8 8', col, 1, 0);)
+#define COLUMN_MAP COLUMN(8*8, map, "Map", ui.drawstring(pos, sprintf("%-.8s", gethostcachestring(field_map, sv)), '8 8', col, 1, 0);)
+#define COLUMN_HOSTNAME COLUMN(64*8, name, "Name", ui.drawstring(pos, sprintf("%s", gethostcachestring(field_name, sv)), '8 8', col, 1, 0);)
 //FIXME: add a little * icon before the hostname for favourites or something
 
-#define COLUMNS 				COLUMN_NUMPLAYERS	COLUMN_MAXPLAYERS	COLUMN_PING	COLUMN_FRAGLIMIT	COLUMN_TIMELIMIT	COLUMN_GAMEDIR	COLUMN_ADDRESS	COLUMN_MAP	COLUMN_HOSTNAME
+#define COLUMNS COLUMN_NUMPLAYERS COLUMN_MAXPLAYERS COLUMN_PING COLUMN_FRAGLIMIT COLUMN_TIMELIMIT COLUMN_GAMEDIR COLUMN_ADDRESS COLUMN_MAP COLUMN_HOSTNAME
 
 class mitem_servers : mitem
 {
@@ -69,10 +69,10 @@ class mitem_servers : mitem
 		local float sv, maxsv = gethostcachevalue(SLIST_HOSTCACHEVIEWCOUNT);
 		local float maxy = self.item_size_y;
 		float left = pos_x;
-	
+
 		local vector omin = ui.drawrectmin, omax = ui.drawrectmax;
 		local vector cmin = pos + '0 8', cmax = pos + item_size;
-	
+
 		cmin_x = max(omin_x, cmin_x);
 		cmin_y = max(omin_y, cmin_y);
 		cmax_x = min(omax_x, cmax_x);
@@ -109,7 +109,7 @@ class mitem_servers : mitem
 		maxy = ceil(maxy/8) - 1;
 		if (maxsv  > slider.val + maxy)
 			maxsv = slider.val + maxy;
-	
+
 		float sort = gethostcachevalue(SLIST_SORTFIELD);
 		string colkey = __NULL__;
 #define COLUMN(width, sortname, title, draw) if (field_##sortname<0) autocvar_sb_show##sortname = FALSE; if (autocvar_sb_show##sortname) {if (ui.mousepos[0] > pos_x && ui.mousepos[1] < pos_y+8) colkey = #sortname; pos_x += width+8;}
@@ -118,7 +118,7 @@ class mitem_servers : mitem
 
 		vector col;
 		pos_x = left;
-#define COLUMN(width, sortname, title, draw) if (autocvar_sb_show##sortname) {col = '1 1 1'; if (sort == field_##sortname) col_z = 0; if (colkey == #sortname) col_x = 0; ui.drawstring(pos, title, '8 8', col, 1, 0); pos_x += width+8;}
+#define COLUMN(width, sortname, title, draw) if (autocvar_sb_show##sortname) {col = '1 1 1'; if (sort == field_##sortname) col_z = 0; if (colkey == #sortname) col = RGB_BGHOVERA; ui.drawstring(pos, title, '8 8', col, 1, 0); pos_x += width+8;}
 		COLUMNS
 #undef COLUMN
 
@@ -128,25 +128,25 @@ class mitem_servers : mitem
 		pos_y += 8 * (1-(slider.val-floor(slider.val)));
 		for (float y=pos_y,	sv = max(0, floor(slider.val)); sv < maxsv; sv+=1)
 		{
-			col = (sv&1)?'0.1 0.1 0.1':'0.15 0.1 0.05';
-			drawfill([left, y], [item_size_x,8], col, 0.8, 0); 
+			col = (sv&1) ? RGB_BGHOVERA : RGB_BGHOVERB;
+			drawfill([left, y], [item_size_x,8], col, 0.8, 0);
 			y += 8;
 		}
 		for (	sv = max(0, floor(slider.val)); sv < maxsv; sv+=1)
 		{
-			col = ((server_selected==sv)?'1 1 0':'1 1 1');
-	
+			col = ((server_selected==sv) ? RGB_TXTB : RGB_TXT);
+
 			//if isproxy
 			//if islocal
 			//if isfavorite
-	
+
 			pos_x = left;
-#define COLUMN(width, sortname, title, draw) if (autocvar_sb_show##sortname) {draw   pos_x += width+8; }
+#define COLUMN(width, sortname, title, draw) if (autocvar_sb_show##sortname) { draw pos_x += width+8; }
 			COLUMNS
 #undef COLUMN
 			pos_y += 8;
 		}
-	
+
 		ui.setcliparea(omin_x, omin_y, omax_x - omin_x, omax_y - omin_y);
 	};
 	virtual float(vector pos, float scan, float char, float down) item_keypress =
@@ -187,7 +187,7 @@ class mitem_servers : mitem
 			}
 			if (news < 0 || news >= gethostcachevalue(SLIST_HOSTCACHEVIEWCOUNT))
 				return FALSE;
-	
+
 			news += floor(slider.val);
 
 			if (server_selected == news && dbltime > cltime)
@@ -200,7 +200,7 @@ class mitem_servers : mitem
 			else
 				server_selected = news;
 			dobound = TRUE;
-	
+
 			dbltime = cltime + 0.5;
 		}
 		else if (scan == K_ENTER)
@@ -292,7 +292,7 @@ class mitem_servers_players : mitem
 	{
 //		this.item_flags |= IF_SELECTABLE;
 	};
-	
+
 	virtual void(vector pos) item_draw =
 	{
 		float player;
@@ -311,15 +311,15 @@ class mitem_servers_players : mitem
 			float frags		= stof(argv(1));
 			float ontime	= stof(argv(2));
 			float ping		= stof(argv(3));
-			string name	= argv(4);
+			string name		= argv(4);
 			string skin		= argv(5);
 			vector top		= stov(argv(6));
 			vector bot		= stov(argv(7));
 
-			drawfill(pos,		'16 4',	top, 1, 0);
-			drawfill(pos+'0 4 0',	'16 4',	bot, 1, 0);
-			drawstring(pos,	sprintf("%g", frags), '8 8', '1 1 1', 1, 0);
-			drawstring(pos+'20 0',	name, '8 8', '1 1 1', 1, 0);
+			drawfill(pos, '16 4', top, 1, 0);
+			drawfill(pos+'0 4 0', '16 4', bot, 1, 0);
+			drawstring(pos,	sprintf("%g", frags), '8 8', RGB_TXT, 1, 0);
+			drawstring(pos+'20 0', name, '8 8', RGB_TXT, 1, 0);
 			pos_y += 8;
 			if (++y == 8)
 			{
@@ -328,7 +328,7 @@ class mitem_servers_players : mitem
 				pos_x += 16*8;
 			}
 		}
-	
+
 		if (y)
 		{
 			pos_y = opos_y;
@@ -339,9 +339,9 @@ class mitem_servers_players : mitem
 		m = tokenizebyseparator(gethostcachestring(gethostcacheindexforkey("serverinfo"), listing.server_selected), "\\");
 		for(player = 1; player <= m; player += 2)
 		{
-			drawtextfield(pos,		'64 8', 6, argv(player));
-			drawtextfield(pos+'68 0',	[32*8-40, 8], 3, argv(player+1));
-	
+			drawtextfield(pos, '64 8', 6, argv(player));
+			drawtextfield(pos+'68 0', [32*8-40, 8], 3, argv(player+1));
+
 			pos_y += 8;
 			if (++y == 8)
 			{
@@ -363,7 +363,7 @@ nonstatic void(mitem_desktop desktop) M_Servers =
 		localcmd("menu_servers\n");
 		return;
 	}
-	
+
 #ifdef CSQC
 	if not (checkextension("FTE_CSQC_SERVERBROWSER"))
 	{
@@ -379,14 +379,14 @@ nonstatic void(mitem_desktop desktop) M_Servers =
 	{
 #if 1
 		mitem_exmenu m;
-		m = spawn(mitem_exmenu, item_text:_("Options"), item_flags:IF_SELECTABLE, item_command:"m_main");
+		m = spawn(mitem_exmenu, item_text:_("Servers List"), item_flags:IF_SELECTABLE, item_command:"m_multi");
 		desktop.add(m, RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, '0 0', '0 0');
 		desktop.item_focuschange(m, IF_KFOCUSED);
 		m.totop();
 #else
 		mitem_menu m;
 		m = menu_spawn(desktop, _("Servers List"), '320 200');
-		m.item_command = "m_main";
+		m.item_command = "m_multi";
 		m.item_flags |= IF_RESIZABLE;
 		desktop.item_focuschange(m, IF_KFOCUSED);
 		m.totop();
@@ -394,28 +394,54 @@ nonstatic void(mitem_desktop desktop) M_Servers =
 
 		mitem_vslider sl = spawn(mitem_vslider, stride:4, item_flags:IF_SELECTABLE);
 		mitem_servers ls = spawn(mitem_servers, slider:sl);
-	
-		m.add(ls, RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, '0 0', '-16 -68');
-		m.add(spawn(mitem_servers_players, listing:ls),	RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, [8*20, -8*8], [0, -8*0]);
-		m.add(sl,	RS_X_MIN_PARENT_MAX|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, [-16, 8], [0, -68]);
+
+		m.add(ls,
+			RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX,
+			'0 0', '-16 -68');
+		m.add(spawn(mitem_servers_players, listing:ls),
+			RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX,
+			[8*20, -8*8], [0, -8*0]);
+		m.add(sl,
+			RS_X_MIN_PARENT_MAX|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX,
+			[-8, 8], [0, -68]);
 
 		//only add checkboxes for field names accepted by this engine.
-		if (gethostcacheindexforkey("ping") >= 0)
-			m.add(menuitemcheck_spawn(_("Ping"),			"sb_showping", 			[8*8, 8]),	RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX, [0, -8*8], [8*20, -8*7]);
-		if (gethostcacheindexforkey("cname") >= 0)
-			m.add(menuitemcheck_spawn(_("Address"),		"sb_showaddress", 		[8*8, 8]),	RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX, [0, -8*7], [8*20, -8*6]);
-		if (gethostcacheindexforkey("map") >= 0)
-			m.add(menuitemcheck_spawn(_("Map"),			"sb_showmap", 			[8*8, 8]),	RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX, [0, -8*6], [8*20, -8*5]);
-		if (gethostcacheindexforkey("gamedir") >= 0 || gethostcacheindexforkey("mod") >= 0)
-			m.add(menuitemcheck_spawn(_("Gamedir"),		"sb_showgamedir", 		[8*8, 8]),	RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX, [0, -8*5], [8*20, -8*4]);
-		if (gethostcacheindexforkey("numplayers") >= 0)
-			m.add(menuitemcheck_spawn(_("NumPlayers"),		"sb_shownumplayers",	[8*8, 8]),	RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX, [0, -8*4], [8*20, -8*3]);
-		if (gethostcacheindexforkey("maxplayers") >= 0)
-			m.add(menuitemcheck_spawn(_("MaxPlayers"),		"sb_showmaxplayers",	[8*8, 8]),	RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX, [0, -8*3], [8*20, -8*2]);
-		if (gethostcacheindexforkey("fraglimit") >= 0)
-			m.add(menuitemcheck_spawn(_("Fraglimit"),		"sb_showfraglimit", 		[8*8, 8]),	RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX, [0, -8*2], [8*20, -8*1]);
-		if (gethostcacheindexforkey("timelimit") >= 0)
-			m.add(menuitemcheck_spawn(_("Timelimit"),		"sb_showtimelimit", 		[8*8, 8]),	RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX, [0, -8*1], [8*20, -8*0]);
+		if (gethostcacheindexforkey("ping") >= 0) {
+			m.add(spawn_check(_("Ping"), "sb_showping", [8*8, 8]),
+				RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX,
+				[0, -8*8], [8*20, -8*7]); }
+		if (gethostcacheindexforkey("cname") >= 0) {
+			m.add(spawn_check(_("Address"), "sb_showaddress", [8*8, 8]),
+				RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX,
+				[0, -8*7], [8*20, -8*6]); }
+		if (gethostcacheindexforkey("map") >= 0) {
+			m.add(spawn_check(_("Map"), "sb_showmap", [8*8, 8]),
+				RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX,
+				[0, -8*6], [8*20, -8*5]); }
+		if (gethostcacheindexforkey("gamedir") >= 0 || gethostcacheindexforkey("mod") >= 0) {
+			m.add(spawn_check(_("Gamedir"), "sb_showgamedir", [8*8, 8]),
+				RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX,
+				[0, -8*5], [8*20, -8*4]); }
+		if (gethostcacheindexforkey("numplayers") >= 0) {
+			m.add(spawn_check(_("NumPlayers"), "sb_shownumplayers", [8*8, 8]),
+				RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX,
+				[0, -8*4], [8*20, -8*3]); }
+		if (gethostcacheindexforkey("maxplayers") >= 0) {
+			m.add(spawn_check(_("MaxPlayers"), "sb_showmaxplayers", [8*8, 8]),
+				RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX,
+				[0, -8*3], [8*20, -8*2]); }
+		if (gethostcacheindexforkey("fraglimit") >= 0) {
+			m.add(spawn_check(_("Fraglimit"), "sb_showfraglimit", [8*8, 8]),
+				RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX,
+				[0, -8*2], [8*20, -8*1]); }
+		if (gethostcacheindexforkey("timelimit") >= 0) {
+			m.add(spawn_check(_("Timelimit"), "sb_showtimelimit", [8*8, 8]),
+				RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX,
+				[0, -8*1], [8*20, -8*0]); }
+
+		addmenuback(m);
 	}
+
+	addmenuback(o);
 };
 

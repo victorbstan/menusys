@@ -73,9 +73,9 @@ void(vector pos) mitem_tabs::item_draw =
 			if (!item_kactivechild)
 				item_focuschange(ch, IF_KFOCUSED);
 			if (mouseinbox(tpos, [w, 16]))
-				col_z = 0;
+				col = RGB_MFOCUS;
 			if (ch.item_flags & IF_KFOCUSED)
-				col_x = 0;
+				col = RGB_KFOCUS;
 		}
 
 		ui.drawstring(tpos + '4 4', ch.item_text, '8 8', col, item_alpha, 0);
@@ -111,7 +111,7 @@ float(vector pos, float scan, float char, float down) mitem_tabs::item_keypress 
 				item_focuschange(ch, IF_KFOCUSED);	//give the tab full focus.
 				return TRUE;
 			}
-			
+
 			tpos_x += sz_x;
 		}
 	}

@@ -21,28 +21,28 @@
 
 __strip var float dp_workarounds;
 
-#define IF_SELECTABLE		(1<<0)	//can accept KFOCUSED/MFOCUSED and key events etc. cannot be selected otherwise.
-#define IF_INTERACT		(1<<1)	//generic interaction flag for use by the widgets themselves.
-#define IF_RESIZABLE		(1<<2)	//may be resized, either by parent (it takes the full space) or by user.
-#define IF_MFOCUSED		(1<<3)	//mouse is currently sitting over it
-#define IF_KFOCUSED		(1<<4)	//has keyboard focus
-#define IF_NOKILL		(1<<5)	//kill button is disabled. move to frame/menu?
-#define IF_DRAGGABLE		(1<<6)	//can be dragged. this is stupid.
-#define IF_DROPPABLE		(1<<7)	//dragged items can be dropped on this item.
-#define IF_CLIENTMOVED		(1<<8)	//recalc required client dimensions (and toggle scrollbars if needed). move to frame?
-#define IF_CENTERALIGN		(1<<9)	//
-#define IF_RIGHTALIGN		(1<<10)	//
-#define IF_NOCURSOR		(1<<11)	//when mgrabbed, the cursor will not be shown
-#define IF_ISFRAME		(1<<12)	//is derived from mitem_frame (helps debugging recurion).
+#define IF_SELECTABLE			(1<<0)	//can accept KFOCUSED/MFOCUSED and key events etc. cannot be selected otherwise.
+#define IF_INTERACT				(1<<1)	//generic interaction flag for use by the widgets themselves.
+#define IF_RESIZABLE			(1<<2)	//may be resized, either by parent (it takes the full space) or by user.
+#define IF_MFOCUSED				(1<<3)	//mouse is currently sitting over it
+#define IF_KFOCUSED				(1<<4)	//has keyboard focus
+#define IF_NOKILL				(1<<5)	//kill button is disabled. move to frame/menu?
+#define IF_DRAGGABLE			(1<<6)	//can be dragged. this is stupid.
+#define IF_DROPPABLE			(1<<7)	//dragged items can be dropped on this item.
+#define IF_CLIENTMOVED			(1<<8)	//recalc required client dimensions (and toggle scrollbars if needed). move to frame?
+#define IF_CENTERALIGN			(1<<9)	//
+#define IF_RIGHTALIGN			(1<<10)	//
+#define IF_NOCURSOR				(1<<11)	//when mgrabbed, the cursor will not be shown
+#define IF_ISFRAME				(1<<12)	//is derived from mitem_frame (helps debugging recurion).
 #define IF_FOCUSFOLLOWSMOUSE 	(1<<13)	//on frames, child keyboard focus (mostly) follows the mouse cursor. not like windows, but handy on things with lots of buttons. annoying on the desktop. move to frame?
-#define IF_INVISIBLE		(1<<14)
+#define IF_INVISIBLE			(1<<14)
 
 #define RS_X_MIN_PARENT_MIN	0x0000
 #define RS_X_MIN_PARENT_MID	0x0001
 #define RS_X_MIN_PARENT_MAX	0x0002
-#define RS_X_FRACTION			0x0004
+#define RS_X_FRACTION		0x0004
 
-#define RS_X_MAX_OWN_MIN		0x0000
+#define RS_X_MAX_OWN_MIN	0x0000
 #define RS_X_MAX_PARENT_MIN	0x0010
 #define RS_X_MAX_PARENT_MID	0x0020
 #define RS_X_MAX_PARENT_MAX	0x0040
@@ -50,33 +50,86 @@ __strip var float dp_workarounds;
 #define RS_Y_MIN_PARENT_MIN	0x0000
 #define RS_Y_MIN_PARENT_MID	0x0100
 #define RS_Y_MIN_PARENT_MAX	0x0200
-#define RS_Y_FRACTION			0x0400
+#define RS_Y_FRACTION		0x0400
 
-#define RS_Y_MAX_OWN_MIN		0x0000
+#define RS_Y_MAX_OWN_MIN	0x0000
 #define RS_Y_MAX_PARENT_MIN	0x1000
 #define RS_Y_MAX_PARENT_MID	0x2000
 #define RS_Y_MAX_PARENT_MAX	0x4000
-
-//the 3d effect needs some sort of fake lighting values.
-//these are for bumps. invert for inset things.
-#define TD_TOP '0.8 0.8 0.8'
-#define TD_LFT '0.6 0.6 0.6'
-#define TD_RGT '0.2 0.2 0.2'
-#define TD_BOT '0.0 0.0 0.0'
-
-#ifndef MENUBACK_RGB
-#define MENUBACK_RGB '0.4 0.365 0.29'
-//#define MENUBACK_RGB '0.5 0.5 0.6'
-#endif
-#ifndef MENUBACK_ALPHA
-#define MENUBACK_ALPHA 0.8
-#endif
 
 //#ifdef TARGET_FTE
 //#pragma TARGET FTE
 //#endif
 
 //#define HEIRACHYDEBUG	//enable this and press f1 to print out the current menuitem tree
+
+// Color scheme/theme
+// text
+#define XRGB_TXT "^xFFF"
+#define RGB_TXT '1 1 1'
+#define XRGB_TXTB "^xFFD"
+#define RGB_TXTB '1 1 0.875'
+// darker conchars variant
+#define XRGB_ALT "^xF86"
+#define RGB_ALT '1 0.5 0.375'
+// notifications
+#define XRGB_DANGER "^xD32"
+#define RGB_DANGER '0.875 0.1875 0.125'
+#define XRGB_WARNING "^xD62"
+#define RGB_WARNING '0.875 0.375 0.125'
+#define XRGB_INFO "^x69A"
+#define RGB_INFO '0.375 0.5625 0.625'
+#define XRGB_SUCCESS "^xEB3"
+#define RGB_SUCCESS '0.9375 0.6875 0.1875'
+#define XRGB_MUTED "^xAA9"
+#define RGB_MUTED '0.625 0.625 0.5625'
+// interactivity
+#define XRGB_MFOCUS "^xF86"
+#define RGB_MFOCUS '1 0.5 0.375'
+#define XRGB_KFOCUS "^xF86"
+#define RGB_KFOCUS '1 0.5 0.375'
+#define XRGB_KMFOCUS "^xF86"
+#define RGB_KMFOCUS '1 0.5 0.375'
+// backgrounds & fills
+#define RGB_BGHOVERA '0.1 0.1 0.1'
+#define RGB_BGHOVERB '0.15 0.15 0.15'
+#define RGB_VSLIDER '0.625 0.625 0.5625'
+#define VSLIDER_ALPHA 0.2
+#define RGB_MENUBACK '0.25 0.1875 0.125'
+#define MENUBACK_ALPHA 0.5
+
+//the 3d effect needs some sort of fake lighting values.
+//these are for bumps. invert for inset things. (like in 1995)
+#define TD_TOP '0.8 0.8 0.8'
+#define TD_LFT '0.6 0.6 0.6'
+#define TD_RGT '0.2 0.2 0.2'
+#define TD_BOT '0.0 0.0 0.0'
+
+// sizes
+#define PADDING 4
+#define SPACING 1
+// does not define scroll bar width, but can be used for offsets
+#define SCRLY 8
+// traditional quake menu sizes
+#define MENU_WIDTH 320
+#define MENU_HEIGHT 200
+// text
+#define TXT_SMSZ 4
+#define TXT_NMSZ 8
+#define TXT_MDSZ 10
+#define TXT_LGSZ 12
+#define TXT_XLSZ 14
+#define TXT_XXLSZ 16
+// fonts
+#define MENU_FONT_WIN ""
+#define MENU_FONT ""
+#define GL_FONT ""
+enum
+{
+	E_FTE,
+	E_QSS,
+} engine; //For use ONLY with known possible cvar values.
+
 
 class mitem_frame;
 .vector		mins;		//gravity mins
@@ -92,16 +145,16 @@ class mitem
 	virtual float(string key)										isvalid;
 	virtual void() 													item_remove;
 	virtual void() 													item_resized;
-	float 			item_flags;		//contains IF_ flags
+	float 		item_flags;			//contains IF_ flags
 	vector 		item_position;		//relative to the parent's client area. which is admittedly not well defined...
 	vector 		item_size;			//interaction bounding box.
-	float 			item_scale;		//text etc scale
+	float 		item_scale;			//text etc scale
 	vector 		item_rgb;			//colours!
-	float 			item_alpha;		//transparency value
+	float 		item_alpha;			//transparency value
 	string 		item_text;			//used as a unique identifier
 	string 		item_command;		//something to do when clicked. move out?
 	mitem_frame	item_parent;		//the item that contains us. make mitem_frame?
-	mitem 		item_next;		//the next child within the parent
+	mitem 		item_next;			//the next child within the parent
 
 	float			resizeflags;
 
@@ -112,10 +165,10 @@ class mitem
 //this struct is used to access the various drawing functions. this allows the functions to be replaced for worldspace stuff
 typedef struct uiinfo_s
 {
-	void(float min_x, float min_y, float max_x, float max_y)							setcliparea;
+	void(float min_x, float min_y, float max_x, float max_y)									setcliparea;
 	float(vector min, string imagename, vector size, vector col, float alph, float drawflag)	drawpic;
-	float(vector min, vector size, vector col, float alph, float drawflag)				drawfill;
-	float(vector min, float charcode, vector scale, vector col, float alph, float drawflag)	drawcharacter;
+	float(vector min, vector size, vector col, float alph, float drawflag)						drawfill;
+	float(vector min, float charcode, vector scale, vector col, float alph, float drawflag)		drawcharacter;
 	float(vector min, string text, vector scale, vector col, float alph, float drawflag)		drawstring;
 
 	mitem kgrabs;		//kfocused or mfocused or both or none to say what sort of grabs is in effect.
@@ -146,7 +199,37 @@ var uiinfo_t ui =
 	drawstring
 };
 
-
+#ifdef MENU
+// Convert our virtual canvas to the engine's viewport with one physical scale.
+// Engines may clamp console width/height independently in a small window.
+// Compensating here preserves artwork proportions and the mouse hitboxes
+// without overwriting the user's scr_*scale settings.
+var vector menu_drawscale = '1 1 1';
+static vector(vector v) menu_project =
+{
+	return [v.x*menu_drawscale.x, v.y*menu_drawscale.y, v.z];
+};
+static void(float x, float y, float w, float h) menu_clip =
+{
+	drawsetcliparea(x*menu_drawscale.x, y*menu_drawscale.y, w*menu_drawscale.x, h*menu_drawscale.y);
+};
+static float(vector pos, string pic, vector size, vector rgb, float alpha, float flags) menu_pic =
+{
+	return drawpic(menu_project(pos), pic, menu_project(size), rgb, alpha, flags);
+};
+static float(vector pos, vector size, vector rgb, float alpha, float flags) menu_fill =
+{
+	return drawfill(menu_project(pos), menu_project(size), rgb, alpha, flags);
+};
+static float(vector pos, float chr, vector size, vector rgb, float alpha, float flags) menu_character =
+{
+	return drawcharacter(menu_project(pos), chr, menu_project(size), rgb, alpha, flags);
+};
+static float(vector pos, string value, vector size, vector rgb, float alpha, float flags) menu_string =
+{
+	return drawstring(menu_project(pos), value, menu_project(size), rgb, alpha, flags);
+};
+#endif
 
 void() queryscreensize =
 {
@@ -156,6 +239,19 @@ void() queryscreensize =
 	ui.screensize[0] = cvar("vid_conwidth");
 	ui.screensize[1] = cvar("vid_conheight");
 	ui.screensize[2] = 0;
+	float pw = cvar("vid_pixwidth"), ph = cvar("vid_pixheight");
+	menu_drawscale = '1 1 1';
+	if (pw > 0 && ph > 0 && ui.screensize.x > 0 && ui.screensize.y > 0)
+	{
+		float scale = min(pw/ui.screensize.x, ph/ui.screensize.y, pw/MENU_WIDTH, ph/MENU_HEIGHT);
+		menu_drawscale = [scale*ui.screensize.x/pw, scale*ui.screensize.y/ph, 1];
+		ui.screensize = [pw/scale, ph/scale, 0];
+	}
+	ui.setcliparea = menu_clip;
+	ui.drawpic = menu_pic;
+	ui.drawfill = menu_fill;
+	ui.drawcharacter = menu_character;
+	ui.drawstring = menu_string;
 #endif
 #ifdef CSQC
 	#ifdef CSQC_SIMPLE
@@ -189,7 +285,6 @@ float(vector minp, vector sz) mouseinbox =
 	return TRUE;
 };
 
-
 void(mitem ch, vector parentsize) mitem_parentresized;
 
 #include "mitem_frame.qc"
@@ -206,11 +301,11 @@ void mitem_printnode(float depth, mitem root, string prefix)
 	mitem ch;
 	string col = "";
 	if (root.item_flags & IF_KFOCUSED && root.item_flags & IF_MFOCUSED)
-		col = "^2";
+		col = XRGB_KMFOCUS;
 	else if (root.item_flags & IF_KFOCUSED)
-		col = "^5";
+		col = XRGB_KFOCUS;
 	else if (root.item_flags & IF_MFOCUSED)
-		col = "^3";
+		col = XRGB_MFOCUS;
 
 	print(sprintf("%s%s%i:%s%s\n", col, strpad(depth, ""), root, prefix, root.item_text));
 
@@ -267,8 +362,8 @@ float(string key) mitem::isvalid =
 	//walk through to the parent for menu parents to track all this.
 	if (this.item_parent)
 		return this.item_parent.isvalid(key);
-	else	//no parent, just assume its a cvar.
-		return cvar_type(key);
+	else	//no parent, just assume its a cvar or command.
+		return cvar_type(key)?cvar_type(key):checkcommand(key);
 };
 
 
@@ -317,16 +412,17 @@ vector(mitem it) menuitem_textcolour =
 	local vector col;
 	col = it.item_rgb;
 	if (!(it.item_flags & IF_SELECTABLE) && it.item_keypress && it.item_command != "")
-		col *= 0.2;
+		col *= 0.2; // darken
 	else
 	{
 		if (it.item_flags & IF_MFOCUSED)
-			col_z = 0;
+			col = RGB_MFOCUS;
 		if (it.item_flags & IF_KFOCUSED)
-			col_x = 0;
+			col = RGB_KFOCUS;
 	}
 	return col;
 };
+
 void(vector pos) mitem::item_draw =
 {
 	vector col;
@@ -334,6 +430,7 @@ void(vector pos) mitem::item_draw =
 	col = menuitem_textcolour(this);
 	ui.drawstring(pos, this.item_text, '1 1 0' * this.item_scale, col, this.item_alpha, 0);
 };
+
 void() mitem::item_remove =
 {
 	local mitem ch;
@@ -387,7 +484,7 @@ void() mitem::mitem =
 	if (!this.item_scale)
 		this.item_scale = 1;
 	if (!this.item_rgb)
-		this.item_rgb = '1 1 1';
+		this.item_rgb = RGB_TXT;
 	if (!this.item_alpha)
 		this.item_alpha = 1;
 
