@@ -32,14 +32,14 @@ nonstatic void(mitem_desktop desktop) M_Single =
 	);
 
 	// Left plaque
-	
+
 	float qplaquewidth = 32;
 	m.add(spawn_pic("gfx/qplaque.lmp", '32 144'),
 		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN,
 		[leftpadding, padding], [qplaquewidth, 144]);
 
 	// Title
-	
+
 	mitem_pic banner = spawn(mitem_pic, item_text:"gfx/ttl_sgl.lmp", item_size_y:24, item_flags:IF_CENTERALIGN);
 	m.add(
 		banner,
@@ -59,6 +59,8 @@ nonstatic void(mitem_desktop desktop) M_Single =
 		item_size:'10 10', item_rgb:'255 0 0', item_alpha:alpha); // save
 	mitem_classicbutton btn4 = spawn(mitem_classicbutton, item_command:"m_pop;m_levels",  // m_levels
 		item_size:'10 10', item_rgb:'255 0 0', item_alpha:alpha); // levels
+	mitem_classicbutton btn5 = spawn(mitem_classicbutton, item_command:"m_pop;m_demos",
+		item_size:'10 10', item_rgb:'255 0 0', item_alpha:alpha);
 
 	// buttons start location
 	float bsx = qplaquewidth+leftpadding+plaquepadding;
@@ -70,6 +72,7 @@ nonstatic void(mitem_desktop desktop) M_Single =
 	m.add(btn2, bposrel, [bsx, by], [240, 19]); by+=20; // load
 	m.add(btn3, bposrel, [bsx, by], [240, 19]); by+=20; // save
 	m.add(btn4, bposrel, [bsx, by], [240, 19]); by+=20; // levels
+	m.add(btn5, bposrel, [bsx, by], [240, 19]); // demos
 
 	// Menu options image
 	mitem_pic menuart = spawn(mitem_pic, item_text:"gfx/sp_menu.lmp");
@@ -79,10 +82,12 @@ nonstatic void(mitem_desktop desktop) M_Single =
 		[bsx, bsy], msize);
 
 	// "Levels" menu image, from MarkV
-	mitem_pic levelsart = spawn(mitem_pic, item_text:"menugfx/levels.lmp");
+	mitem_pic levelsart = spawn(mitem_pic, item_text:classic_art("gfx/levels.lmp", "menugfx/levels.lmp"));
 	m.add(levelsart,
 		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN,
-		[bsx+(msize.x-levelsart.item_size.x)*0.5, bsy+msize.y-4], levelsart.item_size);
+		[bsx, bsy+60], levelsart.item_size);
+	mitem_pic demosart = spawn(mitem_pic, item_text:classic_art("gfx/demos.lmp", "menugfx/demos.lmp"));
+	m.add(demosart, bposrel, [bsx, bsy+80], demosart.item_size);
 
 	mm.item_focuschange(m, IF_KFOCUSED);
 	m.item_focuschange(btn1, IF_KFOCUSED);

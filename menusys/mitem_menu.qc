@@ -37,7 +37,7 @@ class mitem_menu : mitem_frame
 		item_size[1] += item_framesize[1]+item_framesize[2];
 
 		item_flags |= IF_SELECTABLE;
-		
+
 #ifdef CSQC
 		cprint("");
 #endif
@@ -61,7 +61,7 @@ void(mitem newfocus, float flag) mitem_menu::item_focuschange =
 		//move the window to the top of the z-order when it gets focus.
 		if (item_flags & IF_KFOCUSED)
 			totop();
-		//release grabs if someone else took focus.	
+		//release grabs if someone else took focus.
 		else if (ui.mgrabs == this)
 		{
 			ui.mgrabs = __NULL__;
@@ -181,7 +181,7 @@ float(vector pos, float scan, float char, float down) mitem_menu::item_keypress 
 		draginfo[2] = 0;
 		return TRUE;
 	}
-	
+
 	if (!super::item_keypress(pos, scan, char, down))
 	{
 		down &= 1;

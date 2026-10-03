@@ -39,7 +39,7 @@ nonstatic void(mitem_desktop desktop) M_Options_Audio =
 	float titleoffset = -12;
 
 	// Main menu
-	
+
 	// no dupes please.
 	local mitem_exmenu mm;
 	mm = (mitem_exmenu)desktop.findchildtext(_("Audio Options"));
@@ -61,7 +61,7 @@ nonstatic void(mitem_desktop desktop) M_Options_Audio =
 	);
 
 	// Title
-	
+
 	mitem_pic banner = spawn(mitem_pic, item_text:"gfx/p_option.lmp", item_size_y:24, item_flags:IF_CENTERALIGN);
 	m.add(
 		banner,
@@ -83,7 +83,7 @@ nonstatic void(mitem_desktop desktop) M_Options_Audio =
 		[0, banner.item_size_y+padding], // top-left
 		[0, 0] // bottom-right
 	);
-	
+
 	// Options
 
 	float by = 0;
@@ -105,32 +105,32 @@ nonstatic void(mitem_desktop desktop) M_Options_Audio =
 	); by += TXT_MDSZ+spacing;
 
 	by += padding;
-	
+
 	float fl = RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN;
 
 	if (engine!=E_QSS) {
-		fr.add(spawn_combo(_("Sound Device"), "s_device", optionsize, cvar_string("_s_device_opts")), 
+		fr.add(spawn_combo(_("Sound Device"), "s_device", optionsize, cvar_string("_s_device_opts")),
 			fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing; }
-	fr.add(spawn_hslider(_("Master Volume"),"volume", '0.0 1 0.1', optionsize), 
+	fr.add(spawn_hslider(_("Master Volume"),"volume", '0.0 1 0.1', optionsize),
 		fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
-	fr.add(spawn_hslider(_("Ambient Volume"), "ambient_level", '0 0.5 0.05', optionsize), 
-		fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
-	if (engine!=E_QSS) {
-		fr.add(spawn_hslider(_("Self Volume"), "s_localvolume", '0 1 0.1', optionsize), 
-			fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing; }
-	fr.add(spawn_hslider(_("Music Volume"), "bgmvolume", '0 0.5 0.05', optionsize), 
+	fr.add(spawn_hslider(_("Ambient Volume"), "ambient_level", '0 0.5 0.05', optionsize),
 		fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
 	if (engine!=E_QSS) {
-		fr.add(spawn_hslider(_("Channels"), "s_numspeakers", '1 6 1', optionsize), 
+		fr.add(spawn_hslider(_("Self Volume"), "s_localvolume", '0 1 0.1', optionsize),
 			fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing; }
-	if (engine==E_QSS) 
+	fr.add(spawn_hslider(_("Music Volume"), "bgmvolume", '0 0.5 0.05', optionsize),
+		fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
+	if (engine!=E_QSS) {
+		fr.add(spawn_hslider(_("Channels"), "s_numspeakers", '1 6 1', optionsize),
+			fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing; }
+	if (engine==E_QSS)
 	{
 		fr.add(spawn_combo(_("Audio Filtering"), "sndspeed", optionsize, _(
 			"\"\"	\"Off\" "
 			"11025	\"On\" "
-			)),	fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing; 
+			)),	fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
 	}
-	if (engine!=E_QSS) 
+	if (engine!=E_QSS)
 	{
 		fr.add(spawn_combo(_("Audio Quality"), "s_khz", optionsize, _(
 			"8 \"8000hz (telephone)\" "
@@ -143,41 +143,41 @@ nonstatic void(mitem_desktop desktop) M_Options_Audio =
 			//"192	\"192000hz (professional quality)\" "
 		)),	fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
 	}
-	if (engine!=E_QSS) 
+	if (engine!=E_QSS)
 	{
-		fr.add(spawn_check(_("Doppler"), "s_doppler", optionsize), 
+		fr.add(spawn_check(_("Doppler"), "s_doppler", optionsize),
 			fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
-		fr.add(spawn_check(_("8bit audio"), "s_loadas8bit", optionsize), 
+		fr.add(spawn_check(_("8bit audio"), "s_loadas8bit", optionsize),
 			fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
 	}
-	if (engine!=E_QSS) 
+	if (engine!=E_QSS)
 	{
-		fr.add(spawn_check(_("Swap Speakers"), "s_swapstereo", optionsize), 
+		fr.add(spawn_check(_("Swap Speakers"), "s_swapstereo", optionsize),
 			fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
-		fr.add(spawn_hslider(_("Latency"), "s_mixahead", '0.1 0.3 0.01', optionsize), 
+		fr.add(spawn_hslider(_("Latency"), "s_mixahead", '0.1 0.3 0.01', optionsize),
 			fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
 	}
-	fr.add(spawn_check(_("Disable Sound"), "nosound", optionsize), 
+	fr.add(spawn_check(_("Disable Sound"), "nosound", optionsize),
 		fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
 	//ambient fade
 	if (engine!=E_QSS) {
-	fr.add(spawn_check(_("Static Sounds"), "cl_staticsounds", optionsize), 
+	fr.add(spawn_check(_("Static Sounds"), "cl_staticsounds", optionsize),
 		fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing; }
 	if (engine!=E_QSS) {
-		fr.add(spawn_check(_("Mix in Background"),"s_inactive", optionsize), 
+		fr.add(spawn_check(_("Mix in Background"),"s_inactive", optionsize),
 			fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing; }
 
 	by += padding;
 
 	if (engine!=E_QSS)
 	{
-		fr.add(spawn_combo(_("Microphone Device"), "cl_voip_capturedevice", optionsize, cvar_string("_cl_voip_capturedevice_opts")), 
+		fr.add(spawn_combo(_("Microphone Device"), "cl_voip_capturedevice", optionsize, cvar_string("_cl_voip_capturedevice_opts")),
 			fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
-		fr.add(spawn_hslider(_("VOIP Playback Vol"),"cl_voip_play", '0 2 0.1', optionsize), 
+		fr.add(spawn_hslider(_("VOIP Playback Vol"),"cl_voip_play", '0 2 0.1', optionsize),
 			fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
-		fr.add(spawn_check(_("VOIP Test"), "cl_voip_test", optionsize), 
+		fr.add(spawn_check(_("VOIP Test"), "cl_voip_test", optionsize),
 			fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
-		fr.add(spawn_hslider(_("VOIP Record Vol"), "cl_voip_micamp", '0 4 0.1', optionsize), 
+		fr.add(spawn_hslider(_("VOIP Record Vol"), "cl_voip_micamp", '0 4 0.1', optionsize),
 			fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
 		fr.add(spawn_combo(_("VOIP Mode"), "cl_voip_send", optionsize, _(
 			"0 \"Push-To-Talk\" 1"
@@ -196,14 +196,14 @@ nonstatic void(mitem_desktop desktop) M_Options_Audio =
 			"4 \"speex (wide 16khz)\""
 			"5 \"speex (ultrawide 32khz)\""
 		)), fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
-		fr.add(spawn_hslider(_("Opus bitrate"), "cl_voip_bitrate", '0.5 128 0.5', optionsize), 
+		fr.add(spawn_hslider(_("Opus bitrate"), "cl_voip_bitrate", '0.5 128 0.5', optionsize),
 			fl, [bx, by], [maxposx, TXT_NMSZ]); by += TXT_NMSZ+spacing;
 	}
 
-	by += padding; 
+	by += padding;
 
 	// extra spacing for drop-downs
-	fr.add(spawn_mitem_spacer(16, -1), 
+	fr.add(spawn_mitem_spacer(16, -1),
 		fl, [bx, by], [maxposx, 24]);
 
 	addmenuback(mm);

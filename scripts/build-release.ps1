@@ -214,10 +214,11 @@ if (-not (Test-Path -LiteralPath $baseDirectory -PathType Container)) {
 }
 
 $basePakPath = Get-RequiredFile (Join-Path $baseDirectory "menu.pak") "Base menu.pak"
-$baseReadmePath = Get-RequiredFile (Join-Path $baseDirectory "README.md") "Base package README"
+$releaseTemplates = Join-Path $PSScriptRoot '../assets/release'
+$baseReadmePath = Get-RequiredFile (Join-Path $releaseTemplates "README.md") "Package README template"
 $baseConfigPath = Get-RequiredFile (
-    (Join-Path $baseDirectory "autoexec.cfg.example")
-) "Base example configuration"
+    (Join-Path $releaseTemplates "autoexec.cfg.example")
+) "Example configuration template"
 
 $outputPath = Get-FullPath $OutputDirectory
 [void](New-Item -ItemType Directory -Path $outputPath -Force)
@@ -247,8 +248,19 @@ try {
         (Normalize-PakPath $_.Name) -ine "menu.dat"
     })
 
-    if ($supportEntries.Count -ne 19) {
-        throw "Expected 19 support assets in the base PAK; found $($supportEntries.Count)."
+    foreach ($required in @('menugfx/levels.lmp', 'menugfx/demos.lmp', 'menugfx/cursor_copr.tga')) {
+        if ($supportEntries.Name -notcontains $required) {
+            throw "Base PAK is missing support asset: $required"
+        }
+    }
+
+    $assetDirectory = Join-Path $stagingRoot 'assets'
+    & (Join-Path $PSScriptRoot 'build-menu-assets.ps1') -OutputDirectory $assetDirectory
+    foreach ($asset in Get-ChildItem -LiteralPath $assetDirectory -File) {
+        $assetName = 'menugfx/' + $asset.Name
+        $supportEntries = @($supportEntries | Where-Object { $_.Name -ine $assetName }) + @(
+            [pscustomobject]@{ Name = $assetName; Data = [IO.File]::ReadAllBytes($asset.FullName) }
+        )
     }
 
     $duplicateSupportPaths = @($supportEntries |
@@ -272,8 +284,8 @@ try {
     Copy-Item -LiteralPath $baseConfigPath -Destination $stagingPackageDirectory
 
     $verifiedEntries = @(Read-Pak $stagingPakPath)
-    if ($verifiedEntries.Count -ne 20) {
-        throw "Expected 20 entries in the release PAK; found $($verifiedEntries.Count)."
+    if ($verifiedEntries.Count -ne $newEntries.Count) {
+        throw "Release PAK entry count does not match the build inputs."
     }
 
     $menuEntries = @($verifiedEntries | Where-Object { $_.Name -ieq "menu.dat" })

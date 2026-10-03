@@ -4,10 +4,7 @@
 //I'm feeling lazy, so I'm going to only provide X slots, like quake's menu.
 static string savenames[] =
 {
-	"quicksave", // hacky headline placeholder
 	"quick",
-
-	"normalsave", // hacky headline placeholder
 	"s0",
 	"s1",
 	"s2",
@@ -15,8 +12,11 @@ static string savenames[] =
 	"s4",
 	"s5",
 	"s6",
-
-	"autosave", // hacky headline placeholder
+	"s7",
+	"s8",
+	"s9",
+	"s10",
+	"s11",
 	"a0",
 	"a1",
 	"a2",
@@ -114,15 +114,19 @@ static string(string savename) scansave =
 		f = fopen(sprintf("%s.sav", savename), FILE_READ);
 	if (f < 0)
 		return __NULL__;	//weird
-	
+
 	v = fgets(f); //should be the version
 	l = fgets(f); //description
 	fclose(f);
-	
+
 	if (l)
 	{
 		l = strreplace("_", " ", l);
-		
+		// Legacy saves pad the description with underscores. Discard that
+		// padding before centering, otherwise the visible title shifts left.
+		while (strlen(l) && substring(l, -1, 1) == " ")
+			l = substring(l, 0, strlen(l)-1);
+
 		// TODO: get modificaton date - VBS
 		// filepath = sprintf("%s.sav", savename); // correct path
 		// searchhandle sh = search_begin(filepath, 0, 0);
@@ -150,9 +154,10 @@ void(mitem_desktop desktop, float mode) M_LoadSave =
 
 	// no dupes please.
 	local mitem_exmenu mm;
-	mm = (mitem_exmenu)desktop.findchildtext(_("Load/Save"));
+	string title = mode == 2 ? _("Save Game") : _("Load Game");
+	mm = (mitem_exmenu)desktop.findchildtext(title);
 	if (mm) { mm.totop(); return; }
-	mm = spawn(mitem_exmenu, item_text:"Load/Save", item_flags:IF_SELECTABLE, item_command:"m_single");
+	mm = spawn(mitem_exmenu, item_text:title, item_flags:IF_SELECTABLE, item_command:"m_single");
 	desktop.add(mm, RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, [0, 0], [0, 0]);
 	desktop.item_focuschange(mm, IF_KFOCUSED);
 	mm.totop();
@@ -195,8 +200,22 @@ void(mitem_desktop desktop, float mode) M_LoadSave =
 	float i;
 	float y=0;
 	float itemscale=8;
+	float cansave = isserver() || dp_workarounds;
+	if (mode == 2 && !cansave)
+	{
+		fr.addc(spawn_text(_("Start a single-player game to save"), "", itemscale), y);
+		y += itemscale+PADDING;
+	}
 	for (i = 0; i < NUMSAVESLOTS; i++)
 	{
+		// Headings are separate, non-interactive widgets, never save slots.
+		if (savenames[i] == "quick" || savenames[i] == "s0" || savenames[i] == "a0")
+		{
+			string heading = savenames[i] == "quick" ? _("QUICK SAVE") :
+				savenames[i] == "s0" ? _("MY SAVES") : _("AUTO SAVE");
+			fr.addc(spawn_headline(heading, itemscale), y);
+			y += itemscale+2;
+		}
 		l = scansave(savenames[i]);
 		smode = mode;
 		if (l=="")
@@ -206,20 +225,15 @@ void(mitem_desktop desktop, float mode) M_LoadSave =
 				smode = 0;
 		}
 
-		// Add section divider
-		if (savenames[i] == "quicksave")
-			l = strcat("^m", "QUICK SAVE");
-		else if (savenames[i] == "autosave")
-			l = strcat("^m", "AUTO SAVE");
-		else if (savenames[i] == "normalsave")
-			l = strcat("^m", "MY SAVES");
+		if (mode == 2 && !cansave)
+			smode = 0;
 
 		// line item
 		fr.add(
 			spawn(mitem_saveoption, item_scale:itemscale, slot:savenames[i], mode:smode, item_text:l),
 			RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN,
 			[0, y], // top left
-			[16, itemscale]); // bottom right
+			[-SCRLY, itemscale]); // leave room for the scrollbar
 
 		y+=itemscale+2; // a little padding for the next line item
 	}
@@ -233,9 +247,6 @@ void(mitem_desktop desktop) M_Load =
 };
 void(mitem_desktop desktop) M_Save =
 {
-	if (!(isserver() || dp_workarounds))
-		M_Main(desktop);	//can't save when not connected. this should be rare, but can if you use the console or the main menu options are stale.
-	else
-		M_LoadSave(desktop, 2);
+	M_LoadSave(desktop, 2);
 };
 #endif

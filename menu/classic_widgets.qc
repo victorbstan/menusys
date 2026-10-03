@@ -5,6 +5,28 @@ The stock menu artwork contains the option labels, so the button itself is
 invisible. When selected, it draws Quake's animated menudot to the left of
 the corresponding label.
 */
+// Game-supplied artwork wins over the private packaged fallback. Keeping the
+// fallback under menugfx avoids overriding a game's gfx/ assets in the PAK.
+string(string gamepic, string fallback) classic_art =
+{
+	float f = fopen(gamepic, FILE_READ);
+	if (f >= 0)
+	{
+		fclose(f);
+		return gamepic;
+	}
+	return fallback;
+};
+
+// Older QSS builds do not implement argescape. Quote file arguments directly
+// and omit names that cannot be represented by the engines' command parser.
+string(string filename) classic_filearg =
+{
+	if (strstrofs(filename, "\"", 0) >= 0 || strstrofs(filename, "\n", 0) >= 0 || strstrofs(filename, "\r", 0) >= 0)
+		return __NULL__;
+	return strcat("\"", filename, "\"");
+};
+
 class mitem_classicbutton : mitem_filli
 {
 	virtual void(vector pos) item_draw =

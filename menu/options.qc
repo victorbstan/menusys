@@ -31,10 +31,10 @@ nonstatic void(mitem_desktop desktop) M_Options =
 	float spacing = SPACING;
 	float qplaquewidth = 32;
 	float plaquepadding = 24;
-	float titleoffset = -12;	
-	
+	float titleoffset = -12;
+
 	// Main menu
-	
+
 	// no dupes please.
 	mitem_exmenu mm;
 	mm = (mitem_exmenu)desktop.findchildtext(_("Options"));
@@ -62,7 +62,7 @@ nonstatic void(mitem_desktop desktop) M_Options =
 		[padding, padding], [qplaquewidth, 144]);
 
 	// Title
-	
+
 	mitem_pic banner = spawn(mitem_pic, item_text:"gfx/p_option.lmp", item_size_y:24, item_flags:IF_CENTERALIGN);
 	m.add(
 		banner,
@@ -89,75 +89,75 @@ nonstatic void(mitem_desktop desktop) M_Options =
 		[qplaquewidth+padding, banner.item_size_y+padding], // top-left
 		[0, 0] // bottom-right
 	);
-	
+
 	// bsx += 48; // some extra padding to give more space for the 3d character to show through
 	by += padding;
 
 	// show the options.
 	float fl = RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN;
 	if (checkcommand2("fps_preset", FALSE)) {
-		fr.add(spawn(mitem_text, item_text:"^mGraphical Presets", item_command:"m_pop;m_preset", item_scale:TXT_NMSZ), 
+		fr.add(spawn(mitem_text, item_text:"^mGraphical Presets", item_command:"m_pop;m_preset", item_scale:TXT_NMSZ),
 			fl, [bsx, by], [0, TXT_NMSZ]); by += TXT_NMSZ+spacing; }
 	if (engine!=E_QSS) // disabled by choice, feature is availabe in QSS -- VBS
 	{
-		fr.add(spawn(mitem_text, item_text:"^mGame Configs", item_command:"m_pop;m_configs", item_scale:TXT_NMSZ), 
+		fr.add(spawn(mitem_text, item_text:"^mGame Configs", item_command:"m_pop;m_configs", item_scale:TXT_NMSZ),
 			fl, [bsx, by], [0, TXT_NMSZ]); by += TXT_NMSZ+spacing;
 	}
-	fr.add(spawn(mitem_text, item_text:"^mBasic Setup", item_command:"m_pop;m_basicopts",	item_scale:TXT_NMSZ), 
+	fr.add(spawn(mitem_text, item_text:"^mBasic Setup", item_command:"m_pop;m_basicopts",	item_scale:TXT_NMSZ),
 		fl, [bsx, by], [0, TXT_NMSZ]); by += TXT_NMSZ+spacing;
-	fr.add(spawn(mitem_text, item_text:"^mControls", item_command:"m_pop;m_keys", item_scale:TXT_NMSZ), 
+	fr.add(spawn(mitem_text, item_text:"^mControls", item_command:"m_pop;m_keys", item_scale:TXT_NMSZ),
 		fl, [bsx, by], [0, TXT_NMSZ]); by += TXT_NMSZ+spacing;
-	fr.add(spawn(mitem_text, item_text:"^mAudio", item_command:"m_pop;m_audio", item_scale:TXT_NMSZ), 
+	fr.add(spawn(mitem_text, item_text:"^mAudio", item_command:"m_pop;m_audio", item_scale:TXT_NMSZ),
 		fl, [bsx, by], [0, TXT_NMSZ]); by += TXT_NMSZ+spacing;
-	fr.add(spawn(mitem_text, item_text:"^mVideo", item_command:"m_pop;m_video", item_scale:TXT_NMSZ), 
+	fr.add(spawn(mitem_text, item_text:"^mVideo", item_command:"m_pop;m_video", item_scale:TXT_NMSZ),
 		fl, [bsx, by], [0, TXT_NMSZ]); by += TXT_NMSZ+spacing;
-	fr.add(spawn(mitem_text, item_text:"^mEffects", item_command:"m_pop;m_effects", item_scale:TXT_NMSZ), 
+	fr.add(spawn(mitem_text, item_text:"^mEffects", item_command:"m_pop;m_effects", item_scale:TXT_NMSZ),
 		fl, [bsx, by], [0, TXT_NMSZ]); by += TXT_NMSZ+spacing;
 	if (engine!=E_QSS) // disabled by choice, feature is availabe in QSS -- VBS
 	{
 		if (checkcommand2("r_particledesc", FALSE)) {
-			fr.add(spawn(mitem_text, item_text:"^mParticles", item_command:"m_pop;m_particles", item_scale:TXT_NMSZ), 
+			fr.add(spawn(mitem_text, item_text:"^mParticles", item_command:"m_pop;m_particles", item_scale:TXT_NMSZ),
 				fl, [bsx, by], [0, TXT_NMSZ]); by += TXT_NMSZ+spacing; }
 	}
 	if (checkcommand2("ezhud_nquake", FALSE)) {
-		fr.add(spawn(mitem_text, item_text:"^mHud", item_command:"m_pop;m_hud", item_scale:TXT_NMSZ), 
+		fr.add(spawn(mitem_text, item_text:"^mHud", item_command:"m_pop;m_hud", item_scale:TXT_NMSZ),
 			fl, [bsx, by], [0, TXT_NMSZ]); by += TXT_NMSZ+spacing; }
 	if (checkcommand2("pkg", FALSE)) {
-		fr.add(spawn(mitem_text, item_text:"^mUpdates", item_command:"m_pop;m_updates", item_scale:TXT_NMSZ), 
+		fr.add(spawn(mitem_text, item_text:"^mUpdates", item_command:"m_pop;m_updates", item_scale:TXT_NMSZ),
 			fl, [bsx, by], [0, TXT_NMSZ]); by += TXT_NMSZ+spacing; }
 
-	by += padding*2; 
+	by += padding*2;
 
 	if (checkbuiltin2(buf_cvarlist, TRUE)) {
-		fr.add(spawn(mitem_text, item_text:"^mAdvanced Settings", item_command:"m_pop;m_cvars", item_scale:TXT_NMSZ), 
+		fr.add(spawn(mitem_text, item_text:"^mAdvanced Settings", item_command:"m_pop;m_cvars", item_scale:TXT_NMSZ),
 			fl, [bsx, by], [0, TXT_NMSZ]); by += TXT_NMSZ+spacing; }
 
-	by += padding*4; 
+	by += padding*4;
 
 	// FTE
 	if (checkcommand2("cvarreset", FALSE)) {
-		fr.add(spawn(mitem_text, item_text:strcat("^d", XRGB_DANGER, "Reset Settings"), item_command:"m_reset", item_scale:TXT_NMSZ), 
+		fr.add(spawn(mitem_text, item_text:strcat("^d", XRGB_DANGER, "Reset Settings"), item_command:"m_reset", item_scale:TXT_NMSZ),
 			fl, [bsx, by], [0, TXT_MDSZ]); by += TXT_MDSZ+padding; }
 	if (checkcommand2("cfg_save", FALSE)) {
-		fr.add(spawn(mitem_text, item_text:strcat("^d", XRGB_SUCCESS, "Save Settings"), item_command:"cfg_save", item_scale:TXT_MDSZ), 
+		fr.add(spawn(mitem_text, item_text:strcat("^d", XRGB_SUCCESS, "Save Settings"), item_command:"cfg_save", item_scale:TXT_MDSZ),
 			fl, [bsx, by], [0, TXT_MDSZ]); by += TXT_MDSZ+spacing; }
 
 	// Player model (DISABLED: crashes if game id1 isn't initialized. Too lazy to fix...)
-	// m.add(spawn (mitem_playerpreview, item_text: "progs/player.mdl", firstframe:0, framecount:6, shootframe:119, shootframes:6), 
-	// 	RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, 
+	// m.add(spawn (mitem_playerpreview, item_text: "progs/player.mdl", firstframe:0, framecount:6, shootframe:119, shootframes:6),
+	// 	RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX,
 	// 	[0, 0], [-menux/2+qplaquewidth, 0]);
-	
+
 	addmenuback(mm);
 };
 
 // Rest settings prompt
 
 static void(
-	mitem_desktop desktop, 
-	string question, 
-	string affirmitive, 
-	string affirmitiveaction, 
-	string negative, 
+	mitem_desktop desktop,
+	string question,
+	string affirmitive,
+	string affirmitiveaction,
+	string negative,
 	string negativeaction
 ) M_SimplePrompt =
 {
@@ -175,11 +175,11 @@ static void(
 	//center the actual items
 	pos = MENU_HEIGHT/2-TXT_NMSZ*4;
 
-	mp.addc(spawn(mitem_text, item_text:question, 
+	mp.addc(spawn(mitem_text, item_text:question,
 		item_scale:TXT_MDSZ, item_flags:IF_CENTERALIGN), pos); pos+=TXT_MDSZ+PADDING;
-	mp.addc(spawn(mitem_text, item_text:affirmitive, 
+	mp.addc(spawn(mitem_text, item_text:affirmitive,
 		item_command:affirmitiveaction, item_scale:TXT_NMSZ, item_flags:IF_CENTERALIGN), pos); pos+=TXT_NMSZ+PADDING;
-	mp.addc(spawn(mitem_text, item_text:negative, 
+	mp.addc(spawn(mitem_text, item_text:negative,
 		item_command:negativeaction, item_scale:TXT_NMSZ, item_flags:IF_CENTERALIGN), pos); pos+=TXT_NMSZ+SPACING;
 
 	addmenuback(mp);
@@ -191,9 +191,9 @@ nonstatic void(mitem_desktop desktop) M_Reset =
 	string cmd = "m_pop;cvarreset *;exec default.cfg;m_options;";
 	if (!checkcommand2("cvarreset", FALSE))
 		cmd = "m_pop;resetall;exec default.cfg;m_options;";
-	M_SimplePrompt(desktop, 
-		"Reset All Settings?", 
-		strcat(XRGB_DANGER, "Yes"), cmd, 
+	M_SimplePrompt(desktop,
+		"Reset All Settings?",
+		strcat(XRGB_DANGER, "Yes"), cmd,
 		strcat(XRGB_TXT, "Cancel"), "m_pop;m_options;"
 	);
 };

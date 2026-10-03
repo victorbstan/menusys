@@ -4,7 +4,7 @@ class mitem_pictext : mitem_text
 	virtual void(vector pos) item_draw =
 	{
 		if (pic)
-			drawpic(pos, pic, [item_size_y,item_size_y], '1 1 1', 1, 0); 
+			drawpic(pos, pic, [item_size_y,item_size_y], '1 1 1', 1, 0);
 		pos_x += item_size_y;
 		super::item_draw(pos);
 	};
@@ -71,6 +71,6 @@ void(mitem_desktop desktop) M_Menu_Mods =
 
 	if (!mod)
 		fr.add(spawn(mitem_text, item_text:"No mods detected", item_scale:16, item_flags:0), RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN, [0, mod*16], [0, 16]);
-	
+
 	addmenuback(m);
 };

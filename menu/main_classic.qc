@@ -30,7 +30,7 @@ float(string cmd, float assumption) checkcommand2 =
 float(__variant cmd, float assumption) checkbuiltin2 =
 {
 	//teehee. if the #0 stuff isn't working (DP) then it ends up calling an OP_DONE(0) instruction giving a return false.
-	if (!checkbuiltin(checkbuiltin)) 
+	if (!checkbuiltin(checkbuiltin))
 		return assumption;
 	return checkbuiltin(cmd);
 };
@@ -82,7 +82,7 @@ nonstatic void(mitem_desktop desktop) M_Main =
 		[leftpadding, padding], [qplaquewidth, 144]);
 
 	// Title
-	
+
 	mitem_pic banner = spawn(mitem_pic, item_text:"gfx/ttl_main.lmp", item_size_y:24, item_flags:IF_CENTERALIGN);
 	m.add(
 		banner,

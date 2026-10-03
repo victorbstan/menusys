@@ -13,7 +13,7 @@ class mitem_bind : mitem
 	{
 		item_scale = item_size[1];
 		item_flags |= IF_SELECTABLE;
-		if (item_text) 
+		if (item_text)
 		{
 			// set description text color to "alt"
 			item_text = strzone(strcat("^m", item_text));

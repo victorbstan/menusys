@@ -1,71 +1,21 @@
-// defined until the official support is released
-string(searchhandle handle, float num) search_getpackagename = #0;
-
-// NOTE: deprecated
-class mitem_levelsoption : mitem_text
-{
-	string slot;
-	string pic;
-
-	virtual void() mitem_levelsoption =
-	{
-		item_flags |= IF_SELECTABLE;
-	};
-
-	virtual void(vector pos) item_draw =
-	{
-		// if (pic)
-		// 	drawpic(pos, pic, [item_size_y,item_size_y], '1 1 1', 1, 0); 
-		// pos_x += item_size_y;
-		// super::item_draw(pos);
-
-		//some sort of pulsing if its active.
-		if (item_flags & IF_KFOCUSED)
-			ui.drawfill(pos, item_size, '1 0 0', sin(cltime)*0.125+0.150, 0);
-
-		float w = stringwidth(item_text, TRUE, '1 1 0'*item_scale);
-		ui.drawstring(pos + [(item_size_x-w)/2, 0], item_text, '1 1 0' * item_scale, menuitem_textcolour(this), item_alpha, 0);
-	};
-
-	virtual float(vector pos, float scan, float char, float down) item_keypress =
-	{
-		if (!down)
-			return FALSE;
-		if (scan == K_ENTER || (scan == K_MOUSE1 && mouseinbox(pos, this.item_size)))
-		{
-			if (item_flags & IF_KFOCUSED)
-			{
-				localcmd(sprintf("m_pop;load %s\n", slot));
-			}
-			else
-			{
-				item_parent.item_focuschange(this, IF_KFOCUSED);
-			}
-			return TRUE;
-		}
-		return FALSE;
-	};
-};
-
 // get map description
 static string(string fname) getmapdesciption =
 {
 	float f = fopen(fname, FILE_READ);
 	if (f < 0) {
-		fclose(f);
 		return __NULL__; //weird
 	}
 	// Spoike:
 	// first 12 bytes of a bsp are {int version; int entofs; int entlen;}
-	// if you check that the version is either 29 or the bsp2 value, you can then fseek to the entofs, 
+	// if you check that the version is either 29 or the bsp2 value, you can then fseek to the entofs,
 	// read entlen bytes from the file, and then parse it however you want (eg with tokenize)
-	
+
 	// Paril:
-	// seek to byte 4 of the file, read 4 bytes as int32, read 4 bytes as int32, seek to first number, 
+	// seek to byte 4 of the file, read 4 bytes as int32, read 4 bytes as int32, seek to first number,
 	// then you have a string from there of second number len
-	// as for how you want to extract the message, that's up to you; 
+	// as for how you want to extract the message, that's up to you;
 	// you could write a proper key/value pair parser, or just use assumptions
-	// for instance, worldspawn should always be the first entity in the list, 
+	// for instance, worldspawn should always be the first entity in the list,
 	// so the first instance of "message" you find before the first } will belong to it
 
 	// NOTE: pointers don't work in QSS
@@ -85,7 +35,7 @@ static string(string fname) getmapdesciption =
 			break;
 
 		// match
-		if (strncmp(mapline, "\"message\"", 9) == 0) 
+		if (strncmp(mapline, "\"message\"", 9) == 0)
 		{
 			tokenizebyseparator(substring(mapline, 9, strlen(mapline)), "\"");
 			string mapdesc = argv(1);
@@ -93,7 +43,7 @@ static string(string fname) getmapdesciption =
 			return mapdesc;
 		}
 	}
-	
+
 	fclose(f);
 	return __NULL__;
 };
@@ -104,6 +54,8 @@ float (mitem_frame fr, float y) listlevelsfor =
 
 	// search for mod maps to list
 	searchhandle sh = search_begin("maps/*.bsp", 2, TRUE);
+	if (sh < 0)
+		return y;
 	float mapsearchsize = search_getsize(sh);
 	if (mapsearchsize > 0)
 	{
@@ -123,152 +75,61 @@ float (mitem_frame fr, float y) listlevelsfor =
 			fname = strzone(search_getfilename(sh,li));
 
 			// parse name out of filepath
-			tokenizebyseparator(argv(tokenizebyseparator(fname, "/")-1), "."); 
+			tokenizebyseparator(argv(tokenizebyseparator(fname, "/")-1), ".");
 			lmapname = strzone(argv(0));
 
 			// exclude some files that may also be .bsp but are not maps
 			if (strtolower(substring(lmapname, 0, 2)) == "b_")
+			{
+				strunzone(fname);
+				strunzone(lmapname);
 				continue;
+			}
 
 			// The active search path already contains exactly the maps the engine
 			// can load. Do not infer a game directory from the package filename:
 			// FTE may return an absolute Windows path here, which used to reject
 			// every BSP and leave only game-directory headings on this screen.
 			mapinfo = getmapdesciption(fname);
-		
+
 			if not(mapinfo)
 				mapinfo = strzone(lmapname);
 			else
 				mapinfo = strzone(strcat(lmapname, " ", XRGB_TXTB, mapinfo));
 
 			// command to load the level
-			lvlcmd = strzone(strcat("m_pop; map ", lmapname, ";\n"));
+			string argument = classic_filearg(lmapname);
+			if (!argument)
+			{
+				strunzone(fname);
+				strunzone(lmapname);
+				strunzone(mapinfo);
+				continue;
+			}
+			lvlcmd = strzone(sprintf("m_pop;map %s\n", argument));
 			// render level info line
 			fr.add(
-				spawn(mitem_text, item_text:mapinfo, item_command:lvlcmd, item_scale:levelnamescale, 
+				spawn(mitem_text, item_text:mapinfo, item_command:lvlcmd, item_scale:levelnamescale,
 					item_rgb:RGB_TXT),
 				RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN,
 				[0, y], // top left
 				[16, levelnamescale]); // bottom right
 
 			y+=levelnamescale+2; // padding for the next line item
+			strunzone(fname);
+			strunzone(lmapname);
+			strunzone(lvlcmd);
+			strunzone(mapinfo);
 		}
-		strunzone(fname);
-		strunzone(lmapname);
-		strunzone(lvlcmd);
-		strunzone(mapinfo);
 	}
 	search_end(sh);
 
 	return y;
 };
 
-float(mitem_frame fr, float y) listmodsandlevels =
-{
-	float modnamescale=TXT_LGSZ;
-	
-	float idirs;
-	string gamedir = "";
-	string desc = "";
-	string info = "";
-	string modcmd = "";
-	for (idirs = 0; ; idirs++)
-	{
-		gamedir = __NULL__;
-		desc = __NULL__;
-		info = __NULL__;
-		modcmd = __NULL__;
-
-		// Game dir info
-		gamedir = getgamedirinfo(idirs, GGDI_GAMEDIR);
-		if not(gamedir) // end of loop
-			break;
-		desc = getgamedirinfo(idirs, GGDI_DESCRIPTION);
-		info = strzone(getgamedirinfo(idirs, GGDI_GAMEDIRLIST));
-		modcmd = getgamedirinfo(idirs, GGDI_LOADCOMMAND);
-		// string icon = getgamedirinfo(idirs, GGDI_ICON);
-
-		gamedir = strtolower(gamedir);
-		if (engine == E_FTE) {
-			if (gamedir == "qw" || gamedir == "fte" || gamedir == "")
-				gamedir = "id1";
-		}
-		gamedir = strzone(gamedir);
-
-		// basic dir name filtering for undesireable characters
-		// NOTE: disabled as it prevented valid directories, with periods in name, from being displayed
-		//float hasperiodinname = tokenizebyseparator(gamedir, ".") > 1;
-		//if (substring(gamedir, 0, 1) == "." || substring(gamedir, 0, 2) == ".." || hasperiodinname > 0)
-		if (substring(gamedir, 0, 1) == "." || substring(gamedir, 0, 2) == "..")
-			continue;
-		
-		if (desc=="")
-			desc = sprintf("^m%s", gamedir);
-		else
-			desc = sprintf("^m%s ^h%s", desc, gamedir); //include the gamedir, faded somewhat.
-		desc = strzone(desc);
-
-		if (engine == E_FTE) {
-			if (modcmd == "qw" || modcmd == "fte" || modcmd == "")
-				modcmd = sprintf("gamedir id1");
-		}
-		if not(modcmd)
-			modcmd = sprintf("gamedir %s", gamedir);
-		// command to load the mod and open the levels menu again
-		modcmd = strcat("m_pop;", modcmd, "; m_levels;\n");
-		modcmd = strzone(modcmd);
-
-		if (gamedir == "")
-			continue;
-
-		// Work out whether this entry represents the active game before adding
-		// its heading. Reloading the active game needlessly tears down MenuQC
-		// and leaves the user at the console.
-		float iscurrent = FALSE;
-		string gamelist = cvar_string("game");
-		float modscount = tokenizebyseparator(gamelist, ";");
-		if (gamelist == "")
-		{
-			if (gamedir == "id1")
-				iscurrent = TRUE;
-		}
-		else
-		{
-			for (float i = 0; i < modscount; i++)
-			{
-				if (strtolower(argv(i)) == gamedir)
-				{
-					iscurrent = TRUE;
-					break;
-				}
-			}
-		}
-		
-		// render mod info line
-		fr.add(
-			spawn(mitem_text, item_text:desc, item_command:iscurrent?"":modcmd, item_scale:modnamescale),
-			RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN,
-			[0, y], // top left
-			[16, modnamescale]); // bottom right
-
-		y+=modnamescale+2; // padding for the next line item
-
-		// Only enumerate maps from the active game. Other headings switch game
-		// first, then reopen this screen from the new search path.
-		if (iscurrent)
-			y = listlevelsfor(fr, y);
-	}
-	strunzone(gamedir);
-	strunzone(desc);
-	strunzone(info);
-	strunzone(modcmd);
-
-	return y;
-};
-
 void(mitem_desktop desktop) M_Levels =
 {
-	string saveorload = "menugfx/levels.lmp";
+	string saveorload = classic_art("gfx/p_levels.lmp", "menugfx/p_levels.lmp");
 	float ssx = ui.screensize.x;
 	float ssy = ui.screensize.y;
 	float menux = MENU_WIDTH;
@@ -300,7 +161,7 @@ void(mitem_desktop desktop) M_Levels =
 	// Content
 
 	// banner image
-	mitem_pic banner = spawn(mitem_pic, item_text:saveorload, item_size_y:24, item_flags:IF_CENTERALIGN);
+	mitem_pic banner = spawn(mitem_pic, item_text:saveorload, item_flags:IF_CENTERALIGN);
 	m.add(banner, RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MID|RS_Y_MAX_OWN_MIN, // top-left|bottom-right relation
 		[banner.item_size_x*-0.5, padding], // top-left
 		[banner.item_size_x*0.5, banner.item_size_y]); // bottom-right
@@ -318,10 +179,11 @@ void(mitem_desktop desktop) M_Levels =
 		[0, banner.item_size_y+(padding)], // top-left
 		[0, 0] // bottom-right
 	);
-	
+
 	float y=0;
 	y += listlevelsfor(fr, y);
+	if (!y)
+		fr.addc(spawn_text(_("No maps found"), "", TXT_NMSZ), 0);
 
 	addmenuback(mm);
 };
-

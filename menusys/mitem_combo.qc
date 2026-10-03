@@ -171,7 +171,7 @@ void(vector pos) mitem_combo_popup::item_draw =
 	ui.drawfill(pos, [1, popupsize_y - 1], TD_RGT, item_alpha, 0);
 	ui.drawfill(pos + [popupsize_x-1, 1], [1, popupsize_y - 1], TD_LFT, item_alpha, 0);
 	ui.drawfill(pos + [0, popupsize_y-1], [popupsize_x, 1], TD_TOP, item_alpha, 0);
-*/	
+*/
 
 	pos_x += 1;
 
@@ -250,9 +250,9 @@ void(vector pos) mitem_combo_popup::item_draw =
 
 	//reset the clip area
 	ui.setcliparea(
-		ui.drawrectmin[0], 
-		ui.drawrectmin[1], 
-		ui.drawrectmax[0] - ui.drawrectmin[0], 
+		ui.drawrectmin[0],
+		ui.drawrectmin[1],
+		ui.drawrectmax[0] - ui.drawrectmin[0],
 		ui.drawrectmax[1] - ui.drawrectmin[1]
 	);
 };

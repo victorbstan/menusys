@@ -32,14 +32,14 @@ nonstatic void(mitem_desktop desktop) M_Multi =
 	);
 
 	// Left plaque
-	
+
 	float qplaquewidth = 32;
 	m.add(spawn_pic("gfx/qplaque.lmp", '32 144'),
 		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN,
 		[leftpadding, padding], [qplaquewidth, 144]);
 
 	// Title
-	
+
 	mitem_pic banner = spawn(mitem_pic, item_text:"gfx/p_multi.lmp", item_size_y:24, item_flags:IF_CENTERALIGN);
 	m.add(
 		banner,
@@ -55,9 +55,9 @@ nonstatic void(mitem_desktop desktop) M_Multi =
 		item_size:'10 10', item_rgb:'255 0 0', item_alpha:alpha); // join
 	mitem_classicbutton btn2 = spawn(mitem_classicbutton, item_command:"m_pop;m_newgame mp", // TODO: proper mp menu
 		item_size:'10 10', item_rgb:'255 0 0', item_alpha:alpha); // new game
-	mitem_classicbutton btn3 = spawn(mitem_classicbutton, item_command:"m_pop;m_basicopts", // TODO: proper mp setup menu
+	mitem_classicbutton btn3 = spawn(mitem_classicbutton, item_command:"m_pop;m_setup",
 		item_size:'10 10', item_rgb:'255 0 0', item_alpha:alpha); // setup
-		
+
 	// buttons start location
 	float bsx = qplaquewidth+leftpadding+plaquepadding;
 	float bsy = banner.item_size_y+(padding*2);

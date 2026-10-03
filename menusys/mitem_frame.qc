@@ -534,6 +534,8 @@ void(mitem_frame rootmenu, float upwards) menu_selectnextitem =
 	mitem item = menu_findnextitem(rootmenu, upwards, rootmenu.item_kactivechild?rootmenu.item_kactivechild:rootmenu.item_mactivechild);
 	if (!item)
 		item = menu_findnextitem(rootmenu, upwards, __NULL__);
+	if (!item)
+		return;
 
 	menu_selectitem(item);
 	item.item_focuschange(item, IF_KFOCUSED);	//focus on the new
@@ -599,6 +601,12 @@ float(vector pos, float scan, float char, float down) mitem_frame::item_keypress
 };
 void() mitem_frame::item_remove =
 {
+	// The scrollbar is owned by the frame but is not in item_children.
+	if (vslider)
+	{
+		vslider.item_remove();
+		vslider = (mitem_vslider)__NULL__;
+	}
 	local mitem ch;
 	while (this.item_children)
 	{

@@ -39,7 +39,7 @@ nonstatic void(mitem_desktop desktop) M_Configs =
 	);
 
 	// Title
-	
+
 	mitem_pic banner = spawn(mitem_pic, item_text:"gfx/p_option.lmp", item_size_y:24, item_flags:IF_CENTERALIGN);
 	m.add(
 		banner,
@@ -61,7 +61,7 @@ nonstatic void(mitem_desktop desktop) M_Configs =
 		[0, banner.item_size_y+padding], // top-left
 		[0, 0] // bottom-right
 	);
-	
+
 	// Options content
 
 	float posy = 0;
@@ -80,14 +80,14 @@ nonstatic void(mitem_desktop desktop) M_Configs =
 		string dname = GetFirstLineComment(fname, iname);
 		iname = sprintf("exec \"%s\"", fname);
 		if (dname && !fr.findchildcmd(iname))
-			fr.add(spawn(mitem_text, item_text:dname, item_command:iname, item_scale:TXT_NMSZ, item_flags:IF_CENTERALIGN), 
-				RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN, 
+			fr.add(spawn(mitem_text, item_text:dname, item_command:iname, item_scale:TXT_NMSZ, item_flags:IF_CENTERALIGN),
+				RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN,
 				[0, posy], [posx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
 	}
 	search_end(fs);
 	if (c <= 0)
-		fr.add(spawn(mitem_text, item_text:strcat(XRGB_WARNING, "No configs found"), item_scale:TXT_MDSZ, item_flags:IF_CENTERALIGN), 
-			RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN, 
+		fr.add(spawn(mitem_text, item_text:strcat(XRGB_WARNING, "No configs found"), item_scale:TXT_MDSZ, item_flags:IF_CENTERALIGN),
+			RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN,
 			[0, posy], [posx, TXT_MDSZ]); posy+=TXT_NMSZ+spacing;
 
 	//random art for style

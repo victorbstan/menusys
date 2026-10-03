@@ -1,0 +1,16 @@
+// System cursor in FTE. Empty means use the engine's default cursor.
+cl_cursor ""
+
+// Optional packaged custom cursor; uncomment to enable.
+// cl_cursor "menugfx/cursor_copr.tga"
+// cl_cursor "menugfx/cursor_tintin.tga"
+// cl_cursor_size 2
+// cl_cursorbias 0
+
+// Optional QSS menu, status bar, and console scale.
+// scr_menuscale 4
+// scr_sbarscale 4
+// scr_conscale 4
+
+// Optional classic texture filtering.
+// gl_texturemode gl_nearest

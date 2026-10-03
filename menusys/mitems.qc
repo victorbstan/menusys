@@ -65,12 +65,12 @@ __strip var float dp_workarounds;
 
 // Color scheme/theme
 // text
-#define XRGB_TXT "^xFFF" 
-#define RGB_TXT '1 1 1' 
-#define XRGB_TXTB "^xFFD" 
+#define XRGB_TXT "^xFFF"
+#define RGB_TXT '1 1 1'
+#define XRGB_TXTB "^xFFD"
 #define RGB_TXTB '1 1 0.875'
 // darker conchars variant
-#define XRGB_ALT "^xF86" 
+#define XRGB_ALT "^xF86"
 #define RGB_ALT '1 0.5 0.375'
 // notifications
 #define XRGB_DANGER "^xD32"
@@ -124,9 +124,6 @@ __strip var float dp_workarounds;
 #define MENU_FONT_WIN ""
 #define MENU_FONT ""
 #define GL_FONT ""
-// curosr
-#define CURSORPATH "menugfx/cursor.tga"
-
 enum
 {
 	E_FTE,
@@ -202,6 +199,38 @@ var uiinfo_t ui =
 	drawstring
 };
 
+#ifdef MENU
+// Convert our virtual canvas to the engine's viewport with one physical scale.
+// Engines may clamp console width/height independently in a small window.
+// Compensating here preserves artwork proportions and the mouse hitboxes
+// without overwriting the user's scr_*scale settings.
+var vector menu_drawscale = '1 1 1';
+static vector(vector v) menu_project =
+{
+	return [v.x*menu_drawscale.x, v.y*menu_drawscale.y, v.z];
+};
+static void(float x, float y, float w, float h) menu_clip =
+{
+	drawsetcliparea(x*menu_drawscale.x, y*menu_drawscale.y, w*menu_drawscale.x, h*menu_drawscale.y);
+};
+static float(vector pos, string pic, vector size, vector rgb, float alpha, float flags) menu_pic =
+{
+	return drawpic(menu_project(pos), pic, menu_project(size), rgb, alpha, flags);
+};
+static float(vector pos, vector size, vector rgb, float alpha, float flags) menu_fill =
+{
+	return drawfill(menu_project(pos), menu_project(size), rgb, alpha, flags);
+};
+static float(vector pos, float chr, vector size, vector rgb, float alpha, float flags) menu_character =
+{
+	return drawcharacter(menu_project(pos), chr, menu_project(size), rgb, alpha, flags);
+};
+static float(vector pos, string value, vector size, vector rgb, float alpha, float flags) menu_string =
+{
+	return drawstring(menu_project(pos), value, menu_project(size), rgb, alpha, flags);
+};
+#endif
+
 void() queryscreensize =
 {
 #ifdef MENU
@@ -210,6 +239,19 @@ void() queryscreensize =
 	ui.screensize[0] = cvar("vid_conwidth");
 	ui.screensize[1] = cvar("vid_conheight");
 	ui.screensize[2] = 0;
+	float pw = cvar("vid_pixwidth"), ph = cvar("vid_pixheight");
+	menu_drawscale = '1 1 1';
+	if (pw > 0 && ph > 0 && ui.screensize.x > 0 && ui.screensize.y > 0)
+	{
+		float scale = min(pw/ui.screensize.x, ph/ui.screensize.y, pw/MENU_WIDTH, ph/MENU_HEIGHT);
+		menu_drawscale = [scale*ui.screensize.x/pw, scale*ui.screensize.y/ph, 1];
+		ui.screensize = [pw/scale, ph/scale, 0];
+	}
+	ui.setcliparea = menu_clip;
+	ui.drawpic = menu_pic;
+	ui.drawfill = menu_fill;
+	ui.drawcharacter = menu_character;
+	ui.drawstring = menu_string;
 #endif
 #ifdef CSQC
 	#ifdef CSQC_SIMPLE

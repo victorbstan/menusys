@@ -38,6 +38,18 @@ and draw ordering in mind when changing these screens.
 
 ## Compile MenuQC
 
+The command-line build helper writes under `dist/build` and keeps compiler
+logs there. It avoids overwriting an installed module even with older FTEQCC
+versions that ignore `-o`:
+
+```powershell
+.\scripts\build-menu.ps1 -Compiler C:\path\to\fteqcc.exe
+.\scripts\build-menu.ps1 -Compiler C:\path\to\fteqcc.exe -Csqc
+```
+
+Both variants should report zero warnings. The following GUI workflow retains
+the original output path.
+
 From the repository root, open `menu.src` in FTEQCC and choose **Compile**. A
 command-line invocation also works with compiler builds that support it:
 
@@ -107,6 +119,35 @@ Verify that a command-line map starts without the menu covering it:
 - Escape opens and closes the menu normally.
 - `+map start` loads the map without leaving the main menu open.
 - The Levels, Mods, Options, Load, and Save screens still open.
+- Levels and Demos align with the original Single Player rows.
+- Game `gfx/levels.lmp`, `gfx/demos.lmp`, and their `p_` headers override the
+  packaged fallbacks, whether loose or inside a PAK.
+- `menu_load` and `menu_save` open Load and Save. Empty slots and section
+  headings cannot be loaded; Save before a game starts explains its disabled
+  slots. Save a running game, reopen Load, and load that slot.
+- Multiplayer > Setup displays `gfx/menuplyr.lmp`; name, hostname, and both
+  color controls work.
+- `cl_cursor ""` uses FTE's system cursor. Switching to a packaged cursor and
+  back works while a menu is open.
+- A small window retains artwork proportions and matching mouse hitboxes.
+- Repeatedly opening and closing scrolling screens releases their widgets.
+
+### Automated packaged runtime check
+
+```powershell
+.\scripts\test-menu-runtime.ps1 `
+    -Engine C:\path\to\fteqw64.exe `
+    -GameData C:\path\to\quake\id1 `
+    -MenuPak .\dist\classic-menusys-vbs-v1.0-beta.7\menu.pak `
+    -TestName quake
+```
+
+Use `-Qss` for Quakespasm-Spiked and `-Width 400 -Height 300` for a smaller
+window. Each run creates a new isolated basedir under `dist/runtime`, copies
+both game PAKs, captures eight screenshots, verifies a save was written, and
+checks logs for command and VM failures. Inspect the screenshots as well.
+QSS test commands use a temporary localhost-only listener after signon; the
+test shuts down that engine at completion. The original game data is untouched.
 
 ## Troubleshooting
 

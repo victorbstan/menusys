@@ -64,7 +64,7 @@ nonstatic void(mitem_desktop desktop) M_Options_Video =
 	float titleoffset = -12;
 
 	// Main menu
-	
+
 	// no dupes please.
 	local mitem_exmenu mm;
 	mm = (mitem_exmenu)desktop.findchildtext(_("Video Options"));
@@ -86,7 +86,7 @@ nonstatic void(mitem_desktop desktop) M_Options_Video =
 	);
 
 	// Title
-	
+
 	mitem_pic banner = spawn(mitem_pic, item_text:"gfx/p_option.lmp", item_size_y:24, item_flags:IF_CENTERALIGN);
 	m.add(
 		banner,
@@ -108,7 +108,7 @@ nonstatic void(mitem_desktop desktop) M_Options_Video =
 		[0, banner.item_size_y+padding], // top-left
 		[0, 0] // bottom-right
 	);
-	
+
 	// Options
 
 	float posy = 0;
@@ -121,7 +121,7 @@ nonstatic void(mitem_desktop desktop) M_Options_Video =
 	fr.addc(spawn_headline("Video"), posy); posy+=TXT_MDSZ+padding;
 
 	// Button
-	fr.add(spawn(mitem_text, item_text:_("Restart Video"), 
+	fr.add(spawn(mitem_text, item_text:_("Restart Video"),
 		item_command:"vid_restart",
 		// item_rgb: RGB_TXTB,
 		item_scale:TXT_MDSZ,
@@ -135,8 +135,8 @@ nonstatic void(mitem_desktop desktop) M_Options_Video =
 	float fl = RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN;
 
 	if (cvar_type("vid_renderer")) {
-		fr.add(spawn_combo(_("Renderer"), "vid_renderer", optionsize, 
-			cvar_string("_vid_renderer_opts")), 
+		fr.add(spawn_combo(_("Renderer"), "vid_renderer", optionsize,
+			cvar_string("_vid_renderer_opts")),
 			fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing; }
 
 	//add the options
@@ -152,15 +152,15 @@ nonstatic void(mitem_desktop desktop) M_Options_Video =
 			"1 \"Fullscreen\""
 		), fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
 	}
-	else 
+	else
 	{
-		fr.add(spawn_check(_("Fullscreen"), "vid_fullscreen", optionsize), 
+		fr.add(spawn_check(_("Fullscreen"), "vid_fullscreen", optionsize),
 			fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
 	}
 	if (cvar_type("vid_resizable")) {
 		fr.add(spawn_check(_("Resizable"), "vid_resizable", optionsize),
 			fl, [posx, posy], [maxposx, TXT_NMSZ]), posy+=TXT_NMSZ+spacing; }
-	
+
 	fr.add(spawn_combo(_("MSAA"), cv3("vid_samples"/*dp*/, "vid_fsaa"/*qs*/, "vid_multisample"/*fte*/), optionsize,
 		"0 \"Off\""
 		"2 \"2x\""
@@ -168,7 +168,7 @@ nonstatic void(mitem_desktop desktop) M_Options_Video =
 	), fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
 
 	if (cv2("vid_mode", "vid_describemodes")) {
-		fr.add(spawn_combo(_("Video Mode"), cv2("vid_mode", "vid_describemodes"), optionsize, PrepareVideoModes()), 
+		fr.add(spawn_combo(_("Video Mode"), cv2("vid_mode", "vid_describemodes"), optionsize, PrepareVideoModes()),
 			fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;	}
 
 	static const string scaleoptions = _(
@@ -178,16 +178,16 @@ nonstatic void(mitem_desktop desktop) M_Options_Video =
 		"4 \"x4\""
 	);
 	if (cvar_type("vid_conautoscale")) {
-		fr.add(spawn_combo(_("Video Zoom"), "vid_conautoscale", optionsize, scaleoptions), 
+		fr.add(spawn_combo(_("Video Zoom"), "vid_conautoscale", optionsize, scaleoptions),
 			fl, [posx, posy], [maxposx, TXT_NMSZ]), posy+=TXT_NMSZ+spacing; }
 	if (cvar_type("scr_conscale")) {
-		fr.add(spawn_combo(_("Console Zoom"), "scr_conscale", optionsize, scaleoptions), 
+		fr.add(spawn_combo(_("Console Zoom"), "scr_conscale", optionsize, scaleoptions),
 			fl, [posx, posy], [maxposx, TXT_NMSZ]), posy+=TXT_NMSZ+spacing; }
 	if (cvar_type("scr_sbarscale")) {
-		fr.add(spawn_combo(_("Sbar Zoom"), "scr_sbarscale", optionsize, scaleoptions), 
+		fr.add(spawn_combo(_("Sbar Zoom"), "scr_sbarscale", optionsize, scaleoptions),
 			fl, [posx, posy], [maxposx, TXT_NMSZ]), posy+=TXT_NMSZ+spacing; }
 	if (cvar_type("scr_menuscale")) {
-		fr.add(spawn_combo(_("Menu Zoom"), "scr_menuscale", optionsize, scaleoptions), 
+		fr.add(spawn_combo(_("Menu Zoom"), "scr_menuscale", optionsize, scaleoptions),
 			fl, [posx, posy], [maxposx, TXT_NMSZ]), posy+=TXT_NMSZ+spacing; }
 	fr.add(spawn_combo(_("Colour Depth"), cv2("vid_bitsperpixel", "vid_bpp"), optionsize, _(
 		"16 \"16bit (No Win10)\"" //r5g6b5, or so. unsupported on win10.
@@ -211,20 +211,20 @@ nonstatic void(mitem_desktop desktop) M_Options_Video =
 			"144 \"144\""
 			"240 \"240\""
 		)),	fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing; }
-	fr.add(spawn_check(_("VSync"), cv2("vid_vsync", "vid_wait"), optionsize), 
+	fr.add(spawn_check(_("VSync"), cv2("vid_vsync", "vid_wait"), optionsize),
 		fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
-	fr.add(spawn_check(_("Show Framerate"), cv3("showfps"/*dp*/, "scr_showfps"/*qs*/, "show_fps"/*id/qw*/), optionsize), 
+	fr.add(spawn_check(_("Show Framerate"), cv3("showfps"/*dp*/, "scr_showfps"/*qs*/, "show_fps"/*id/qw*/), optionsize),
 		fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
-	fr.add(spawn_hslider(_("View Size"), "viewsize", '50 120 10', optionsize), 
+	fr.add(spawn_hslider(_("View Size"), "viewsize", '50 120 10', optionsize),
 		fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
-	fr.add(spawn_hslider(_("Field Of View"), "fov", '50 140 5', optionsize), 
+	fr.add(spawn_hslider(_("Field Of View"), "fov", '50 140 5', optionsize),
 		fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
-	fr.add(spawn_hslider(_("Gamma"), "gamma", '1.3 0.5 -0.1', optionsize), 
+	fr.add(spawn_hslider(_("Gamma"), "gamma", '1.3 0.5 -0.1', optionsize),
 		fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
-	fr.add(spawn_hslider(_("Contrast"), "contrast", '0.7 2 0.1', optionsize), 
+	fr.add(spawn_hslider(_("Contrast"), "contrast", '0.7 2 0.1', optionsize),
 		fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
 	if (engine!=E_QSS) {
-		fr.add(spawn_hslider(_("Brightness"), "brightness", '0 0.4 0.05', optionsize), 
+		fr.add(spawn_hslider(_("Brightness"), "brightness", '0 0.4 0.05', optionsize),
 			fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
 		fr.add(spawn_combo(_("Hardware Gamma"), "vid_hardwaregamma", optionsize,
 			"0 \"Off\" "
@@ -237,7 +237,7 @@ nonstatic void(mitem_desktop desktop) M_Options_Video =
 	posy+=padding;
 
 	// extra spacing for drop-downs
-	fr.add(spawn_mitem_spacer(16, -1), 
+	fr.add(spawn_mitem_spacer(16, -1),
 		fl, [posx, posy], [maxposx, 24]);
 
 	addmenuback(mm);

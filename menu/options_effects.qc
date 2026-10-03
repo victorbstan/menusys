@@ -9,7 +9,7 @@ nonstatic void(mitem_desktop desktop) M_Options_Effects =
 	float titleoffset = -12;
 
 	// Main menu
-	
+
 	// no dupes please.
 	local mitem_exmenu mm;
 	mm = (mitem_exmenu)desktop.findchildtext(_("Effects Options"));
@@ -31,7 +31,7 @@ nonstatic void(mitem_desktop desktop) M_Options_Effects =
 	);
 
 	// Title
-	
+
 	mitem_pic banner = spawn(mitem_pic, item_text:"gfx/p_option.lmp", item_size_y:24, item_flags:IF_CENTERALIGN);
 	m.add(
 		banner,
@@ -53,7 +53,7 @@ nonstatic void(mitem_desktop desktop) M_Options_Effects =
 		[0, banner.item_size_y+padding], // top-left
 		[0, 0] // bottom-right
 	);
-	
+
 	// Options
 
 	float posy = 0;
@@ -66,8 +66,8 @@ nonstatic void(mitem_desktop desktop) M_Options_Effects =
 	fr.addc(spawn_headline("Effects"), posy); posy+=TXT_MDSZ+padding;
 
 	// Button
-	fr.add(spawn(mitem_text, item_text:_("Restart Video"), 
-		item_command:"vid_restart", 
+	fr.add(spawn(mitem_text, item_text:_("Restart Video"),
+		item_command:"vid_restart",
 		item_scale:TXT_MDSZ,
 		item_flags:IF_CENTERALIGN),
 		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN,
@@ -77,7 +77,7 @@ nonstatic void(mitem_desktop desktop) M_Options_Effects =
 	posy+=padding;
 
 	float fl = RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN;
-	// fr.add(spawn_check(_("Show Framerate"), cv3("showfps", "scr_showfps", "show_fps"), optionsize), 
+	// fr.add(spawn_check(_("Show Framerate"), cv3("showfps", "scr_showfps", "show_fps"), optionsize),
 	// 	fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
 	fr.add(spawn_combo(_("Texture Mode"), "gl_texturemode", optionsize, _(
 		"GL_NEAREST	\"Nearest\""
@@ -105,11 +105,11 @@ nonstatic void(mitem_desktop desktop) M_Options_Effects =
 	}
 	fr.add(spawn_check(_("Lightmaps Only"), "r_lightmap", optionsize),
 		fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
-	fr.add(spawn_check(_("High Res Textures"), "gl_load24bit", optionsize), 
+	fr.add(spawn_check(_("High Res Textures"), "gl_load24bit", optionsize),
 		fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
 	if (engine == E_QSS)
 	{
-		fr.add(spawn_check(_("Wireframe"), "r_showtris", optionsize), 
+		fr.add(spawn_check(_("Wireframe"), "r_showtris", optionsize),
 			fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
 		fr.add(spawn_check(_("Simple DLights"), "gl_flashblend", optionsize),
 			fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
@@ -118,23 +118,23 @@ nonstatic void(mitem_desktop desktop) M_Options_Effects =
 	}
 	else
 	{
-		fr.add(spawn_check(_("Wireframe"), "r_wireframe", optionsize), 
+		fr.add(spawn_check(_("Wireframe"), "r_wireframe", optionsize),
 			fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
-		fr.add(spawn_check(_("Bloom"), "r_bloom", optionsize), 
+		fr.add(spawn_check(_("Bloom"), "r_bloom", optionsize),
 			fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
-		fr.add(spawn_check(_("Simple Textures"), "r_drawflat", optionsize), 
+		fr.add(spawn_check(_("Simple Textures"), "r_drawflat", optionsize),
 			fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
-		fr.add(spawn_check(_("Paletted Rendering"), "r_softwarebanding", optionsize), 
+		fr.add(spawn_check(_("Paletted Rendering"), "r_softwarebanding", optionsize),
 			fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
-		fr.add(spawn_check(_("HDR"), "r_hdr_irisadaptation", optionsize), 
+		fr.add(spawn_check(_("HDR"), "r_hdr_irisadaptation", optionsize),
 			fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
-		fr.add(spawn_check(_("Coronas"), "r_coronas", optionsize), 
+		fr.add(spawn_check(_("Coronas"), "r_coronas", optionsize),
 			fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
-		fr.add(spawn_check(_("Relief Mapping"), "r_glsl_offsetmapping", optionsize), 
+		fr.add(spawn_check(_("Relief Mapping"), "r_glsl_offsetmapping", optionsize),
 			fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
-		fr.add(spawn_check(_("RT. Dynamic Light"), "r_shadow_realtime_dlight", optionsize), 
+		fr.add(spawn_check(_("RT. Dynamic Light"), "r_shadow_realtime_dlight", optionsize),
 			fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
-		fr.add(spawn_check(_("RT. World Light"), "r_shadow_realtime_world", optionsize), 
+		fr.add(spawn_check(_("RT. World Light"), "r_shadow_realtime_world", optionsize),
 			fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
 		fr.add(spawn_combo(_("Water Effects"), "r_waterstyle", optionsize, _(
 			"1 \"Classic\""
@@ -156,15 +156,15 @@ nonstatic void(mitem_desktop desktop) M_Options_Effects =
 			"360 \"360 degrees\""
 		)),	fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
 	}
-	fr.add(spawn_hslider(_("Particle Density"), "r_part_density", '0.25 4 0.25', optionsize), 
+	fr.add(spawn_hslider(_("Particle Density"), "r_part_density", '0.25 4 0.25', optionsize),
 		fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
 
 	posy+=padding;
 
 	// extra spacing for drop-downs
-	fr.add(spawn_mitem_spacer(16, -1), 
+	fr.add(spawn_mitem_spacer(16, -1),
 		fl, [posx, posy], [maxposx, 24]);
-	
+
 	addmenuback(mm);
 };
 

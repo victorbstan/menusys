@@ -111,7 +111,7 @@ float(vector pos, float scan, float char, float down) mitem_tabs::item_keypress 
 				item_focuschange(ch, IF_KFOCUSED);	//give the tab full focus.
 				return TRUE;
 			}
-			
+
 			tpos_x += sz_x;
 		}
 	}

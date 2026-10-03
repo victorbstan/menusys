@@ -7,7 +7,7 @@ class mitem_check : mitem
 	{
 		if (!down)
 			return FALSE;
-	
+
 		if (scan == K_ENTER || scan == K_SPACE || scan == K_LEFTARROW || scan == K_RIGHTARROW || scan == K_MOUSE1)
 		{
 			pos_x += this.item_size_x / 2;
@@ -42,7 +42,7 @@ class mitem_check : mitem
 				ui.drawstring(pos + '4 0', "^{e083}", '1 1 0' * this.item_scale, rgb, this.item_alpha, 0);
 		}
 	};
-	
+
 	void() mitem_check =
 	{
 		if (item_text)
@@ -56,7 +56,7 @@ class mitem_check : mitem
 		if (isvalid(item_command))
 			item_flags |= IF_SELECTABLE;
 	};
-		
+
 	virtual void() item_resized =
 	{
 		if (isvalid(item_command))
@@ -79,8 +79,8 @@ void() mitem_check::item_remove =
 //optional, can spawn direcly
 mitem_check(string text, string command, vector sz) spawn_check =
 {
-	return spawn(mitem_check, 
-		item_text:strcat("^m", text), 
+	return spawn(mitem_check,
+		item_text:strcat("^m", text),
 		item_size: sz,
 		item_command: command,
 		item_scale: sz_y

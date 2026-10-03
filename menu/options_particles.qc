@@ -11,7 +11,7 @@ class particlesmenu : mitem_frame
 	{
 		cvar_set("r_particledesc", thelist);
 	};
-	
+
 	//to reconfigure colours for when something changees.
 	nonvirtual void() UpdateSelections =
 	{
@@ -41,7 +41,7 @@ class particlesmenu : mitem_frame
 				return;
 			}
 		}
-		
+
 		if (strstrofs(cmd, "\t") >= 0 || strstrofs(cmd, " ") >= 0 || strstrofs(cmd, "\"") >= 0 || strstrofs(cmd, ";") >= 0 || strstrofs(cmd, "\n") >= 0)
 			thelist = strtrim(strcat(thelist, " \"", cmd, "\""));
 		else
@@ -79,7 +79,7 @@ nonstatic void(mitem_desktop desktop) M_Options_Particles =
 	float titleoffset = -12;
 
 	// Main menu
-	
+
 	// no dupes please.
 	local mitem_exmenu mm;
 	mm = (mitem_exmenu)desktop.findchildtext(_("Particles"));
@@ -101,7 +101,7 @@ nonstatic void(mitem_desktop desktop) M_Options_Particles =
 	);
 
 	// Title
-	
+
 	mitem_pic banner = spawn(mitem_pic, item_text:"gfx/p_option.lmp", item_size_y:24, item_flags:IF_CENTERALIGN);
 	m.add(
 		banner,
@@ -134,12 +134,12 @@ nonstatic void(mitem_desktop desktop) M_Options_Particles =
 
 	// Headline
 	ffr.addc(spawn_headline("Particles"), posy); posy+=TXT_MDSZ+padding;
-	
+
 	// Special frame for particles option
 	particlesmenu fr = spawn(particlesmenu, item_flags: IF_SELECTABLE, frame_hasscroll:FALSE);
 	ffr.add(
-		fr, 
-		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, 
+		fr,
+		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX,
 		[0, 0], // top-left
 		[0, 0] // bottom-right
 	);
@@ -150,42 +150,42 @@ nonstatic void(mitem_desktop desktop) M_Options_Particles =
 	//FIXME: these should not be listed if its a no-compat/no-legacy build. this'll do for now, but its a bit wrong
 	if (checkextension("FTE_PART_NAMESPACE_EFFECTINFO"))
 	{
-		fr.add(spawn(mitem_text, item_text:"Classic Particles", item_command:"classic", item_scale:TXT_NMSZ, item_flags:IF_CENTERALIGN), 
+		fr.add(spawn(mitem_text, item_text:"Classic Particles", item_command:"classic", item_scale:TXT_NMSZ, item_flags:IF_CENTERALIGN),
 			fl, [posx, posy], [0, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
 		if (engine==E_FTE)
 		{
-			fr.add(spawn(mitem_text, item_text:"High Quality", item_command:"high", item_scale:TXT_NMSZ, item_flags:IF_CENTERALIGN), 
+			fr.add(spawn(mitem_text, item_text:"High Quality", item_command:"high", item_scale:TXT_NMSZ, item_flags:IF_CENTERALIGN),
 				fl, [posx, posy], [0, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
-			fr.add(spawn(mitem_text, item_text:"TimeServ's Shaft", item_command:"tsshaft", item_scale:TXT_NMSZ, item_flags:IF_CENTERALIGN), 
+			fr.add(spawn(mitem_text, item_text:"TimeServ's Shaft", item_command:"tsshaft", item_scale:TXT_NMSZ, item_flags:IF_CENTERALIGN),
 				fl, [posx, posy], [0, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
 		}
-	
+
 		string efi = GetFirstLineComment("effectinfo.txt", "Effectinfo");
 		if (efi) {
-			fr.add(spawn(mitem_text, item_text:efi, item_command:"effectinfo", item_scale:TXT_NMSZ, item_flags:IF_CENTERALIGN), 
+			fr.add(spawn(mitem_text, item_text:efi, item_command:"effectinfo", item_scale:TXT_NMSZ, item_flags:IF_CENTERALIGN),
 				fl, [posx, posy], [0, TXT_NMSZ]); posy += TXT_NMSZ+spacing; }
 	}
 
 	float fs;
-	fs = search_begin("particles/*.cfg", TRUE, TRUE);	
+	fs = search_begin("particles/*.cfg", TRUE, TRUE);
 	for (float c = search_getsize(fs), float i = 0; i < c; i++)
 	{
 		string fname = search_getfilename(fs, i);
 		string iname = substring(fname, 10, -5);
 		string dname = GetFirstLineComment(fname, iname);
 		if (dname && !fr.findchildcmd(iname)) {
-			fr.add(spawn(mitem_text, item_text:dname, item_command:iname, item_scale:TXT_NMSZ, item_flags:IF_CENTERALIGN), 
+			fr.add(spawn(mitem_text, item_text:dname, item_command:iname, item_scale:TXT_NMSZ, item_flags:IF_CENTERALIGN),
 				fl, [posx, posy], [0, TXT_NMSZ]); posy += TXT_NMSZ+spacing; }
 	}
 	search_end(fs);
-	fs = search_begin("particles/*/*.cfg", TRUE, TRUE);	
+	fs = search_begin("particles/*/*.cfg", TRUE, TRUE);
 	for (float c = search_getsize(fs), float i = 0; i < c; i++)
 	{
 		string fname = search_getfilename(fs, i);
 		string iname = substring(fname, 10, -5);
 		string dname = GetFirstLineComment(fname, iname);
 		if (dname && !fr.findchildcmd(iname)) {
-			fr.add(spawn(mitem_text, item_text:dname, item_command:iname, item_scale:TXT_NMSZ, item_flags:IF_CENTERALIGN), 
+			fr.add(spawn(mitem_text, item_text:dname, item_command:iname, item_scale:TXT_NMSZ, item_flags:IF_CENTERALIGN),
 				fl, [posx, posy], [0, TXT_NMSZ]); posy += TXT_NMSZ+spacing; }
 	}
 	search_end(fs);
@@ -193,7 +193,7 @@ nonstatic void(mitem_desktop desktop) M_Options_Particles =
 	fr.UpdateSelections();
 
 	// extra spacing for drop-downs
-	fr.add(spawn_mitem_spacer(16, -1), 
+	fr.add(spawn_mitem_spacer(16, -1),
 		fl, [posx, posy], [maxposx, 24]);
 
 	addmenuback(mm);

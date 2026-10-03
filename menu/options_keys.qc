@@ -56,7 +56,7 @@ void(mitem_desktop desktop) M_Options_Keys =
 	float titleoffset = -12;
 
 	// Main menu
-	
+
 	// no dupes please.
 	mitem_exmenu mm;
 	mm = (mitem_exmenu)desktop.findchildtext(_("Key Options"));
@@ -78,7 +78,7 @@ void(mitem_desktop desktop) M_Options_Keys =
 	);
 
 	// Title
-	
+
 	mitem_pic banner = spawn(mitem_pic, item_text:"gfx/ttl_cstm.lmp", item_size_y:24, item_flags:IF_CENTERALIGN);
 	m.add(
 		banner,
@@ -100,7 +100,7 @@ void(mitem_desktop desktop) M_Options_Keys =
 		[0, banner.item_size_y+padding], // top-left
 		[0, 0] // bottom-right
 	);
-	
+
 	// Options
 
 	float posy = 0;
@@ -139,15 +139,15 @@ void(mitem_desktop desktop) M_Options_Keys =
 				{
 					mitem it = spawn_text(n, "", TXT_NMSZ);
 					it.item_flags &= ~IF_SELECTABLE;
-					fr.add(it, 
-						RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN, 
+					fr.add(it,
+						RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN,
 						[posx, posy], it.item_size); posy+=TXT_NMSZ+spacing;
 				}
 			}
 			else
 			{
-				fr.add(spawn_bind(n, c, optionsize), 
-					RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN, 
+				fr.add(spawn_bind(n, c, optionsize),
+					RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN,
 					[posx, posy], [0, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
 			}
 			i += 8;
@@ -161,11 +161,11 @@ void(mitem_desktop desktop) M_Options_Keys =
 		{
 			if (binds[i].name == "") //no name is a spacer
 				continue;
-			fr.add(spawn_bind(binds[i].name, binds[i].cmd, optionsize), 
-				RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN, 
+			fr.add(spawn_bind(binds[i].name, binds[i].cmd, optionsize),
+				RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN,
 				[posx, posy], [0, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;
 		}
 	}
-	
+
 	addmenuback(mm);
 };

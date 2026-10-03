@@ -58,7 +58,7 @@ nonstatic void(mitem_desktop desktop) M_Preset =
 	float titleoffset = -12;
 
 	// Main menu
-	
+
 	// no dupes please.
 	local mitem_exmenu mm;
 	mm = (mitem_exmenu)desktop.findchildtext(_("Graphical Presets"));
@@ -80,7 +80,7 @@ nonstatic void(mitem_desktop desktop) M_Preset =
 	);
 
 	// Title
-	
+
 	mitem_pic banner = spawn(mitem_pic, item_text:"gfx/p_option.lmp", item_size_y:24, item_flags:IF_CENTERALIGN);
 	m.add(
 		banner,
@@ -102,11 +102,11 @@ nonstatic void(mitem_desktop desktop) M_Preset =
 		[0, banner.item_size_y+padding], // top-left
 		[0, 0] // bottom-right
 	);
-	
+
 	// Options
-	
+
 	float y=0;
-	
+
 	// Headline
 	fr.addc(spawn_headline("Graphic Presets"), y); y+=TXT_MDSZ+padding;
 
@@ -122,8 +122,8 @@ nonstatic void(mitem_desktop desktop) M_Preset =
 		iname = sprintf("exec \"configs/preset_%s.cfg\";vid_reload", iname);
 		if (dname && !fr.findchildcmd(iname))
 		{
-			fr.add(spawn(mitem_text, item_text:dname, item_command:iname, 
-				item_scale:TXT_NMSZ, item_flags:IF_CENTERALIGN), 
+			fr.add(spawn(mitem_text, item_text:dname, item_command:iname,
+				item_scale:TXT_NMSZ, item_flags:IF_CENTERALIGN),
 				fl, [0, y], [0, TXT_NMSZ]); y+=TXT_NMSZ+spacing;
 		}
 	}
@@ -133,8 +133,8 @@ nonstatic void(mitem_desktop desktop) M_Preset =
 		//add the default options
 		for (i = 0; i < presets.length; i++)
 		{
-			fr.add(spawn(mitem_text, item_text:presets[i].name, item_command:sprintf("fps_preset %s", presets[i].preset), 
-				item_scale:TXT_NMSZ, item_flags:IF_CENTERALIGN), 
+			fr.add(spawn(mitem_text, item_text:presets[i].name, item_command:sprintf("fps_preset %s", presets[i].preset),
+				item_scale:TXT_NMSZ, item_flags:IF_CENTERALIGN),
 				fl, [0, y], [0, TXT_NMSZ]); y+=TXT_NMSZ+spacing;
 		}
 	}

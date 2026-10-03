@@ -19,11 +19,11 @@ class mitem_colours : mitem
 		if (isvalid(item_command))
 			item_flags |= IF_SELECTABLE;
 	};
-	
+
 	virtual void() item_resized =
 	{
 		if (isvalid(item_command))
-			item_flags |= IF_SELECTABLE;		
+			item_flags |= IF_SELECTABLE;
 		else
 			item_flags &= ~IF_SELECTABLE;
 		super::item_resized();
@@ -125,7 +125,7 @@ static vector(string v) hextorgb =
 		case  5:	return [0xaf, 0x67, 0x23]/255;
 		case  6:	return [0xff, 0xf3, 0x1b]/255;
 		case  7:	return [0xe3, 0xb3, 0x97]/255;
-		
+
 		case  8:	return [0xab, 0x8b, 0xa3]/255;
 		case  9:	return [0xbb, 0x73, 0x97]/255;
 		case 10:	return [0xdb, 0xc3, 0xbb]/255;

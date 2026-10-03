@@ -94,14 +94,14 @@ nonstatic void(mitem_desktop desktop) M_NewGame =
 	);
 
 	// Left plaque
-	
+
 	// float qplaquewidth = 32;
 	// m.add(spawn_pic("gfx/qplaque.lmp", '32 144'),
 	// 	RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN,
 	// 	[padding, padding], [qplaquewidth, 144]);
 
 	// Title
-	
+
 	banner = spawn(mitem_pic, item_text:"gfx/p_multi.lmp", item_size_y:24, item_flags:IF_CENTERALIGN);
 	m.add(
 		banner,
@@ -137,7 +137,7 @@ nonstatic void(mitem_desktop desktop) M_NewGame =
 		);
 
 		// Options - single
-		m.add(spawn(mitem_text, item_text:"Single Player", item_command:"m_pop;m_newgame sp", item_scale:TXT_LGSZ), 
+		m.add(spawn(mitem_text, item_text:"Single Player", item_command:"m_pop;m_newgame sp", item_scale:TXT_LGSZ),
 			RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN,
 			[qplaquewidth+plaquepadding, posy], [0, TXT_LGSZ]); posy+=TXT_LGSZ+padding;
 
@@ -153,13 +153,13 @@ nonstatic void(mitem_desktop desktop) M_NewGame =
 
 		// Options - multi
 		// NOTE: Could this simply be a drop-down selection in a new MP game setup screen?
-		m.add(spawn(mitem_text, item_text:"Cooperative", item_command:"m_pop;m_newgame coop", item_scale:TXT_LGSZ), 
+		m.add(spawn(mitem_text, item_text:"Cooperative", item_command:"m_pop;m_newgame coop", item_scale:TXT_LGSZ),
 			RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN,
 			[qplaquewidth+plaquepadding, posy], [0, TXT_LGSZ]); posy+=TXT_LGSZ+padding;
-		m.add(spawn(mitem_text, item_text:"Deathmatch", item_command:"m_pop;m_newgame dm", item_scale:TXT_LGSZ), 
+		m.add(spawn(mitem_text, item_text:"Deathmatch", item_command:"m_pop;m_newgame dm", item_scale:TXT_LGSZ),
 			RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN,
 			[qplaquewidth+plaquepadding, posy], [0, TXT_LGSZ]); posy+=TXT_LGSZ+padding;
-		m.add(spawn(mitem_text, item_text:"Team Deathmatch", item_command:"m_pop;m_newgame tdm", item_scale:TXT_LGSZ), 
+		m.add(spawn(mitem_text, item_text:"Team Deathmatch", item_command:"m_pop;m_newgame tdm", item_scale:TXT_LGSZ),
 			RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN,
 			[qplaquewidth+plaquepadding, posy], [0, TXT_LGSZ]); posy+=TXT_LGSZ+padding;
 
@@ -172,7 +172,7 @@ nonstatic void(mitem_desktop desktop) M_NewGame =
 	// Headline
 
 	if (gametype == "dm")
-		m.addc(spawn_headline("Deathmatch"), posy); 
+		m.addc(spawn_headline("Deathmatch"), posy);
 	if (gametype == "tdm")
 		m.addc(spawn_headline("Team Deathmatch"), posy);
 	if (gametype == "coop")
@@ -182,21 +182,21 @@ nonstatic void(mitem_desktop desktop) M_NewGame =
 
 	// Settings
 
-	m.add(spawn_edit(_("Hostname"), "hostname", optionsize), 
+	m.add(spawn_edit(_("Hostname"), "hostname", optionsize),
 		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN,
 		[posx, posy], [maxposx, TXT_NMSZ]
 	); posy+=TXT_NMSZ+SPACING;
-	
+
 	m.add(spawn_combo(_("Public"), "sv_public", optionsize, _(
 			"-1	\"Splitscreen\" "
 			"0	\"Manual IP Sharing\" "
 			"1	\"Public (Manual Config)\" "
 			"2	\"Public (Holepunch)\" "
-		)), 
+		)),
 		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN,
 		[posx, posy], [maxposx, TXT_NMSZ]
 	); posy+=TXT_NMSZ+SPACING;
-	
+
 	if (cvar_type("maxclients"))
 	{
 		m.add(spawn_combo(_("Max Clients"), "maxclients", optionsize, _(
@@ -210,8 +210,8 @@ nonstatic void(mitem_desktop desktop) M_NewGame =
 			RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN,
 			[posx, posy], [maxposx, TXT_NMSZ]
 		); posy+=TXT_NMSZ+SPACING;
-	} 
-	else 
+	}
+	else
 	{
 		m.add(spawn_combo(_("Max Clients"), "maxplayers", optionsize, _(
 				"2	\"Two\" "
@@ -222,8 +222,8 @@ nonstatic void(mitem_desktop desktop) M_NewGame =
 			[posx, posy], [maxposx, TXT_NMSZ]
 		); posy+=TXT_NMSZ+SPACING;
 	}
-	
-	
+
+
 	if (gametype == "dm" || gametype == "tdm")
 	{
 		if (m.get("deathmatch") == "0")
@@ -236,7 +236,7 @@ nonstatic void(mitem_desktop desktop) M_NewGame =
 				"2	\"Weapons Stay\" "
 				"3	\"Powerups Respawn\" "
 				"4	\"Start With Weapons\" "
-			)),	
+			)),
 			RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN,
 			[posx, posy], [maxposx, TXT_NMSZ]
 		); posy+=TXT_NMSZ+SPACING;
@@ -261,7 +261,7 @@ nonstatic void(mitem_desktop desktop) M_NewGame =
 	}
 	if (gametype == "coop")
 	{
-		m.add(spawn_check(_("No Friendly Fire"), "teamplay", optionsize), 
+		m.add(spawn_check(_("No Friendly Fire"), "teamplay", optionsize),
 			RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN,
 			[posx, posy], [maxposx, TXT_NMSZ]
 		); posy+=TXT_NMSZ+SPACING;
@@ -285,7 +285,7 @@ nonstatic void(mitem_desktop desktop) M_NewGame =
 				"50 \"50 minutes\" "
 				"55 \"55 minutes\" "
 				"60 \"1 hour\" "
-			)),	
+			)),
 			RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN,
 			[posx, posy], [maxposx, TXT_NMSZ]
 		); posy+=TXT_NMSZ+SPACING;
@@ -347,7 +347,7 @@ nonstatic void(mitem_desktop desktop) M_NewGame =
 				"e4m7 \"E4M7 (Azure Agony)\" "
 				"e4m8 \"E4M8 (The Nameless City)\" "
 				"end \"End (Shub-Niggurath's Pit)\" "
-			)),	
+			)),
 			RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN,
 			[posx, posy], [maxposx, TXT_NMSZ]
 		); posy+=TXT_NMSZ+SPACING;
@@ -355,7 +355,7 @@ nonstatic void(mitem_desktop desktop) M_NewGame =
 
 	posy+=padding;
 
-	m.add(spawn(mitem_text, item_text:"START", item_command:"m_pop;m_newgame begin", item_flags:IF_CENTERALIGN, item_scale:TXT_NMSZ), 
+	m.add(spawn(mitem_text, item_text:"START", item_command:"m_pop;m_newgame begin", item_flags:IF_CENTERALIGN, item_scale:TXT_NMSZ),
 		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN,
 		[posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+padding;
 

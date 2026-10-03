@@ -1,5 +1,5 @@
 /***************************************************************************
-Draws a conchars table with row/col in hex, 
+Draws a conchars table with row/col in hex,
 the hex values can be used with other functions to render the conchar.
 For reference purposes mainly.
 */
@@ -18,22 +18,22 @@ class mitem_conchars : mitem
 		if (doonce)
 		{
 			float ir;
-			for(ir=0; ir<16; ir++) 
+			for(ir=0; ir<16; ir++)
 			{
 				string irhex = sprintf("%x", ir);
 
-				float ic;	
-				for(ic=0; ic<16; ic++) 
+				float ic;
+				for(ic=0; ic<16; ic++)
 				{
 					string ichex = sprintf("%x", ic);
 
 					string svalue = strcat("0x",irhex,ichex);
 					float value = stoh(svalue);
 					ui.drawcharacter(
-						[pos.x+(ic*19), pos.y+(ir*16)], 
-						value, 
+						[pos.x+(ic*19), pos.y+(ir*16)],
+						value,
 						'8 8', // size
-						'1 1 1', // color 
+						'1 1 1', // color
 						1, // alpha
 						0 // flag (unused)
 					);
@@ -43,17 +43,17 @@ class mitem_conchars : mitem
 
 					// coord label for each conchar
 					ui.drawstring(
-						[pos.x+(ic*19), pos.y+(ir*16)+10], 
-						svalue, 
+						[pos.x+(ic*19), pos.y+(ir*16)+10],
+						svalue,
 						'4 4', // size
-						'1 1 1', // color 
+						'1 1 1', // color
 						1, // alpha
 						0 // flag (unused)
 					);
 				}
 			}
 			// done, no need to keep calculating this
-			doonce = 0; 
+			doonce = 0;
 		}
 	};
 

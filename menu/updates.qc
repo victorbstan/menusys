@@ -106,7 +106,7 @@ void(vector pos, float idx) mitem_updategrid::grid_draw =
 			action = "rem";
 		else if (action=="auto")	//install(to satisfy dependancies)
 			action = "rem";
-		else 
+		else
 			action = "del";
 
 		text = strcat("pkg quiet_", action, " \"", text, "\"\n");

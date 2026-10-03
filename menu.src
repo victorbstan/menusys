@@ -46,6 +46,8 @@ void(mitem_desktop desktop) M_Pop =
 	cmd("m_single",		M_Single, 				menu/single_classic.qc) \
 	cmd("m_multi",		M_Multi, 				menu/multi_classic.qc) \
 	cmd("m_levels",		M_Levels, 				menu/levels.qc) \
+	cmd("m_demos",       M_Demos,                menu/demos.qc) \
+	cmd("m_setup",       M_PlayerSetup,          menu/player_setup.qc) \
 	cmd("m_options",	M_Options,				menu/options.qc) \
 	cmd("m_keys",		M_Options_Keys,			menu/options_keys.qc) \
 	cmd("m_basicopts",	M_Options_Basic,		menu/options_basic.qc) \
@@ -56,6 +58,10 @@ void(mitem_desktop desktop) M_Pop =
 	cmd("m_hud",		M_Options_Hud,			menu/options_hud.qc) \
 	cmd("m_load",		M_Load,					menu/loadsave.qc) \
 	cmd("m_save",		M_Save,					) \
+	cmd("menu_load",     M_Load,                 ) \
+	cmd("menu_save",     M_Save,                 ) \
+	cmd("menu_setup",    M_PlayerSetup,          ) \
+	cmd("menu_demo",     M_Demos,                ) \
 	cmd("m_quit",		M_Quit,					menu/quit.qc) \
 	cmd("m_mods",		M_Menu_Mods,			menu/mods.qc) \
 	cmd("m_updates",	M_Menu_Updates,			menu/updates.qc) \
@@ -72,7 +78,7 @@ void(mitem_desktop desktop) M_Pop =
 	cmd("m_help3",		M_Help3,				) \
 	cmd("m_help4",		M_Help4,				) \
 	cmd("m_help5",		M_Help5,				) \
-	
+
 //make sure all the right files are included
 #define cmd(n,fnc,inc) inc
 #includelist
@@ -177,10 +183,10 @@ void() m_init =
 		dp_workarounds = autocvar(dp_workarounds_allow, TRUE);
 	if (autocvar(dp_workarounds_force, FALSE))
 		dp_workarounds = TRUE;
-	
+
 	if (dp_workarounds)
 		print("^1WORKING AROUND DP BUGS\n");
-	
+
 	//for compat with DP, 'none' is the default cursor in menuqc.
 	//naturally this is not ideal.
 	if (checkextension("FTE_QC_HARDWARECURSORS"))

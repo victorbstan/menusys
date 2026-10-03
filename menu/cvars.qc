@@ -54,7 +54,7 @@ void(vector pos, float idx) mitem_cvargrid::grid_draw =
 
 	vector col = item_rgb;
 	if (item_flags & IF_MFOCUSED && idx == grid_mactive)
-		col = RGB_MFOCUS; 
+		col = RGB_MFOCUS;
 	if (item_flags & IF_KFOCUSED && idx == grid_kactive)
 		col = RGB_KFOCUS;
 
@@ -265,10 +265,10 @@ void(mitem_desktop desktop) M_Menu_Cvars =
 	);
 
 	// Content
-	
+
 	// banner image
 	mitem_pic banner = spawn(mitem_pic, item_text:"gfx/ttl_cstm.lmp", item_size_y:24, item_flags:IF_CENTERALIGN);
-	m.add(banner, 
+	m.add(banner,
 		RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MID|RS_Y_MAX_OWN_MIN, // top-left|bottom-right relation
 		[banner.item_size_x*-0.5, padding], // top-left
 		[banner.item_size_x*0.5, banner.item_size_y]); // bottom-right
@@ -297,12 +297,12 @@ void(mitem_desktop desktop) M_Menu_Cvars =
 
 	// Toggles & Filters at the top
 
-	fr.add(spawn_check("Modified Only", "*modified", [menux/2-(padding*2), TXT_NMSZ]), 
-		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN, 
+	fr.add(spawn_check("Modified Only", "*modified", [menux/2-(padding*2), TXT_NMSZ]),
+		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN,
 		[posx, posy], [(menux)-(padding*2), TXT_NMSZ]); posy+=TXT_NMSZ+SPACING;
-	
-	fr.add(spawn_edit("Cvar Filter", "*filter", [menux/2-(padding*2), TXT_NMSZ]), 
-		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN, 
+
+	fr.add(spawn_edit("Cvar Filter", "*filter", [menux/2-(padding*2), TXT_NMSZ]),
+		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN,
 		[posx, posy], [(menux)-(padding*2), TXT_NMSZ]); posy+=TXT_NMSZ+padding;
 
 	// Grid
@@ -310,7 +310,7 @@ void(mitem_desktop desktop) M_Menu_Cvars =
 	//spawn our grid for the actual options. this provides a scrollbar if we have too many items.\
 	float gridheight = engine==E_FTE?100:128;
 	fr.grid = spawn(mitem_cvargrid, item_flags: IF_SELECTABLE, item_scale: 6);
-	fr.add(fr.grid, RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN, 
+	fr.add(fr.grid, RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN,
 		[0, posy], [menux-(padding*2), gridheight]); posy+=gridheight+padding;
 
 	// I wish QSS could show the description text for cvars, but it can't...
@@ -318,14 +318,14 @@ void(mitem_desktop desktop) M_Menu_Cvars =
 	{
 		// description at bottom of page
 		// can't seem to be able to set text size for textfields?
-		fr.add(spawn(mitem_label, item_text: "*desc", item_flags: 0, item_scale: 6), 
-			RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN, 
+		fr.add(spawn(mitem_label, item_text: "*desc", item_flags: 0, item_scale: 6),
+			RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN,
 			[0, posy], [menux-(padding*2), 24]);
 	}
-	
+
 
 	fr.updatefilters();
-	
+
 	//and give us a suitable menu tint too, just because.
 	addmenuback(mm);
 };

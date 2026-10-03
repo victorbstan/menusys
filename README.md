@@ -2,7 +2,8 @@
 
 Classic Menu System is a MenuQC replacement for Quake engines that support
 external `menu.dat` modules. It keeps the original image-based Quake menus while
-adding mouse navigation, a level and mod browser, and expanded engine options.
+adding mouse navigation, level and demo browsers, Player Setup, and expanded
+engine options. A separate mod browser is available with `m_mods`.
 
 The project also serves as a base for building custom MenuQC menus or menus
 inside CSQC. The active release branch is `simple-menus`. The `menusys/`
@@ -59,8 +60,16 @@ Putting `menu.pak` in a mod directory limits the replacement menu to that mod.
 
 ## Build and test
 
-Compile `menu.src` with FTEQCC. Its `#pragma progs_dat "../menu.dat"` directive
-writes the generated file one directory above this repository.
+Build with FTEQCC using the helper, which writes to `dist/build` without
+overwriting an installed menu:
+
+```powershell
+.\scripts\build-menu.ps1 -Compiler C:\path\to\fteqcc.exe
+.\scripts\build-menu.ps1 -Compiler C:\path\to\fteqcc.exe -Csqc
+```
+
+Compiling `menu.src` directly in the GUI retains its historical output path,
+`../menu.dat`.
 
 For a clean runtime test, copy the result into a dedicated game directory and
 launch FTEQW from the Quake basedir:
@@ -69,7 +78,7 @@ launch FTEQW from the Quake basedir:
 $quakeBasedir = "C:\path\to\quake"
 
 New-Item -ItemType Directory -Force "$quakeBasedir\menusys_test"
-Copy-Item "..\menu.dat" "$quakeBasedir\menusys_test\menu.dat" -Force
+Copy-Item ".\dist\build\menu.dat" "$quakeBasedir\menusys_test\menu.dat" -Force
 
 Set-Location $quakeBasedir
 .\fteqw64.exe -nohome -game menusys_test
@@ -125,6 +134,23 @@ For a strictly single-player project, a PureCSQC-style architecture is another
 option, but its entry points must be merged with this menu framework manually.
 
 ## Customize the menus
+
+### Artwork and cursor
+
+The Levels and Demos buttons prefer `gfx/levels.lmp` and `gfx/demos.lmp` from
+the active game. Their headers prefer `gfx/p_levels.lmp` and `gfx/p_demos.lmp`.
+Loose files and PAK entries both work. Packaged fallbacks live under `menugfx/`
+and retain their native proportions.
+
+In FTE, `cl_cursor ""` selects the system cursor. Set a packaged image such as
+`cl_cursor "menugfx/cursor_copr.tga"` for a custom cursor. Changes apply while
+the menu is open. Menu layout scales uniformly to fit smaller windows without
+changing the user's scale settings.
+
+The engine shortcuts `menu_load`, `menu_save`, `menu_setup`, and `menu_demo`
+open the corresponding screens, as do `m_load`, `m_save`, `m_setup`, and
+`m_demos`. Save stays visible before a game starts and explains why its slots
+are disabled.
 
 ### Add or change a menu item
 
@@ -358,9 +384,9 @@ assets in the previous release package:
 
 ```powershell
 .\scripts\build-release.ps1 `
-    -Version v1.0-beta.5 `
-    -MenuDat ..\menu.dat `
-    -BasePackageDirectory C:\path\to\classic-menusys-vbs-v1.0-beta.4
+    -Version v1.0-beta.7 `
+    -MenuDat .\dist\build\menu.dat `
+    -BasePackageDirectory C:\path\to\classic-menusys-vbs-v1.0-beta.6
 ```
 
 The script creates a validated package and ZIP under `dist/`. It refuses to
@@ -380,6 +406,10 @@ See [Releasing](docs/RELEASING.md) before tagging or uploading an artifact.
 | `docs/DEVELOPMENT.md` | Contributor build and test workflow |
 | `docs/RELEASING.md` | Packaging and GitHub release workflow |
 | `scripts/build-release.ps1` | Reproducible release packager and validator |
+| `scripts/build-menu.ps1` | MenuQC and CSQC builds under `dist/build` |
+| `scripts/build-menu-assets.ps1` | Generates native Levels and Demos headers |
+| `scripts/test-menu-runtime.ps1` | Isolated engine screenshots and save regression |
+| `assets/release/` | End-user README and example configuration templates |
 | `LICENSE` | Original project licensing notice |
 | `README.TXT` | Original unformatted project notes, retained for history |
 | `menusys/readme.txt` | Detailed widget-library reference |

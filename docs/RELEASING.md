@@ -10,9 +10,9 @@ Releases consist of a Git tag plus a downloadable ZIP containing a compiled
 3. Compile `menu.src` from that merged commit.
 4. Complete the regression checklist in
    [DEVELOPMENT.md](DEVELOPMENT.md#manual-regression-checklist).
-5. Extract the previous release ZIP. Its directory supplies the cursor, demo,
-   level-list, README, and configuration assets that are not source-controlled
-   here.
+5. Extract the previous release ZIP. Its directory supplies the cursor and
+   menu-button assets. Headers are generated from source; README and example
+   configuration come from `assets/release/`.
 
 Example branch update:
 
@@ -27,34 +27,35 @@ Run the release builder from the repository root:
 
 ```powershell
 .\scripts\build-release.ps1 `
-    -Version v1.0-beta.5 `
-    -MenuDat ..\menu.dat `
-    -BasePackageDirectory C:\path\to\classic-menusys-vbs-v1.0-beta.4
+    -Version v1.0-beta.7 `
+    -MenuDat .\dist\build\menu.dat `
+    -BasePackageDirectory C:\path\to\classic-menusys-vbs-v1.0-beta.6
 ```
 
 By default this creates:
 
 ```text
-dist/classic-menusys-vbs-v1.0-beta.5/
-dist/classic-menusys-vbs-v1.0-beta.5.zip
+dist/classic-menusys-vbs-v1.0-beta.7/
+dist/classic-menusys-vbs-v1.0-beta.7.zip
 ```
 
 Use `-OutputDirectory` to put artifacts elsewhere. Use `-Force` only when you
 intend to replace an artifact for the same version.
 
-The script reads the previous `menu.pak`, preserves its 19 non-code support
-assets, inserts the newly compiled `menu.dat`, and writes a fresh PAK. It does
-not modify the previous package.
+The script reads the previous `menu.pak`, preserves its support assets, adds or
+replaces the two generated `menugfx/p_*.lmp` headers, inserts the newly compiled
+`menu.dat`, and writes a fresh PAK. A beta.6 base produces 22 entries. It does
+not modify the previous package or override the game's `gfx/` artwork.
 
 ## Automatic validation
 
 The builder fails unless all of the following are true:
 
-- the base package has exactly 19 non-code support assets;
-- the new PAK has exactly 20 entries;
+- the base package has the required Levels, Demos, and default custom cursor;
+- the new PAK entry count matches the assembled inputs;
 - there is exactly one root-level `menu.dat`;
 - the packaged `menu.dat` hash matches the compiled input;
-- all support assets are byte-for-byte identical to the base package;
+- all support assets match their source bytes, including generated headers;
 - every internal PAK path uses `/`, not `\`; and
 - the ZIP contains the expected top-level package directory and three files.
 
@@ -73,17 +74,17 @@ Record the downloadable file's SHA-256 checksum:
 
 ```powershell
 Get-FileHash -Algorithm SHA256 `
-    .\dist\classic-menusys-vbs-v1.0-beta.5.zip
+    .\dist\classic-menusys-vbs-v1.0-beta.7.zip
 ```
 
 ## Publish on GitHub
 
 1. Open <https://github.com/victorbstan/menusys/releases/new>.
-2. Create a new tag such as `v1.0-beta.5`.
+2. Create a new tag such as `v1.0-beta.7`.
 3. Target the merged `simple-menus` commit.
-4. Use a title such as `Classic Menu System v1.0-beta.5`.
+4. Use a title such as `Classic Menu System v1.0-beta.7`.
 5. Mark beta versions as pre-releases.
-6. Attach `classic-menusys-vbs-v1.0-beta.5.zip`.
+6. Attach `classic-menusys-vbs-v1.0-beta.7.zip`.
 7. Publish the release.
 
 GitHub's automatic source ZIP does not contain the compiled `menu.pak`; users

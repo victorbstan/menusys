@@ -12,7 +12,7 @@ class mitem_fill : mitem
 #define menuitemfill_spawn(sz,rgb,alpha) spawn(mitem_fill, item_size:sz, item_rgb:rgb, item_alpha:alpha)
 
 /***************************************************************************
-simple spacing item, like block-fill, but invisible 
+simple spacing item, like block-fill, but invisible
 non-interactable.
 */
 class mitem_spacer : mitem
@@ -21,7 +21,7 @@ class mitem_spacer : mitem
 	{
 		// -1 is no alpha, and 0 is full alpha?
 		// ugly pink for debugging if alpha is not -1
-		ui.drawfill(pos, this.item_size, '1 0 1', item_alpha, 0); 
+		ui.drawfill(pos, this.item_size, '1 0 1', item_alpha, 0);
 	};
 };
 #define spawn_mitem_spacer(sz,alpha) spawn(mitem_spacer, item_size:sz, item_alpha:alpha)
@@ -33,10 +33,10 @@ can be used like a click-area / hotspot over images, etc.
 class mitem_filli : mitem
 {
 	float alpha;
-	
-	// shows hover text by cursor when over relevant items, 
+
+	// shows hover text by cursor when over relevant items,
 	// could be done better, more generic
-	string hover_text; 
+	string hover_text;
 	float hovtyoffset;
 	float hovtsize;
 
@@ -52,22 +52,29 @@ class mitem_filli : mitem
 
 	virtual mitem(string ht, float htyo=-16, float hts=TXT_NMSZ) s_hover_text =
 	{
-		hover_text = strzone(ht);
+		// Copy first: callers can pass the widget's current hover text.
+		string replacement = ht != "" ? strzone(ht) : __NULL__;
+		if (hover_text)
+			strunzone(hover_text);
+		hover_text = replacement;
 		hovtyoffset = htyo;
 		hovtsize = hts;
 		return self;
 	};
 
-	void() mitem_filli = 
+	void() mitem_filli =
 	{
 		alpha = item_alpha;
-		
-		item_command = strzone(item_command);
+
 		if (item_command != "")
 		{
 			item_command = strzone(item_command);
 			item_flags |= IF_SELECTABLE;
 		}
+		else
+			item_command = __NULL__;
+		if (hover_text)
+			hover_text = strzone(hover_text);
 	};
 
 	virtual float(vector pos, float scan, float char, float down) item_keypress =
@@ -197,12 +204,13 @@ class mitem_pici : mitem
 			precache_pic(item_text_mactive);
 		}
 
-		item_command = strzone(item_command);
 		if (item_command != "")
 		{
 			item_command = strzone(item_command);
 			item_flags |= IF_SELECTABLE;
 		}
+		else
+			item_command = __NULL__;
 
 		if (!item_size[0])
 		{
@@ -296,6 +304,8 @@ class mitem_text : mitem
 			item_command = strzone(item_command);
 			item_flags |= IF_SELECTABLE;
 		}
+		else
+			item_command = __NULL__;
 	};
 
 	//zone+unzone input strings as needed
@@ -310,18 +320,18 @@ class mitem_text : mitem
 };
 mitem(string text, string command, float height) spawn_text =
 {
-	return spawn(mitem_text, 
-		item_scale:height, 
-		item_text:text, 
-		item_command:command, 
+	return spawn(mitem_text,
+		item_scale:height,
+		item_text:text,
+		item_command:command,
 		item_size:[stringwidth(text, TRUE, '1 1 0'*height), height, 0]
 	);
 };
 mitem(string text, float height=TXT_NMSZ) spawn_headline =
 {
-	return spawn(mitem_text, 
-		item_scale:height, 
-		item_text: text, 
+	return spawn(mitem_text,
+		item_scale:height,
+		item_text: text,
 		item_rgb: RGB_MUTED,
 		item_size:[stringwidth(text, TRUE, '1 1 0'*height), height, 0]
 	);

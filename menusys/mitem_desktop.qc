@@ -27,18 +27,13 @@ float sb_showscores;
 float drawfont;
 float(string fontname, string fontmaps, string sizes, float slot, optional float fix_scale, optional float fix_voffset) loadfont = #357;
 
-var string autocvar_cl_cursor = CURSORPATH;
+var string autocvar_cl_cursor = "";
 var string autocvar_cl_cursorbias = "0";
 var string autocvar_cl_cursor_size = "2";
 var string autocvar_cl_cursor_scale = "2"; // FTE console uses this
 
 void() mitem_desktop::mitem_desktop =
 {
-	cvar_set("cl_cursor", ((autocvar_cl_cursor!="") ? autocvar_cl_cursor : CURSORPATH));
-	cvar_set("cl_cursorbias", ((cvar("cl_cursorbias") > 0) ? autocvar_cl_cursorbias : "0"));
-	cvar_set("cl_cursor_size", ((cvar("cl_cursor_size") > 1) ? autocvar_cl_cursor_size : "2"));
-	cvar_set("cl_cursor_scale", ((cvar("cl_cursor_scale") > 1) ? autocvar_cl_cursor_scale : "2"));
-
 	#define menu_font_win 		autocvar(menu_font_win, MENU_FONT_WIN)
 	#define menu_font			autocvar(menu_font, MENU_FONT)
 	#define menu_font_fallback	autocvar(gl_font, GL_FONT)
@@ -276,30 +271,39 @@ void(vector pos) mitem_desktop::item_draw =
 };
 
 static var float oldgrabstate;	//to work around a DP bug (as well as unnecessary spam)
+static string lastcursor;
+static vector lastcursoroptions;
 
 void(float force) items_updategrabs =
 {
+	vector cursoroptions = [cvar("cl_cursorbias"), cvar("cl_cursor_size"), cvar("cl_cursor_scale")];
+	string cursor = cvar_string("cl_cursor");
+	if (lastcursor != cursor || lastcursoroptions != cursoroptions)
+	{
+		if (lastcursor)
+			strunzone(lastcursor);
+		lastcursor = strzone(cursor);
+		lastcursoroptions = cursoroptions;
+		force = TRUE;
+	}
 	if (!ui.mgrabs || !(ui.mgrabs.item_flags & IF_NOCURSOR))
 	{
 		if (!oldgrabstate || force)
 		{
-			float cursorsize = cursorsize = cvar("cl_cursor_size")?cvar("cl_cursor_size"):cvar("cl_cursor_scale");
+			float cursorsize = cursoroptions.y > 0 ? cursoroptions.y : max(1, cursoroptions.z);
 			oldgrabstate = TRUE;
 #ifdef MENU
 			setkeydest(2);
 			if (!checkbuiltin(setcursormode))
 				setmousetarget(2); //legacy junk
 			else
-			{
-				setcursormode(TRUE, cvar_string("cl_cursor"), cvar("cl_cursorbias")*'1 1', cursorsize);
-			}
-#else
-			setcursormode(TRUE);
 #endif
+			{
 			if (checkextension("FTE_QC_HARDWARECURSORS"))
-				setcursormode(TRUE, cvar_string("cl_cursor"), cvar("cl_cursorbias")*'1 1', cursorsize);
+				setcursormode(TRUE, cursor, [cursoroptions.x, cursoroptions.x, cursorsize], cursorsize);
 			else
 				setcursormode(TRUE);	//because DP sucks.
+			}
 		}
 	}
 	else if (oldgrabstate || force)
@@ -321,6 +325,7 @@ void(mitem_desktop desktop, vector screensize) items_draw =
 
 #ifdef MENU
 	ui.mousepos = getmousepos();
+	ui.mousepos = [ui.mousepos.x/menu_drawscale.x, ui.mousepos.y/menu_drawscale.y, 0];
 #else
 	if (ui.havemouseworld)
 		ui.havemouseworld = 2;	//stale, but not too stale
@@ -438,8 +443,11 @@ menuonly float(mitem_desktop desktop, float scan, float char, float down) items_
 	local float result = FALSE;
 	local vector pos;
 	local mitem p;
-	ui.mousepos = getmousepos();
 	queryscreensize();
+	ui.mousepos = getmousepos();
+#ifdef MENU
+	ui.mousepos = [ui.mousepos.x/menu_drawscale.x, ui.mousepos.y/menu_drawscale.y, 0];
+#endif
 #ifdef HEIRACHYDEBUG
 	if (scan == K_F1 && down)
 	{

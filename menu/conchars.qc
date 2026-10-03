@@ -54,10 +54,9 @@ void(mitem_desktop desktop) M_Conchars =
 
 	// Conchars
 
-	fr.add(spawn(mitem_conchars), 
-		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN, 
+	fr.add(spawn(mitem_conchars),
+		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN,
 		[0, bpadding], [256, 256]);
 
 	addmenuback(m);
 };
-

@@ -12,7 +12,7 @@
 // 			else
 // 				setcustomskin(self, "", sprintf("q1upper \"%s\"\nq1lower \"%s\"\nqwskin \"%s\"\n", cvar_string("topcolor"), cvar_string("bottomcolor"), cvar_string("skin")));
 // 		}
-	
+
 // 		super::item_draw(pos);
 // 	};
 // };
@@ -139,7 +139,7 @@ nonstatic void(mitem_desktop desktop) M_Options_Basic =
 	float titleoffset = -12;
 
 	// Main menu
-	
+
 	// no dupes please.
 	local mitem_exmenu mm;
 	mm = (mitem_exmenu)desktop.findchildtext(_("Basic Options"));
@@ -161,7 +161,7 @@ nonstatic void(mitem_desktop desktop) M_Options_Basic =
 	);
 
 	// Title
-	
+
 	mitem_pic banner = spawn(mitem_pic, item_text:"gfx/p_option.lmp", item_size_y:24, item_flags:IF_CENTERALIGN);
 	m.add(
 		banner,
@@ -183,7 +183,7 @@ nonstatic void(mitem_desktop desktop) M_Options_Basic =
 		[0, banner.item_size_y+padding], // top-left
 		[0, 0] // bottom-right
 	);
-	
+
 	// Options
 
 	float posy = 0;
@@ -196,19 +196,19 @@ nonstatic void(mitem_desktop desktop) M_Options_Basic =
 	fr.addc(spawn_headline("Basic Setup"), posy); posy+=TXT_MDSZ+padding;
 
 	float fl = RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN;
-	fr.add(spawn_edit(_("Player Name"), cv2("_cl_name", "name"), optionsize), 
+	fr.add(spawn_edit(_("Player Name"), cv2("_cl_name", "name"), optionsize),
 		fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
 	if (engine!=E_QSS)
 	{
-		fr.add(spawn_edit(_("Player Team"), "team", optionsize), 
+		fr.add(spawn_edit(_("Player Team"), "team", optionsize),
 			fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
 	}
-	if (engine!=E_QSS) 
+	if (engine!=E_QSS)
 	{
-		fr.add(spawn_combo(_("Player Skin"), "skin", optionsize, skinopts()), 
+		fr.add(spawn_combo(_("Player Skin"), "skin", optionsize, skinopts()),
 			fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
 		// disabled in QSS
-		fr.add(menuitemcolour_spawn(_("Upper Colour"), "topcolor", engine==E_QSS, optionsize), 
+		fr.add(menuitemcolour_spawn(_("Upper Colour"), "topcolor", engine==E_QSS, optionsize),
 			fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
 		fr.add(menuitemcolour_spawn(_("Lower Colour"), "bottomcolor", engine==E_QSS, optionsize),
 			fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
@@ -221,30 +221,30 @@ nonstatic void(mitem_desktop desktop) M_Options_Basic =
 			fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing; }
 	fr.add(spawn_hslider(_("Sensitivity"), "sensitivity", '3 20 1', optionsize),
 		fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
-	fr.add(spawn_hslider(_("Fov"), "fov", '80 130 5', optionsize), 
+	fr.add(spawn_hslider(_("Fov"), "fov", '80 130 5', optionsize),
 		fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
-	if (engine!=E_QSS) 
+	if (engine!=E_QSS)
 	{
-		fr.add(spawn_hslider(_("Viewmodel Fov"), "r_viewmodel_fov", '80 130 5', optionsize), 
+		fr.add(spawn_hslider(_("Viewmodel Fov"), "r_viewmodel_fov", '80 130 5', optionsize),
 			fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
 	}
-	fr.add(spawn_hslider(_("Gamma"), cv2("v_gamma", "gamma"), '0.4 1.3 0.1', optionsize), 
+	fr.add(spawn_hslider(_("Gamma"), cv2("v_gamma", "gamma"), '0.4 1.3 0.1', optionsize),
 		fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
-	fr.add(spawn_hslider(_("Contrast"), cv2("v_contrast", "contrast"), '0.8 1.8 0.1', optionsize), 
+	fr.add(spawn_hslider(_("Contrast"), cv2("v_contrast", "contrast"), '0.8 1.8 0.1', optionsize),
 		fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
 	if (engine!=E_QSS)
 	{
 		fr.add(spawn_hslider(_("Brightness"), cv2("v_brightness", "brightness"),'0.0 0.5 0.1', optionsize),
 			fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
 	}
-	if (engine==E_FTE) 
+	if (engine==E_FTE)
 	{
-		fr.add(spawn_hslider(_("Crosshair"), "crosshair", '0.0 19 1', optionsize), 
+		fr.add(spawn_hslider(_("Crosshair"), "crosshair", '0.0 19 1', optionsize),
 			fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
 	}
 	else
 	{
-		fr.add(spawn_check(_("Crosshair"), "crosshair", optionsize), 
+		fr.add(spawn_check(_("Crosshair"), "crosshair", optionsize),
 			fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
 	}
 	// m.add(spawn (mitem_playerpreview, item_text: "progs/player.mdl", firstframe:0, framecount:6, shootframe:119, shootframes:6), RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, [-200, 12*-16/2], [-40, 12*16/2]);

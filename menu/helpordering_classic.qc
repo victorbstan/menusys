@@ -31,17 +31,17 @@ void(mitem_desktop desktop, float mode) M_HelpOrdering =
 	// Content
 	float da = 0; // debug alpha
 	// Button overlay hotspots spawn
-	mitem_filli btn0 = spawn(mitem_filli, item_command:"m_pop;m_help", 
+	mitem_filli btn0 = spawn(mitem_filli, item_command:"m_pop;m_help",
 		item_size:'100 200', item_rgb:'1 0 0', item_alpha:0+da); // help 0
-	mitem_filli btn1 = spawn(mitem_filli, item_command:"m_pop;m_help1", 
+	mitem_filli btn1 = spawn(mitem_filli, item_command:"m_pop;m_help1",
 		item_size:'100 200', item_rgb:'1 0.1 0.1', item_alpha:0+da); // help 1
-	mitem_filli btn2 = spawn(mitem_filli, item_command:"m_pop;m_help2", 
+	mitem_filli btn2 = spawn(mitem_filli, item_command:"m_pop;m_help2",
 		item_size:'100 200', item_rgb:'1 0.2 0.2', item_alpha:0+da); // help 2
-	mitem_filli btn3 = spawn(mitem_filli, item_command:"m_pop;m_help3", 
+	mitem_filli btn3 = spawn(mitem_filli, item_command:"m_pop;m_help3",
 		item_size:'100 200', item_rgb:'1 0.3 0.3', item_alpha:0+da); // help 3
-	mitem_filli btn4 = spawn(mitem_filli, item_command:"m_pop;m_help4", 
+	mitem_filli btn4 = spawn(mitem_filli, item_command:"m_pop;m_help4",
 		item_size:'100 200', item_rgb:'1 0.4 0.4', item_alpha:0+da); // help 4
-	mitem_filli btn5 = spawn(mitem_filli, item_command:"m_pop;m_help5", 
+	mitem_filli btn5 = spawn(mitem_filli, item_command:"m_pop;m_help5",
 		item_size:'100 200', item_rgb:'1 0.5 0.5', item_alpha:0+da); // help 5
 	// buttons start location
 	float bsx = 0;

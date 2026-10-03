@@ -69,10 +69,10 @@ class mitem_servers : mitem
 		local float sv, maxsv = gethostcachevalue(SLIST_HOSTCACHEVIEWCOUNT);
 		local float maxy = self.item_size_y;
 		float left = pos_x;
-	
+
 		local vector omin = ui.drawrectmin, omax = ui.drawrectmax;
 		local vector cmin = pos + '0 8', cmax = pos + item_size;
-	
+
 		cmin_x = max(omin_x, cmin_x);
 		cmin_y = max(omin_y, cmin_y);
 		cmax_x = min(omax_x, cmax_x);
@@ -109,7 +109,7 @@ class mitem_servers : mitem
 		maxy = ceil(maxy/8) - 1;
 		if (maxsv  > slider.val + maxy)
 			maxsv = slider.val + maxy;
-	
+
 		float sort = gethostcachevalue(SLIST_SORTFIELD);
 		string colkey = __NULL__;
 #define COLUMN(width, sortname, title, draw) if (field_##sortname<0) autocvar_sb_show##sortname = FALSE; if (autocvar_sb_show##sortname) {if (ui.mousepos[0] > pos_x && ui.mousepos[1] < pos_y+8) colkey = #sortname; pos_x += width+8;}
@@ -129,24 +129,24 @@ class mitem_servers : mitem
 		for (float y=pos_y,	sv = max(0, floor(slider.val)); sv < maxsv; sv+=1)
 		{
 			col = (sv&1) ? RGB_BGHOVERA : RGB_BGHOVERB;
-			drawfill([left, y], [item_size_x,8], col, 0.8, 0); 
+			drawfill([left, y], [item_size_x,8], col, 0.8, 0);
 			y += 8;
 		}
 		for (	sv = max(0, floor(slider.val)); sv < maxsv; sv+=1)
 		{
 			col = ((server_selected==sv) ? RGB_TXTB : RGB_TXT);
-	
+
 			//if isproxy
 			//if islocal
 			//if isfavorite
-	
+
 			pos_x = left;
 #define COLUMN(width, sortname, title, draw) if (autocvar_sb_show##sortname) { draw pos_x += width+8; }
 			COLUMNS
 #undef COLUMN
 			pos_y += 8;
 		}
-	
+
 		ui.setcliparea(omin_x, omin_y, omax_x - omin_x, omax_y - omin_y);
 	};
 	virtual float(vector pos, float scan, float char, float down) item_keypress =
@@ -187,7 +187,7 @@ class mitem_servers : mitem
 			}
 			if (news < 0 || news >= gethostcachevalue(SLIST_HOSTCACHEVIEWCOUNT))
 				return FALSE;
-	
+
 			news += floor(slider.val);
 
 			if (server_selected == news && dbltime > cltime)
@@ -200,7 +200,7 @@ class mitem_servers : mitem
 			else
 				server_selected = news;
 			dobound = TRUE;
-	
+
 			dbltime = cltime + 0.5;
 		}
 		else if (scan == K_ENTER)
@@ -292,7 +292,7 @@ class mitem_servers_players : mitem
 	{
 //		this.item_flags |= IF_SELECTABLE;
 	};
-	
+
 	virtual void(vector pos) item_draw =
 	{
 		float player;
@@ -328,7 +328,7 @@ class mitem_servers_players : mitem
 				pos_x += 16*8;
 			}
 		}
-	
+
 		if (y)
 		{
 			pos_y = opos_y;
@@ -341,7 +341,7 @@ class mitem_servers_players : mitem
 		{
 			drawtextfield(pos, '64 8', 6, argv(player));
 			drawtextfield(pos+'68 0', [32*8-40, 8], 3, argv(player+1));
-	
+
 			pos_y += 8;
 			if (++y == 8)
 			{
@@ -363,7 +363,7 @@ nonstatic void(mitem_desktop desktop) M_Servers =
 		localcmd("menu_servers\n");
 		return;
 	}
-	
+
 #ifdef CSQC
 	if not (checkextension("FTE_CSQC_SERVERBROWSER"))
 	{
@@ -394,51 +394,51 @@ nonstatic void(mitem_desktop desktop) M_Servers =
 
 		mitem_vslider sl = spawn(mitem_vslider, stride:4, item_flags:IF_SELECTABLE);
 		mitem_servers ls = spawn(mitem_servers, slider:sl);
-	
-		m.add(ls, 
-			RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, 
+
+		m.add(ls,
+			RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX,
 			'0 0', '-16 -68');
-		m.add(spawn(mitem_servers_players, listing:ls),	
-			RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, 
+		m.add(spawn(mitem_servers_players, listing:ls),
+			RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX,
 			[8*20, -8*8], [0, -8*0]);
 		m.add(sl,
-			RS_X_MIN_PARENT_MAX|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, 
+			RS_X_MIN_PARENT_MAX|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX,
 			[-8, 8], [0, -68]);
 
 		//only add checkboxes for field names accepted by this engine.
 		if (gethostcacheindexforkey("ping") >= 0) {
-			m.add(spawn_check(_("Ping"), "sb_showping", [8*8, 8]), 
-				RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX, 
+			m.add(spawn_check(_("Ping"), "sb_showping", [8*8, 8]),
+				RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX,
 				[0, -8*8], [8*20, -8*7]); }
 		if (gethostcacheindexforkey("cname") >= 0) {
 			m.add(spawn_check(_("Address"), "sb_showaddress", [8*8, 8]),
-				RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX, 
+				RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX,
 				[0, -8*7], [8*20, -8*6]); }
 		if (gethostcacheindexforkey("map") >= 0) {
 			m.add(spawn_check(_("Map"), "sb_showmap", [8*8, 8]),
-				RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX, 
+				RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX,
 				[0, -8*6], [8*20, -8*5]); }
 		if (gethostcacheindexforkey("gamedir") >= 0 || gethostcacheindexforkey("mod") >= 0) {
 			m.add(spawn_check(_("Gamedir"), "sb_showgamedir", [8*8, 8]),
-				RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX, 
+				RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX,
 				[0, -8*5], [8*20, -8*4]); }
 		if (gethostcacheindexforkey("numplayers") >= 0) {
 			m.add(spawn_check(_("NumPlayers"), "sb_shownumplayers", [8*8, 8]),
-				RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX, 
+				RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX,
 				[0, -8*4], [8*20, -8*3]); }
 		if (gethostcacheindexforkey("maxplayers") >= 0) {
 			m.add(spawn_check(_("MaxPlayers"), "sb_showmaxplayers", [8*8, 8]),
-				RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX, 
+				RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX,
 				[0, -8*3], [8*20, -8*2]); }
 		if (gethostcacheindexforkey("fraglimit") >= 0) {
 			m.add(spawn_check(_("Fraglimit"), "sb_showfraglimit", [8*8, 8]),
-				RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX, 
+				RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX,
 				[0, -8*2], [8*20, -8*1]); }
 		if (gethostcacheindexforkey("timelimit") >= 0) {
 			m.add(spawn_check(_("Timelimit"), "sb_showtimelimit", [8*8, 8]),
-				RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX, 
+				RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MAX | RS_X_MAX_PARENT_MIN|RS_Y_MAX_PARENT_MAX,
 				[0, -8*1], [8*20, -8*0]); }
-	
+
 		addmenuback(m);
 	}
 

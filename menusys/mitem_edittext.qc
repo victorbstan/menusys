@@ -8,8 +8,8 @@ class mitem_edit : mitem
 	virtual float(vector pos, float scan, float char, float down) item_keypress;
 	virtual void() item_remove;
 	float spos;
-	
-	void() mitem_edit = 
+
+	void() mitem_edit =
 	{
 		if (item_text)
 			item_text = strzone(item_text);
