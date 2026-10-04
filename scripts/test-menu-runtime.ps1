@@ -5,6 +5,7 @@ param(
     [Parameter(Mandatory = $true)][string] $MenuPak,
     [string] $TestName = 'quake',
     [switch] $Qss,
+    [switch] $LayoutOnly,
     [int] $Width = 960,
     [int] $Height = 600
 )
@@ -47,6 +48,21 @@ $ingame = @(
     "m_pop; m_setup; $pause screenshot setup.png",
     'quit'
 )
+if ($LayoutOnly) {
+    $serverPause = 'wait;' * 600
+    $commands = @(
+        'developer 1',
+        $(if ($Qss) { 'host_maxfps 60; scr_menuscale 3' } else { 'cl_maxfps 60' }),
+        $(if ($Qss) { "$pause togglemenu" } else { "$pause forceqmenu 0; menu_restart; togglemenu" }),
+        'cl_cursor ""',
+        "$pause m_pop; m_main; $pause screenshot main.png",
+        "m_pop; m_single; $pause screenshot single.png",
+        "m_pop; m_options; $pause screenshot options.png",
+        "m_pop; m_servers; $serverPause screenshot servers.png",
+        'quit'
+    )
+    $ingame = @()
+}
 if ($Qss) {
     $commands = @($commands | ForEach-Object { $_ -replace 'screenshot [a-z-]+\.png', 'screenshot png' })
     $ingame = @($ingame | ForEach-Object { $_ -replace 'screenshot [a-z-]+\.png', 'screenshot png' })
@@ -58,12 +74,12 @@ if ($Qss) {
 $args = @('-basedir', ('"' + $testRoot + '"'), '-game', 'menusys_test', '-window', '-width', $Width, '-height', $Height, '-condebug', '+exec', 'regression.cfg')
 if ($Qss) { $args = @('-basedir', ('"' + $testRoot + '"'), '-game', 'menusys_test', '-window', '-width', $Width, '-height', $Height, '-condebug') }
 if ($Qss) {
-    $args += @('-ip', '127.0.0.1', '-port', $testPort)
+    if (-not $LayoutOnly) { $args += @('-ip', '127.0.0.1', '-port', $testPort) }
     [IO.File]::WriteAllLines((Join-Path $game 'quake.rc'), @('exec default.cfg', 'exec autoexec.cfg', 'stuffcmds'))
 }
 if (-not $Qss) { $args = @('-nohome', '+set', 'vid_fullscreen', '0') + $args }
 $process = Start-Process -FilePath $Engine -ArgumentList $args -WorkingDirectory $testRoot -WindowStyle Hidden -PassThru
-if ($Qss) {
+if ($Qss -and -not $LayoutOnly) {
     # Signon commands are appended to the engine buffer. An entire queued
     # regression script would prevent them from running until after Save.
     # Allow signon to finish, then enqueue the next phase through localhost.
@@ -80,9 +96,10 @@ if (-not $process.WaitForExit(55000)) {
     throw "Engine timed out. Inspect $testRoot"
 }
 $expected = @('single', 'load-empty', 'save-disabled', 'save', 'load', 'levels', 'demos', 'setup')
+if ($LayoutOnly) { $expected = @('main', 'single', 'options', 'servers') }
 if ($Qss) {
     $shots = @(Get-ChildItem -LiteralPath $game -Filter 'spasm*.png' | Sort-Object Name)
-    if ($shots.Count -ne $expected.Count) { throw "Expected eight screenshots, found $($shots.Count). Inspect $testRoot" }
+    if ($shots.Count -ne $expected.Count) { throw "Expected $($expected.Count) screenshots, found $($shots.Count). Inspect $testRoot" }
     for ($i = 0; $i -lt $shots.Count; $i++) {
         Move-Item -LiteralPath $shots[$i].FullName -Destination (Join-Path $game ($expected[$i] + '.png'))
     }
@@ -90,7 +107,7 @@ if ($Qss) {
 foreach ($name in $expected) {
     if (-not (Test-Path -LiteralPath (Join-Path $game "$name.png"))) { throw "Missing screenshot: $name" }
 }
-if (-not (Get-ChildItem -LiteralPath $game -Recurse -Filter 's0.sav')) { throw 'Engine did not save s0.' }
+if (-not $LayoutOnly -and -not (Get-ChildItem -LiteralPath $game -Recurse -Filter 's0.sav')) { throw 'Engine did not save s0.' }
 $logs = @(Get-ChildItem -LiteralPath $testRoot -Recurse -Filter '*.log')
 $failures = @($logs | Select-String -Pattern 'Unknown command|unimplemented builtin|Host_Error|Menu_Abort|PF_strunzone:|Can.t savegame')
 if ($failures.Count) { throw ($failures.Line -join "`n") }

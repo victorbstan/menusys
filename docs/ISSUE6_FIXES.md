@@ -83,3 +83,39 @@ separate from the fixes submitted through PR #8.
 Updated artifact: `dist/classic-menusys-vbs-v1.0-beta.8.zip`.
 
 SHA-256: `021912D14A03D719898756F92F329A147BBD77BE1B0689762E80938AD749E306`
+
+
+## Alignment follow-up — 2026-10-04
+
+- LibreQuake 0.09 Solo aligns the visible Levels/Demos lettering with the
+  original rows. Its native LMP canvases have different transparent margins;
+  the measured 172×63/116×20 artwork profile gets separate row origins.
+  Quake/Mark V and differently sized replacements retain their existing origin.
+- Options shares Main's 16-pixel plaque margin and 72-pixel content origin.
+  Its title is centered with its original proportions; the previous -12 offset
+  also stretched the title by 12 pixels.
+- Join prefers a centered MenuQC browser when the host-cache API is supported,
+  instead of handing ordinary navigation to FTE's top-left engine browser.
+  The panel fits smaller windows and is capped at 480×280 logical pixels.
+  Replies refresh the sorted view, column/row clips stay inside the list,
+  scrollbar bounds are nonnegative, and selection survives periodic sorting.
+  Compact switches preserve display, protocol, proxy, empty/full, and favorite
+  filters. Refresh, sorting, arrows, paging, End, Enter, and double-click joining
+  remain available. Advanced browser (or `m_servers native`) retains access to
+  the engine browser and its additional features; that screen owns its layout.
+- MenuQC, optional CSQC, and the layout fixture compile with zero warnings.
+  Final fixture checks pass for Quake at 1920×1080 and LibreQuake at 400×300,
+  including plaque/label/panel geometry, Updates/Video/Effects regression
+  coverage, and real server lists before/after End scrolling (169/28 replies
+  respectively in those runs). Production-package Main/Solo/Options/Join checks
+  pass for QSS (June 25, 2021) with Quake and FTE SVN 6202 with LibreQuake at
+  1920×1080. Screenshots were reviewed. These runs query lists without joining
+  public servers. CSQC coverage remains compilation only.
+
+Updated local artifact: `dist/classic-menusys-vbs-v1.0-beta.9.zip`.
+
+SHA-256: `666C8B28C0B49E9A2F22FB952F2879E8D43350C10197FF412DBA25876390A31B`
+
+All three existing manual-test launchers install beta.9 before starting the
+engine. The currently running LibreQuake process locks its old PAK, so its
+replacement is deferred until close/relaunch. Config and save files persist.

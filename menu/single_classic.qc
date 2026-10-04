@@ -77,17 +77,20 @@ nonstatic void(mitem_desktop desktop) M_Single =
 	// Menu options image
 	mitem_pic menuart = spawn(mitem_pic, item_text:"gfx/sp_menu.lmp");
 	vector msize = menuart.item_size;
+	float artx = classic_solo_x(msize, msize, 0, bsx);
 	m.add(menuart,
 		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN,
-		[bsx, bsy], msize);
+		[artx, bsy], msize);
 
 	// "Levels" menu image, from MarkV
 	mitem_pic levelsart = spawn(mitem_pic, item_text:classic_art("gfx/levels.lmp", "menugfx/levels.lmp"));
+	float levelsx = classic_solo_x(msize, levelsart.item_size, 3, bsx);
 	m.add(levelsart,
 		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN,
-		[bsx, bsy+60], levelsart.item_size);
+		[levelsx, bsy+60], levelsart.item_size);
 	mitem_pic demosart = spawn(mitem_pic, item_text:classic_art("gfx/demos.lmp", "menugfx/demos.lmp"));
-	m.add(demosart, bposrel, [bsx, bsy+80], demosart.item_size);
+	float demosx = classic_solo_x(msize, demosart.item_size, 4, bsx);
+	m.add(demosart, bposrel, [demosx, bsy+80], demosart.item_size);
 
 	mm.item_focuschange(m, IF_KFOCUSED);
 	m.item_focuschange(btn1, IF_KFOCUSED);

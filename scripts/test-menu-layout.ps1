@@ -43,7 +43,12 @@ Copy-Item -LiteralPath $target -Destination (Join-Path $game 'menu.dat')
     'in 1.2 layout_updates', 'in 1.5 screenshot updates-prompt.png',
     'in 3 screenshot updates-empty.png', 'in 3.2 layout_metadata',
     'in 3.5 screenshot updates-metadata.png', 'in 3.8 layout_details',
-    'in 4.1 screenshot updates-details.png', 'in 4.4 quit'
+    'in 4.1 screenshot updates-details.png',
+    'in 4.4 layout_main', 'in 4.7 screenshot main.png',
+    'in 5 layout_solo', 'in 5.3 screenshot solo.png',
+    'in 5.6 layout_options', 'in 5.9 screenshot options.png',
+    'in 6.2 layout_servers', 'in 9 screenshot servers.png',
+    'in 9.2 layout_servers_end', 'in 9.5 screenshot servers-scrolled.png', 'in 9.7 quit'
 ))
 
 # Dismiss the native update-source consent prompt with Escape in this test
@@ -78,11 +83,12 @@ if (-not $process.WaitForExit(15000)) {
     Stop-Process -Id $process.Id
     throw "Layout test timed out. Inspect $testRoot"
 }
-foreach ($name in @('video-scrolled', 'effects-scrolled', 'updates-prompt', 'updates-empty', 'updates-metadata', 'updates-details')) {
+foreach ($name in @('video-scrolled', 'effects-scrolled', 'updates-prompt', 'updates-empty', 'updates-metadata', 'updates-details', 'main', 'solo', 'options', 'servers', 'servers-scrolled')) {
     if (-not (Test-Path -LiteralPath (Join-Path $game "$name.png"))) { throw "Missing layout screenshot: $name" }
 }
 $logs = @(Get-ChildItem -LiteralPath $testRoot -Recurse -Filter '*.log')
-$errors = @($logs | Select-String -Pattern 'Unknown command|unimplemented builtin|Host_Error|Menu_Abort|PF_strunzone:')
+$errors = @($logs | Select-String -Pattern 'Unknown command|unimplemented builtin|Host_Error|Menu_Abort|PF_strunzone:|LAYOUT FAIL')
 if ($errors.Count) { throw ($errors.Line -join "`n") }
 if (-not ($logs | Select-String -Pattern 'LAYOUT details height [1-9]')) { throw 'Long metadata did not exercise its scrollbar.' }
+if (@($logs | Select-String -Pattern 'LAYOUT centered layout_').Count -ne 4) { throw 'Missing centered-menu checks.' }
 Get-ChildItem -LiteralPath $game -Filter '*.png' | Select-Object FullName, Length

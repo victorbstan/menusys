@@ -18,10 +18,24 @@ string(string gamepic, string fallback) classic_art =
 	return fallback;
 };
 
+// LibreQuake 0.09 uses a 172x63 Solo canvas and 116x20 extra rows.
+// Their opaque bounds differ: Solo 37..138, Levels 31..112, Demos 45..112.
+// Match that artwork profile by size, preserving Quake/Mark V's left alignment
+// and leaving differently sized replacement artwork at its authored origin.
+float(vector menu_size, vector row_size, float row, float classic_x) classic_solo_x =
+{
+    if (menu_size.x != 172 || menu_size.y != 63) return classic_x;
+    if (row == 0) return (MENU_WIDTH-37-138)*0.5;
+    if (row_size.x != 116 || row_size.y != 20) return classic_x;
+    if (row == 3) return (MENU_WIDTH-31-112)*0.5;
+    return (MENU_WIDTH-45-112)*0.5;
+};
+
 // Older QSS builds do not implement argescape. Quote file arguments directly
 // and omit names that cannot be represented by the engines' command parser.
 string(string filename) classic_filearg =
 {
+	if (filename == "") return __NULL__;
 	if (strstrofs(filename, "\"", 0) >= 0 || strstrofs(filename, "\n", 0) >= 0 || strstrofs(filename, "\r", 0) >= 0)
 		return __NULL__;
 	return strcat("\"", filename, "\"");

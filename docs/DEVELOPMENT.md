@@ -138,7 +138,7 @@ Verify that a command-line map starts without the menu covering it:
 .\scripts\test-menu-runtime.ps1 `
     -Engine C:\path\to\fteqw64.exe `
     -GameData C:\path\to\quake\id1 `
-    -MenuPak .\dist\classic-menusys-vbs-v1.0-beta.7\menu.pak `
+    -MenuPak .\dist\classic-menusys-vbs-v1.0-beta.9\menu.pak `
     -TestName quake
 ```
 
@@ -148,6 +148,10 @@ both game PAKs, captures eight screenshots, verifies a save was written, and
 checks logs for command and VM failures. Inspect the screenshots as well.
 QSS test commands use a temporary localhost-only listener after signon; the
 test shuts down that engine at completion. The original game data is untouched.
+
+Use `-LayoutOnly -Width 1920 -Height 1080` to capture Main, Solo, Options, and
+Join directly from the production module. This mode skips gameplay and save
+checks, and sets QSS menu scale to 3 in its isolated config for readable images.
 
 ### Scrolling and Updates layout regression
 
@@ -159,16 +163,23 @@ update details that require wrapping and scrolling:
     -Compiler C:\path\to\fteqcc.exe `
     -Engine C:\path\to\fteqw64.exe `
     -GameData C:\path\to\quake\id1 `
-    -MenuPak .\dist\classic-menusys-vbs-v1.0-beta.8\menu.pak `
+    -MenuPak .\dist\classic-menusys-vbs-v1.0-beta.9\menu.pak `
     -TestName layout
 ```
 
-Repeat with LibreQuake data and `-Width 400 -Height 300`. Inspect the six
+Repeat with LibreQuake data and `-Width 400 -Height 300`. Inspect the eleven
 screenshots: Video/Effects text stays below the banner; Updates keeps its list,
 details, and Apply button within the same panel; scrolling long details never
 expands the viewport. The fixture supplies 60 synthetic package rows and a long
 description without enabling update sources or applying packages. It dismisses
 the native source prompt with Escape in its isolated process.
+
+It also checks that Main/Options plaques share their origin, LibreQuake 0.09
+Solo's extra rows align by visible lettering, and Join's panel remains centered.
+The Join screenshots include the real host cache before/after End scrolling;
+server counts depend on available network replies. Join uses MenuQC when the
+engine exposes its host-cache API. `m_servers native` or Advanced browser opens
+the engine browser for additional features; that browser owns its own layout.
 
 The test compiles a separate wrapper from `tests/menu-layout.src` and checks
 logs and scrollbar creation. Never distribute its `layout-menu.dat`; packaged

@@ -30,8 +30,8 @@ nonstatic void(mitem_desktop desktop) M_Options =
 	float padding = PADDING;
 	float spacing = SPACING;
 	float qplaquewidth = 32;
-	float plaquepadding = 24;
-	float titleoffset = -12;
+	float leftpadding = 16;
+	float contentleft = leftpadding + qplaquewidth + 24;
 
 	// Main menu
 
@@ -59,22 +59,21 @@ nonstatic void(mitem_desktop desktop) M_Options =
 
 	m.add(spawn_pic("gfx/qplaque.lmp", '32 144'),
 		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN,
-		[padding, padding], [qplaquewidth, 144]);
+		[leftpadding, padding], [qplaquewidth, 144]);
 
 	// Title
 
 	mitem_pic banner = spawn(mitem_pic, item_text:"gfx/p_option.lmp", item_size_y:24, item_flags:IF_CENTERALIGN);
 	m.add(
 		banner,
-		RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MID|RS_Y_MAX_OWN_MIN,
-		[(banner.item_size_x*-0.5)+titleoffset, padding], [banner.item_size_x*0.5, 24]
+		RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN,
+		[-banner.item_size_x*0.5, padding], banner.item_size
 	);
 
 	// Content
 
 	// option buttons start location
-	// float bsx = qplaquewidth+plaquepadding+padding*2; // with 3d model
-	float bsx = qplaquewidth+padding; // without 3d model
+	float bsx = 0;
 	float by = 0;
 
 	// spawn a container frame for the actual options. this provides a scrollbar if we have too many items.
@@ -86,12 +85,9 @@ nonstatic void(mitem_desktop desktop) M_Options =
 	m.add(
 		fr,
 		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, // top-left|bottom-right relation
-		[qplaquewidth+padding, banner.item_size_y+padding], // top-left
+		[contentleft-padding, banner.item_size_y+padding], // top-left
 		[0, 0] // bottom-right
 	);
-
-	// bsx += 48; // some extra padding to give more space for the 3d character to show through
-	by += padding;
 
 	// show the options.
 	float fl = RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN;
