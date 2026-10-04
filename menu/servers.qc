@@ -19,6 +19,30 @@ var float autocvar_sb_showaddress = 0;
 var float autocvar_sb_showmap = 1;
 var float autocvar_sb_showname = 1;
 var float autocvar_sb_onlyfavs = 0;
+float servers_queried;
+void() servers_filter;
+
+// FTE 6202 corrupts its sorted-array pointer when an asynchronous reply hides
+// an already-visible server. Poll with no masks, then build the filtered view
+// without another polling builtin. Clear masks afterwards for native handoff.
+float() servers_poll =
+{
+	resethostcachemasks();
+	resorthostcache();
+	float count = gethostcachevalue(SLIST_HOSTCACHEVIEWCOUNT);
+	servers_filter();
+	resorthostcache();
+	float addressfield = gethostcacheindexforkey("cname");
+	float first = 0, last = count;
+	while (first < last)
+	{
+		float middle = floor((first+last)*0.5);
+		if (gethostcachestring(addressfield, middle) != "") first = middle+1;
+		else last = middle;
+	}
+	resethostcachemasks();
+	return first;
+};
 
 // Keep the FTE browser's saved protocol, proxy, and population preferences.
 void() servers_filter =
@@ -93,6 +117,19 @@ class mitem_servers : mitem
 	float dobound;
 	float namewidth;
 	float nextsort;
+	float server_count;
+
+	virtual void() refresh =
+	{
+		resethostcachemasks();
+		resorthostcache();
+		refreshhostcache();
+		servers_queried = TRUE;
+		server_count = 0;
+		server_selected = -1;
+		slider.val = 0;
+		nextsort = 0;
+	};
 
 	void() mitem_servers =
 	{
@@ -100,38 +137,41 @@ class mitem_servers : mitem
 		this.item_flags |= IF_SELECTABLE;
 		server_selected = -1;
 
-		//clear the filter
-		servers_filter();
+		resethostcachemasks();
+		resorthostcache();
 		//sort by ping by default
 		sethostcachesort(gethostcacheindexforkey("ping"), FALSE);
-		//(re)query the servers.
-		refreshhostcache();
-
-		resorthostcache();
+		// Reopening keeps the current query/cache. Refresh is an explicit action.
+		if (!servers_queried)
+		{
+			refreshhostcache();
+			servers_queried = TRUE;
+		}
 	};
 
 	virtual void(vector pos) item_draw =
 	{
-		// Replies arrive asynchronously; refresh the sorted view as they arrive.
-		if (cltime >= nextsort)
+		// Masks are clear between draws. Poll every frame so the engine can send
+		// its paced queries promptly; refilter on growth or periodic metadata updates.
+		string selected = __NULL__;
+		float addressfield = gethostcacheindexforkey("cname");
+		if (server_selected >= 0)
+			selected = strzone(gethostcachestring(addressfield, server_selected));
+		float replies = gethostcachevalue(SLIST_HOSTCACHEVIEWCOUNT);
+		if (cltime >= nextsort || replies != server_count)
 		{
-			string selected = __NULL__;
-			float addressfield = gethostcacheindexforkey("cname");
-			if (server_selected >= 0)
-				selected = strzone(gethostcachestring(addressfield, server_selected));
-			servers_filter();
-			resorthostcache();
+			server_count = servers_poll();
 			if (selected)
 			{
 				server_selected = -1;
-				for (float index = 0; index < gethostcachevalue(SLIST_HOSTCACHEVIEWCOUNT); index++)
+				for (float index = 0; index < server_count; index++)
 					if (gethostcachestring(addressfield, index) == selected) { server_selected = index; break; }
-				strunzone(selected);
 				dobound = TRUE;
 			}
 			nextsort = cltime + 0.5;
 		}
-		local float sv, maxsv = gethostcachevalue(SLIST_HOSTCACHEVIEWCOUNT);
+		if (selected) strunzone(selected);
+		local float sv, maxsv = server_count;
 		local float maxy = self.item_size_y;
 		float left = pos_x;
 
@@ -222,7 +262,7 @@ class mitem_servers : mitem
 #undef COLUMN
 			pos_y += 8;
 		}
-		if (!gethostcachevalue(SLIST_HOSTCACHEVIEWCOUNT))
+		if (!server_count)
 		{
 			ui.setcliparea(cmin.x, cmin.y, cmax.x-cmin.x, cmax.y-cmin.y);
 			ui.drawstring([left, cmin.y+8], "Searching... R/F5 to refresh", '8 8', RGB_TXT, 1, 0);
@@ -267,13 +307,13 @@ class mitem_servers : mitem
 						//favour ascending order
 						sethostcachesort(fld, (gethostcachevalue(SLIST_SORTFIELD) == fld) && !gethostcachevalue(SLIST_SORTDESCENDING));
 					}
-					resorthostcache();	//tell the engine that its okay to resort everything.
+					nextsort = 0;
 					dobound = TRUE;
 				}
 				return TRUE;
 			}
 			news += floor(slider.val);
-			if (news < 0 || news >= gethostcachevalue(SLIST_HOSTCACHEVIEWCOUNT))
+			if (news < 0 || news >= server_count)
 				return TRUE;
 
 			if (server_selected == news && dbltime > cltime)
@@ -315,7 +355,7 @@ class mitem_servers : mitem
 			this.server_selected -= 1;
 			if (this.server_selected < 0)
 			{
-				this.server_selected = gethostcachevalue(SLIST_HOSTCACHEVIEWCOUNT);
+				this.server_selected = server_count;
 				if (this.server_selected)
 					this.server_selected -= 1;
 			}
@@ -324,7 +364,7 @@ class mitem_servers : mitem
 		else if (scan == K_DOWNARROW || scan == K_MWHEELDOWN)
 		{
 			this.server_selected += 1;
-			if (this.server_selected >= gethostcachevalue(SLIST_HOSTCACHEVIEWCOUNT))
+			if (this.server_selected >= server_count)
 				this.server_selected = 0;
 			dobound = TRUE;
 		}
@@ -346,8 +386,8 @@ class mitem_servers : mitem
 			if (displaysize < 1)
 				displaysize = 1;
 			this.server_selected += displaysize;
-			if (this.server_selected >= gethostcachevalue(SLIST_HOSTCACHEVIEWCOUNT))
-				this.server_selected = gethostcachevalue(SLIST_HOSTCACHEVIEWCOUNT)-1;
+			if (this.server_selected >= server_count)
+				this.server_selected = server_count-1;
 			dobound = TRUE;
 		}
 		else if (scan == K_HOME)
@@ -357,15 +397,14 @@ class mitem_servers : mitem
 		}
 		else if (scan == K_END)
 		{
-			this.server_selected = gethostcachevalue(SLIST_HOSTCACHEVIEWCOUNT)-1;
+			this.server_selected = server_count-1;
 			if (this.server_selected < 0)
 				this.server_selected = 0;
 			dobound = TRUE;
 		}
 		else if (char == 'r' || char == 'R' || scan == K_F5)
 		{
-			refreshhostcache();
-			resorthostcache();
+			refresh();
 		}
 		else
 			return FALSE;
@@ -469,18 +508,34 @@ nonstatic void(mitem_desktop desktop) M_Servers =
     // request, or an older engine without the API, uses the engine browser.
     if (argv(1) == "native" || !checkbuiltin2(gethostcacheindexforkey, FALSE))
     {
+        if (checkbuiltin2(gethostcacheindexforkey, FALSE))
+        {
+            resethostcachemasks();
+            resorthostcache();
+            refreshhostcache(TRUE);
+        }
         if (checkcommand2("menu_servers", FALSE)) localcmd("menu_servers\n");
         else print(_("Server browsing is unavailable in this engine.\n"));
         return;
     }
 
     mitem_exmenu existing = (mitem_exmenu)desktop.findchildtext(_("Servers List"));
-    if (existing) { existing.totop(); return; }
+    if (existing)
+    {
+        existing.totop();
+        if (argv(1) == "refresh")
+        {
+            mitem_frame frame = (mitem_frame)existing.findchildtext("Server panel");
+            mitem_servers listing = (mitem_servers)frame.findchildtext("Server rows");
+            if (listing) listing.refresh();
+        }
+        return;
+    }
     mitem_exmenu m = spawn(mitem_exmenu, item_text:_("Servers List"), item_flags:IF_SELECTABLE, item_command:"m_multi");
     desktop.add(m, RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, '0 0', '0 0');
     desktop.item_focuschange(m, IF_KFOCUSED);
     m.totop();
-    mitem_serverpanel panel = spawn(mitem_serverpanel, item_flags:IF_SELECTABLE);
+    mitem_serverpanel panel = spawn(mitem_serverpanel, item_flags:IF_SELECTABLE, item_text:"Server panel");
     m.add(panel, RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, '0 0', '0 0');
     mitem_pic banner = spawn(mitem_pic, item_text:"gfx/p_multi.lmp", item_size_y:24);
     panel.add(banner, RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN,
@@ -511,7 +566,7 @@ nonstatic void(mitem_desktop desktop) M_Servers =
         panel.add(spawn_servercheck(_("Fraglimit"), "sb_showfraglimit", '144 8'), flags, '8 -24', '144 8');
     if (gethostcacheindexforkey("timelimit") >= 0)
         panel.add(spawn_servercheck(_("Timelimit"), "sb_showtimelimit", '144 8'), flags, '8 -16', '144 8');
-    panel.add(spawn(mitem_text, item_text:_("Refresh (R/F5)"), item_command:"m_pop;m_servers", item_scale:8),
+    panel.add(spawn(mitem_text, item_text:_("Refresh (R/F5)"), item_command:"m_servers refresh", item_scale:8),
         flags, '168 -72', '112 8');
     if (gethostcacheindexforkey("basegame") >= 0)
     {

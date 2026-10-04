@@ -119,3 +119,40 @@ SHA-256: `666C8B28C0B49E9A2F22FB952F2879E8D43350C10197FF412DBA25876390A31B`
 All three existing manual-test launchers install beta.9 before starting the
 engine. The currently running LibreQuake process locks its old PAK, so its
 replacement is deferred until close/relaunch. Config and save files persist.
+
+## Join crash follow-up — 2026-10-04
+
+- Reproduced a native access violation in FTE SVN 6202 while reopening Join
+  after navigating through Setup. Crash capture and disassembly confirmed the
+  installed engine's `Master_HideServer` shifts its sorted-array pointer instead
+  of decrementing the visible count. A later hostname read dereferences garbage.
+- Poll server replies with masks clear, then rebuild the filtered view without
+  another polling call. Derive the filtered count through address reads, cache
+  it for row/key handling, and clear masks before handing control elsewhere.
+  Poll each frame to preserve FTE's query pacing; refilter on new rows and
+  periodic metadata updates. Capture selection before polling can reorder it.
+- Reopening Join keeps its current query/cache. The Refresh button updates the
+  existing widgets, matching R/F5, rather than removing and recreating the menu.
+  Native advanced-browser handoff clears old displayed flags before querying.
+- Added an isolated navigation fixture covering Join/Setup/reopening, widget
+  identity across Refresh, F5, favorite/protocol/population/display switches,
+  End scrolling, and two advanced-browser returns. Native removal is exercised
+  with `closemenu`; public servers are queried without joining them. The Full
+  switch is tested through its navigation cycle because FTE's numeric getter
+  can differ from the stored value its mask uses.
+- Final navigation checks pass with LibreQuake in-game and disconnected and
+  Quake in-game. The LibreQuake run exercises hundreds of replies (523 visible
+  rows at its second return checkpoint), along with empty filtered views.
+  MenuQC, optional CSQC, and test fixtures compile with zero warnings.
+  Production-package checks pass in FTE/LibreQuake and QSS/Quake at 1920×1080;
+  the eleven-screen LibreQuake layout fixture passes at 400×300. Screenshots,
+  PowerShell syntax, whitespace, VM logs, and return checkpoints were checked.
+  CSQC coverage remains compilation only; the engine executable is unchanged.
+
+Updated local artifact: `dist/classic-menusys-vbs-v1.0-beta.10.zip`.
+
+SHA-256: `0CE404A219F61E869F723B938138DDF5B5277D919E1959F3852E3667959168DA`
+
+All three manual launchers install beta.10, and their test folders contain the
+matching PAK. Close/relaunch to replace an already-loaded module. Beta.9 is
+preserved, and the new artifact has not been published.

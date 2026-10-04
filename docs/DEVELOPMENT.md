@@ -185,6 +185,44 @@ The test compiles a separate wrapper from `tests/menu-layout.src` and checks
 logs and scrollbar creation. Never distribute its `layout-menu.dat`; packaged
 runtime checks use the production `menu.dat` instead.
 
+### Join browser navigation regression
+
+Run the FTE-only navigation fixture with LibreQuake or Quake data:
+
+```powershell
+.\scripts\test-menu-navigation.ps1 `
+    -Compiler C:\path\to\fteqcc.exe `
+    -Engine C:\path\to\fteqw64.exe `
+    -GameData C:\path\to\librequake\id1 `
+    -MenuPak .\dist\classic-menusys-vbs-v1.0-beta.10\menu.pak `
+    -TestName navigation -InGame
+```
+
+Omit `-InGame` for the disconnected case. Each run uses a new isolated folder.
+The fixture activates actual controls through their keyboard handlers: Join,
+Setup, repeated reopening, in-place Refresh, F5, display/population/protocol/
+favorite switches, and two advanced-browser round trips. It closes the native
+browser through FTE's `closemenu` command, which runs its removal callback.
+Assertions check widget identity, fresh filtered rows, and return checkpoints;
+three engine screenshots and clean VM/command logs are required. It queries
+public servers without joining them. Never package `navigation-menu.dat`.
+The Full switch is exercised through navigation rather than a numeric-row
+assertion: FTE's mask uses cached `freeslots`, while its getter recomputes
+`maxplayers - players` after QuakeWorld player parsing changes those fields.
+
+The polling order matters on FTE SVN 6202. Its `Master_HideServer` decrements
+the sorted-array pointer instead of the visible count. Polling while a mask
+excludes a formerly visible server can therefore crash the engine. The MenuQC
+browser clears masks and rebuilds the view before polling, then sorts/filters
+without another polling call. It counts the filtered prefix through address
+reads, clears masks, and caches the count for drawing and navigation. Keep
+polling `gethostcachevalue` calls out of filtered-row loops and key handlers.
+Each draw polls with masks already clear so FTE can pace its queries normally.
+New rows trigger filtering immediately; metadata changes are refiltered at
+least every half second. Selection is captured before polling can reorder rows.
+Native handoff starts a fresh query with the old displayed flags cleared.
+This is a MenuQC workaround; the engine executable remains unmodified.
+
 ## Troubleshooting
 
 ### FTE shows its text menu
