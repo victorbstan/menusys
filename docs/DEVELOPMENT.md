@@ -149,6 +149,31 @@ checks logs for command and VM failures. Inspect the screenshots as well.
 QSS test commands use a temporary localhost-only listener after signon; the
 test shuts down that engine at completion. The original game data is untouched.
 
+### Scrolling and Updates layout regression
+
+Use the FTE-only layout fixture to reproduce scrolled dropdown fields and
+update details that require wrapping and scrolling:
+
+```powershell
+.\scripts\test-menu-layout.ps1 `
+    -Compiler C:\path\to\fteqcc.exe `
+    -Engine C:\path\to\fteqw64.exe `
+    -GameData C:\path\to\quake\id1 `
+    -MenuPak .\dist\classic-menusys-vbs-v1.0-beta.8\menu.pak `
+    -TestName layout
+```
+
+Repeat with LibreQuake data and `-Width 400 -Height 300`. Inspect the six
+screenshots: Video/Effects text stays below the banner; Updates keeps its list,
+details, and Apply button within the same panel; scrolling long details never
+expands the viewport. The fixture supplies 60 synthetic package rows and a long
+description without enabling update sources or applying packages. It dismisses
+the native source prompt with Escape in its isolated process.
+
+The test compiles a separate wrapper from `tests/menu-layout.src` and checks
+logs and scrollbar creation. Never distribute its `layout-menu.dat`; packaged
+runtime checks use the production `menu.dat` instead.
+
 ## Troubleshooting
 
 ### FTE shows its text menu

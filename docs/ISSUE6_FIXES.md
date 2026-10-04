@@ -59,3 +59,27 @@ SHA-256: `0B0DA5E4C228C200D5D4386D08A2740007C8FEF3190BFFE0689040A139C1930E`
 
 The ZIP is a locally built prerelease artifact. GitHub release publication is
 separate from the fixes submitted through PR #8.
+
+## Manual-test follow-up — 2026-10-04
+
+- Combo fields and dropdown lists intersect their private clips with the
+  containing frame. Scrolled values cannot paint above the header. Mouse focus
+  also respects the frame viewport.
+- Updates uses one centered 320×200 panel with a native-sized banner and an
+  Apply button anchored inside it. Empty lists show useful guidance rather than
+  metadata for a nonexistent selection; reopening the screen avoids duplicates.
+- Metadata wraps using the shared UI text path, respecting font size and canvas
+  projection. Description scroll offsets no longer enlarge the visible area.
+  Offscreen labels retain scroll state, and dragging uses the scrollbar bounds.
+- Package grids release owned sliders, bound scroll offsets after resizing,
+  place scrollbar input correctly, and reveal keyboard-selected rows.
+- Both production variants and the dedicated layout fixture compile without
+  warnings. Packaged runtime checks pass for Quake in FTE/QSS and LibreQuake in
+  FTE. FTE layout fixtures cover scrolled Video/Effects, the native source prompt,
+  an empty list, 60 synthetic rows, and long metadata at 960×600 and 400×300.
+  Screenshot review confirms clipping and the panel layout; log and scrollbar
+  assertions pass. The layout fixture does not validate remote package services.
+
+Updated artifact: `dist/classic-menusys-vbs-v1.0-beta.8.zip`.
+
+SHA-256: `021912D14A03D719898756F92F329A147BBD77BE1B0689762E80938AD749E306`

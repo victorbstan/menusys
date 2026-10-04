@@ -231,6 +231,17 @@ static float(vector pos, string value, vector size, vector rgb, float alpha, flo
 };
 #endif
 
+// A widget's private clip must remain inside its containing frame.
+// In particular, combo values can be above the viewport after scrolling.
+void(float x, float y, float w, float h) ui_clipchild =
+{
+	float right = min(x+w, ui.drawrectmax.x);
+	float bottom = min(y+h, ui.drawrectmax.y);
+	x = max(x, ui.drawrectmin.x);
+	y = max(y, ui.drawrectmin.y);
+	ui.setcliparea(x, y, max(0, right-x), max(0, bottom-y));
+};
+
 void() queryscreensize =
 {
 #ifdef MENU

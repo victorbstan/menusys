@@ -341,6 +341,68 @@ mitem(string text, float height=TXT_NMSZ) spawn_headline =
 /***************************************************************************
 label item.
 */
+// Wrap through the same UI draw path as other text. The engine text-field
+// builtin has its own font sizing and bypasses our canvas projection.
+void(vector pos, float width, float alignflags, string line, float scale) ui_textline =
+{
+	float linewidth = stringwidth(line, TRUE, [scale, scale]);
+	if (alignflags & 4)
+		pos.x += width-linewidth;
+	else if (!(alignflags & 1))
+		pos.x += (width-linewidth)/2;
+	ui.drawstring(pos, line, [scale, scale], RGB_TXT, 1, 0);
+};
+float(vector pos, vector size, float alignflags, string text, float scale) ui_textfield =
+{
+	float start = 0, i = 0, lastspace = -1, lines = 0;
+	float length = strlen(text);
+	if (size.x <= 0 || scale <= 0 || !length)
+		return 0;
+	// Metadata may be a temporary engine string. Keep it alive while the
+	// wrapping loop creates substring temporaries of its own.
+	text = strzone(text);
+	while (i < length)
+	{
+		string ch = substring(text, i, 1);
+		if (ch == "\n")
+		{
+			ui_textline(pos+[0, lines*scale], size.x, alignflags, substring(text, start, i-start), scale);
+			lines++;
+			start = ++i;
+			lastspace = -1;
+			continue;
+		}
+		if (ch == " ")
+			lastspace = i;
+		// Do not split an engine color/alternate-font escape across lines.
+		float end = i+1;
+		if (ch == "^" && end < length)
+		{
+			string code = substring(text, end, 1);
+			end = min(length, i+(code == "x" ? 5 : code == "&" ? 4 : 2));
+		}
+		if (i > start && stringwidth(substring(text, start, end-start), TRUE, [scale, scale]) > size.x)
+		{
+			float cut = lastspace > start ? lastspace : i;
+			ui_textline(pos+[0, lines*scale], size.x, alignflags, substring(text, start, cut-start), scale);
+			lines++;
+			start = cut;
+			while (substring(text, start, 1) == " ") start++;
+			i = start;
+			lastspace = -1;
+		}
+		else
+			i = end;
+	}
+	if (start < length)
+	{
+		ui_textline(pos+[0, lines*scale], size.x, alignflags, substring(text, start, length-start), scale);
+		lines++;
+	}
+	strunzone(text);
+	return lines*scale;
+};
+
 class mitem_label : mitem
 {	//class that queries its frame to find the text to show.
 	mitem_vslider vslider;
@@ -352,6 +414,7 @@ class mitem_label : mitem
 		float fl = 2;	//top-align
 		vector textpos = pos;
 		vector clientsize = item_size;
+		float textheight = -1;
 		if (item_flags & IF_CENTERALIGN)
 			fl |= 0;	//default is to center align
 		else if (item_flags & IF_RIGHTALIGN)
@@ -362,7 +425,6 @@ class mitem_label : mitem
 		if (vslider)
 		{
 			textpos[1] -= vslider.val;
-			clientsize[1] += vslider.val;
 			clientsize[0] -= vslider.item_size[0];
 		}
 
@@ -380,12 +442,13 @@ class mitem_label : mitem
 		if (ui.drawrectmax[0] > ui.drawrectmin[0] && ui.drawrectmax[1] > ui.drawrectmin[1])
 		{
 			ui.setcliparea(ui.drawrectmin[0], ui.drawrectmin[1], ui.drawrectmax[0] - ui.drawrectmin[0], ui.drawrectmax[1] - ui.drawrectmin[1]);
-			clientsize[1] = drawtextfield(textpos, clientsize, fl, text) * item_scale;
+			textheight = ui_textfield(textpos, clientsize, fl, text, item_scale);
 			ui.setcliparea(omin_x, omin_y, omax_x - omin_x, omax_y - omin_y);
 
 			if (vslider)
 			{
 				vslider.item_size[1] = item_size[1];
+				vslider.item_position = [clientsize.x, 0];
 				if (ui.mousepos != ui.oldmousepos)
 				{
 					if (mouseinbox(pos + [clientsize[0], 0], vslider.item_size))
@@ -397,14 +460,15 @@ class mitem_label : mitem
 		ui.drawrectmin = omin;
 		ui.drawrectmax = omax;
 
-		if (clientsize[1] > item_size[1])
+		if (textheight > item_size[1])
 		{	//enough text that we need a scrollbar.
 			if (!vslider)
 				vslider = spawn(mitem_vslider, val:0, stride:8);
-			vslider.maxv = clientsize[1] - item_size[1];
+			vslider.maxv = textheight - item_size[1];
+			vslider.val = bound(vslider.minv, vslider.val, vslider.maxv);
 			item_flags |= IF_SELECTABLE;
 		}
-		else if (vslider)
+		else if (textheight >= 0 && vslider)
 		{	//the text got shorter...
 			vslider.item_remove();
 			vslider = (mitem_vslider)__NULL__;
@@ -415,7 +479,8 @@ class mitem_label : mitem
 	virtual float(vector pos, float scan, float char, float down) item_keypress =
 	{
 		if (vslider)
-			if (vslider.item_keypress(pos, scan, char, down))
+			if ((scan != K_MOUSE1 || ui.mgrabs == vslider || mouseinbox(pos+vslider.item_position, vslider.item_size)) &&
+				vslider.item_keypress(pos+vslider.item_position, scan, char, down))
 				return TRUE;
 		if (this.item_command)
 		{
@@ -440,6 +505,8 @@ class mitem_label : mitem
 			item_command = strzone(item_command);
 			item_flags |= IF_SELECTABLE;
 		}
+		else
+			item_command = __NULL__;
 	};
 
 	//zone+unzone input strings as needed

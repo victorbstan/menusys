@@ -661,6 +661,7 @@ void(vector pos) mitem_frame::item_draw =
 				vslider = tmp;
 			}
 			vslider.maxv = clientsize[1] - (item_size[1] - (item_framesize[1]+item_framesize[2]));
+			vslider.val = bound(vslider.minv, vslider.val, vslider.maxv);
 		}
 		else if (vslider)
 		{
@@ -698,7 +699,7 @@ void(vector pos) mitem_frame::item_draw =
 		//if the mouse moved, select the new item
 		if (item_exclusive)
 			newfocus = item_exclusive;
-		else
+		else if (mouseinbox(pos, clientsize) && mouseinbox(omin, omax-omin))
 		{
 			for(ch = item_children; ch; ch = ch.item_next)
 			{
@@ -728,7 +729,7 @@ void(vector pos) mitem_frame::item_draw =
 	{
 		ui.setcliparea(ui.drawrectmin[0], ui.drawrectmin[1], ui.drawrectmax[0] - ui.drawrectmin[0], ui.drawrectmax[1] - ui.drawrectmin[1]);
 		if (item_exclusive)
-			item_exclusive.item_draw(clientpos + ch.item_position);
+			item_exclusive.item_draw(clientpos + item_exclusive.item_position);
 		else
 		{
 			for(ch = item_children; ch; ch = ch.item_next)

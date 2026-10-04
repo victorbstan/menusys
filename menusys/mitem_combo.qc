@@ -123,7 +123,7 @@ void(vector pos) mitem_combo::item_draw =
 	ui.drawfill(pos + [0, item_size_y-1], [item_size_x/2, 1], TD_TOP, item_alpha, 0);
 */
 	//silly strings need to get cut off properly.
-	ui.setcliparea(pos[0], pos[1], item_size_x/2, item_size_y);
+	ui_clipchild(pos[0], pos[1], item_size_x/2, item_size_y);
 	pos_y += (item_size_y - item_scale)*0.5;
 	pos_x += 1;
 	ui.drawstring(pos, curval, '1 1 0' * item_scale, rgb, item_alpha, 0);
@@ -224,7 +224,7 @@ void(vector pos) mitem_combo_popup::item_draw =
 	}
 
 	//constrain the drawing so it doesn't overflow the popup
-	ui.setcliparea(pos[0], pos[1], popupsize[0], popupsize[1]);
+	ui_clipchild(pos[0], pos[1], popupsize[0], popupsize[1]);
 
 	if (pslider)
 	{
