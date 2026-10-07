@@ -15,7 +15,9 @@ Ironwail and Mark V are not supported.
 ## Installation
 
 1. Download the compiled ZIP from
-   [GitHub Releases](https://github.com/victorbstan/menusys/releases).
+   [GitHub Releases](https://github.com/victorbstan/menusys/releases). Choose the
+   attached menu package; GitHub's automatic source archives do not contain
+   `menu.pak`.
 2. Extract it and copy `menu.pak` into your game's `id1` directory, or the mod
    directory where you want to use the menu.
 3. Optionally copy the settings you want from `autoexec.cfg.example` into your
@@ -43,14 +45,18 @@ select items with the mouse. Escape returns to the previous screen or game.
 Game artwork takes priority over the included Levels and Demos fallback
 headers. The appearance can therefore differ between Quake and LibreQuake.
 
+Under **Options → Controls**, select an action and press Enter to assign a key,
+or Backspace to clear its bindings.
+
 ## Mouse settings
 
-Basic Options includes **Always Mouselook**, **Invert Mouse**, and
+**Options → Basic Setup** includes **Always Mouselook**, **Invert Mouse**, and
 **Sensitivity**. Always Mouselook keeps mouse aiming enabled during gameplay;
 the choice made in this menu is remembered across restarts.
 
 In FTE, `cl_cursor ""` selects the system cursor. To use an included custom
-cursor, enter one of these commands in the console or add it to `autoexec.cfg`:
+cursor, choose one of these commands to enter in the console or add to
+`autoexec.cfg`:
 
 ```text
 cl_cursor "menugfx/cursor_copr.tga"
@@ -62,11 +68,18 @@ between engines.
 
 ## Text and window size
 
-Menus follow the current window size and keep their classic proportions.
+Menus follow the current window size and keep their classic proportions,
+including when you resize the window during play.
 
-In QSS, Video Options provides separate **Console Zoom** and **Message Zoom**
+In QSS, **Options → Video** provides separate **Console Zoom** and **Message Zoom**
 settings. **Automatic** makes console text and centered gameplay messages grow
-with the window. Fixed zoom choices remain available.
+with the window, including while the menu is closed. Fixed zoom choices remain
+available. These settings control engine text; menu sizing follows the window
+automatically.
+
+Use these menu controls to choose a fixed text zoom in QSS. Changing only
+`scr_conscale` or `scr_menuscale` in a configuration file can be overridden
+while the corresponding zoom is set to Automatic.
 
 ## Troubleshooting
 
