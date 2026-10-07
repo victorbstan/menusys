@@ -72,10 +72,10 @@ class mitem_classicbutton : mitem_filli
 
 void() classic_menudots_precache =
 {
-	precache_pic("gfx/menudot1.lmp");
-	precache_pic("gfx/menudot2.lmp");
-	precache_pic("gfx/menudot3.lmp");
-	precache_pic("gfx/menudot4.lmp");
-	precache_pic("gfx/menudot5.lmp");
-	precache_pic("gfx/menudot6.lmp");
+	precache_pic("gfx/menudot1.lmp", 0);
+	precache_pic("gfx/menudot2.lmp", 0);
+	precache_pic("gfx/menudot3.lmp", 0);
+	precache_pic("gfx/menudot4.lmp", 0);
+	precache_pic("gfx/menudot5.lmp", 0);
+	precache_pic("gfx/menudot6.lmp", 0);
 };

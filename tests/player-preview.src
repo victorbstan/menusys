@@ -1,0 +1,120 @@
+// Drive actual Setup controls between rendered frames, so localcmd color
+// reaches the engine before inspecting cvars and capturing the next frame.
+#define m_draw preview_original_draw
+#define m_init preview_original_init
+#define m_consolecommand preview_original_command
+#define GameCommand preview_original_gamecommand
+#include "../menu.src"
+#undef m_draw
+#undef m_init
+#undef m_consolecommand
+#undef GameCommand
+
+float preview_stage, preview_frames;
+mitem_frame preview_panel;
+mitem preview_art;
+
+void(float top, float bottom) preview_assert =
+{
+	if (player_setup_color(FALSE) != top || player_setup_color(TRUE) != bottom)
+		print(sprintf("PREVIEW FAIL colors expected %g %g got %g %g\n", top, bottom,
+			player_setup_color(FALSE), player_setup_color(TRUE)));
+	else
+		print("PREVIEW PASS colors ", ftos(top), " ", ftos(bottom), "\n");
+};
+void(float lower, float key) preview_press =
+{
+	mitem_playercolor control = (mitem_playercolor)preview_panel.findchildtext(lower ? _("Pants color") : _("Shirt color"));
+	if (!control) { print("PREVIEW FAIL missing color control\n"); return; }
+	control.item_flags |= IF_KFOCUSED;
+	if (!control.item_keypress('0 0 0', key, 0, TRUE))
+		print("PREVIEW FAIL unhandled color key\n");
+	control.item_flags &= ~IF_KFOCUSED;
+};
+float(string input) m_consolecommand =
+{
+	tokenize(input);
+	if (argv(0) != "preview_run") return preview_original_command(input);
+	startupmenu_pending = FALSE;
+	M_PlayerSetup(desktop);
+	preview_panel = (mitem_frame)((mitem_frame)desktop.item_kactivechild).findchildtext("Setup panel");
+	preview_art = preview_panel.findchildtext("Player preview");
+	if (!preview_art) { print("PREVIEW FAIL missing live preview\n"); localcmd("quit\n"); return TRUE; }
+	items_updategrabs(TRUE);
+	localcmd("color 1 6\n");
+	preview_stage = 1;
+	preview_frames = 0;
+	return TRUE;
+};
+void(vector screensize) m_draw =
+{
+	preview_original_draw(screensize);
+	if (!preview_stage || ++preview_frames < 12) return;
+	preview_frames = 0;
+	if (preview_stage == 1)
+	{
+		preview_assert(1, 6);
+		vector pos;
+		for (mitem it = preview_art; it; it = it.item_parent) pos += it.item_position;
+		print(sprintf("PREVIEW RECT %v SIZE %v VIEW %v SCALE %v\n", pos,
+			preview_art.item_size, menu_viewportsize, menu_drawscale));
+		localcmd("screenshot\nwait\n");
+		preview_press(FALSE, K_RIGHTARROW);
+	}
+	else if (preview_stage == 2)
+	{
+		preview_assert(2, 6);
+		localcmd("screenshot\nwait\n");
+		preview_press(TRUE, K_RIGHTARROW);
+	}
+	else if (preview_stage == 3)
+	{
+		preview_assert(2, 7);
+		localcmd("screenshot\nwait\ncolor 12 4\n");
+	}
+	else if (preview_stage == 4)
+	{
+		preview_assert(12, 4);
+		localcmd("screenshot\nwait\ncolor 13 13\n");
+	}
+	else if (preview_stage == 5)
+	{
+		preview_assert(13, 13);
+		preview_press(FALSE, K_RIGHTARROW);
+	}
+	else if (preview_stage == 6)
+	{
+		preview_assert(0, 13);
+		preview_press(TRUE, K_RIGHTARROW);
+	}
+	else if (preview_stage == 7)
+	{
+		preview_assert(0, 0);
+		preview_press(FALSE, K_LEFTARROW);
+	}
+	else if (preview_stage == 8)
+	{
+		preview_assert(13, 0);
+		preview_press(TRUE, K_LEFTARROW);
+	}
+	else
+	{
+		preview_assert(13, 13);
+		print("PREVIEW COMPLETE\n");
+		localcmd("quit\n");
+		preview_stage = 0;
+		return;
+	}
+	preview_stage++;
+};
+void() m_init =
+{
+	preview_original_init();
+	registercommand("preview_run");
+	print("PREVIEW INIT\n");
+	localcmd("preview_run\n");
+};
+void(string input) GameCommand =
+{
+	if (!m_consolecommand(input)) preview_original_gamecommand(input);
+};

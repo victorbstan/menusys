@@ -52,8 +52,17 @@ float(string input) m_consolecommand =
 	else if (cmd == "nav_action")
 	{
 		string command;
+		if (action == "advanced")
+		{
+			// The native browser is intentionally absent from the MenuQC UI.
+			// Exercise its documented console escape hatch directly.
+			if (navigation_find((mitem_frame)desktop.item_kactivechild, "m_pop;m_servers native", 0))
+				print("NAV FAIL native browser button is visible\n");
+			localcmd("m_pop;m_servers native\n");
+			print("NAV action ", cmd, " ", action, "\n");
+			return TRUE;
+		}
 		if (action == "join") command = "m_pop;m_servers";
-		else if (action == "advanced") command = "m_pop;m_servers native";
 		else if (action == "refresh") command = "m_servers refresh";
 		else if (action == "setup") command = "m_pop;m_setup";
 		else if (action == "favs") command = "sb_onlyfavs";
@@ -84,7 +93,18 @@ float(string input) m_consolecommand =
 	}
 	else if (cmd == "nav_key")
 	{
-		float key = stringtokeynum(action);
+		// QSS 2021 advertises stringtokeynum but leaves builtin 614
+		// unimplemented. Keep the fixture portable by mapping the keys it uses.
+		float key;
+		if (action == "UPARROW") key = K_UPARROW;
+		else if (action == "DOWNARROW") key = K_DOWNARROW;
+		else if (action == "LEFTARROW") key = K_LEFTARROW;
+		else if (action == "RIGHTARROW") key = K_RIGHTARROW;
+		else if (action == "ENTER") key = K_ENTER;
+		else if (action == "ESCAPE") key = K_ESCAPE;
+		else if (action == "END") key = K_END;
+		else if (action == "F5") key = K_F5;
+		else { print("NAV FAIL unknown key ", action, "\n"); return TRUE; }
 		m_keydown(key, 0);
 		m_keyup(key, 0);
 	}
@@ -115,6 +135,14 @@ float(string input) m_consolecommand =
 		print("NAV cached rows ", ftos(count), "\n");
 		print("NAV checkpoint ", action, " active ", desktop.item_kactivechild.item_text, "\n");
 	}
+	else if (cmd == "nav_assertscale")
+	{
+		float expected = stof(action);
+		if (fabs(cvar("vid_conautoscale")-expected) > 0.01)
+			print("NAV FAIL menu scale ", ftos(cvar("vid_conautoscale")), " expected ", action, "\n");
+		else
+			print("NAV scale ", action, "\n");
+	}
 	else return navigation_original_command(input);
 	print("NAV action ", cmd, " ", action, "\n");
 	return TRUE;
@@ -127,4 +155,5 @@ void() m_init =
 	registercommand("nav_key");
 	registercommand("nav_focuslist");
 	registercommand("nav_assert");
+	registercommand("nav_assertscale");
 };

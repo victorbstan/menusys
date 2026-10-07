@@ -5,6 +5,8 @@ param(
     [Parameter(Mandatory = $true)][string] $GameData,
     [Parameter(Mandatory = $true)][string] $MenuPak,
     [string] $TestName = 'navigation',
+    [int] $Width = 960,
+    [int] $Height = 600,
     [switch] $InGame
 )
 $ErrorActionPreference = 'Stop'
@@ -31,7 +33,7 @@ foreach ($name in @('pak0.pak','pak1.pak')) { Copy-Item -LiteralPath (Join-Path 
 Copy-Item -LiteralPath $MenuPak -Destination (Join-Path $game 'menu.pak')
 Copy-Item -LiteralPath $target -Destination (Join-Path $game 'menu.dat')
 [IO.File]::WriteAllLines((Join-Path $game 'quake.rc'), @('exec default.cfg','exec autoexec.cfg','stuffcmds'))
-$startup = @('developer 1','cl_maxfps 60','alias startdemos ""','in 1 forceqmenu 0','in 1 menu_restart')
+$startup = @('developer 1','cl_maxfps 60','alias startdemos ""','in 1 forceqmenu 0','in 1 menu_restart','in 1.2 vid_conautoscale 4')
 if ($InGame) { $startup += @('in 1.3 map start','in 7 exec navigation.cfg') }
 else { $startup += 'in 1.5 exec navigation.cfg' }
 [IO.File]::WriteAllLines((Join-Path $game 'autoexec.cfg'), $startup)
@@ -40,9 +42,9 @@ else { $startup += 'in 1.5 exec navigation.cfg' }
     'in 2.3 nav_key END', 'in 2.8 nav_key ESCAPE', 'in 3.2 nav_action setup',
     'in 3.6 nav_key ESCAPE', 'in 4 nav_action join', 'in 4.6 nav_action refresh',
     'in 5 nav_assert refreshed', 'in 5.5 nav_action advanced',
-    'in 6 screenshot advanced.png', 'in 6.8 closemenu', 'in 8 nav_open', 'in 8.4 nav_action join',
+    'in 5.8 nav_assertscale 0', 'in 6 screenshot advanced.png', 'in 6.8 closemenu', 'in 8 nav_open', 'in 8.4 nav_action join',
     'in 9 nav_key END', 'in 9.4 nav_key ESCAPE', 'in 9.8 nav_action join',
-    'in 10.4 nav_assert returned', 'in 10.8 screenshot returned.png',
+    'in 10.4 nav_assert returned', 'in 10.6 nav_assertscale 4', 'in 10.8 screenshot returned.png',
     'in 11 nav_focuslist', 'in 11.2 nav_key F5', 'in 12 nav_assert key-refresh',
     'in 12.2 nav_action favs', 'in 12.8 nav_assert filtered', 'in 13.2 nav_action favs',
     'in 13.8 nav_action empty', 'in 14.4 nav_assert filtered', 'in 15 nav_action empty',
@@ -50,13 +52,13 @@ else { $startup += 'in 1.5 exec navigation.cfg' }
     'in 17.4 nav_action nq', 'in 18 nav_assert filtered', 'in 18.6 nav_action nq',
     'in 19.2 nav_action qw', 'in 19.8 nav_assert filtered', 'in 20.4 nav_action qw',
     'in 21 nav_action address', 'in 21.2 nav_focuslist', 'in 21.6 nav_key END',
-    'in 22 nav_assert returned', 'in 22.4 nav_action advanced', 'in 24.6 closemenu',
+    'in 22 nav_assert returned', 'in 22.4 nav_action advanced', 'in 22.8 nav_assertscale 0', 'in 24.6 closemenu',
     'in 25.4 nav_open', 'in 26 nav_action join', 'in 27 nav_assert final',
     'in 27.5 screenshot final.png', 'in 28 quit'
 ))
 # closemenu runs the native browser's removal callback. MenuQC key hooks only
 # exercise our widgets, so they cannot dismiss a native menu.
-$engineArgs = @('-nohome','+set','vid_fullscreen','0','-basedir',('"'+$testRoot+'"'),'-game','menusys_test','-window','-width','960','-height','600','-condebug')
+$engineArgs = @('-nohome','+set','vid_fullscreen','0','-basedir',('"'+$testRoot+'"'),'-game','menusys_test','-window','-width',$Width,'-height',$Height,'-condebug')
 $process = Start-Process -FilePath $Engine -ArgumentList $engineArgs -WorkingDirectory $testRoot -WindowStyle Hidden -PassThru
 if (-not $process.WaitForExit(55000)) { Stop-Process -Id $process.Id; throw "Navigation timed out: $testRoot" }
 # This Windows FTE build returns 1 from Sys_Quit even after a normal shutdown.

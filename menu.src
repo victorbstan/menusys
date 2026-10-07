@@ -51,6 +51,7 @@ void(mitem_desktop desktop) M_Pop =
 	cmd("m_options",	M_Options,				menu/options.qc) \
 	cmd("m_keys",		M_Options_Keys,			menu/options_keys.qc) \
 	cmd("m_basicopts",	M_Options_Basic,		menu/options_basic.qc) \
+	cmd("m_textscale", M_TextScale, ) \
 	cmd("m_video",		M_Options_Video,		menu/options_video.qc) \
 	cmd("m_effects",	M_Options_Effects,		menu/options_effects.qc) \
 	cmd("m_audio",		M_Options_Audio,		menu/options_audio.qc) \
@@ -86,11 +87,15 @@ void(mitem_desktop desktop) M_Pop =
 #endlist
 #undef cmd
 
+void(mitem_desktop desktop) M_TextScale = { M_ConsolePreferences(); };
+
 mitem_desktop desktop;
 float startupmenu_pending;
-void() m_shutdown = {};
+void() m_shutdown = {M_ServerRestoreScale();};
 void(vector screensize) m_draw =
 {
+	M_ConsolePreferences();
+	M_MousePreferences();
 	if (dp_workarounds)
 		cltime = gettime(0);
 

@@ -84,8 +84,10 @@ Set-Location $quakeBasedir
 .\fteqw64.exe -nohome -game menusys_test
 ```
 
-See [Development](docs/DEVELOPMENT.md) for the complete build, test, branch, and
-troubleshooting workflow.
+For scaling changes, run [the menu scaling matrix](scripts/test-menu-scaling.ps1)
+and [live resize checks](scripts/test-menu-resize.ps1) with FTE and QSS using
+both registered id1 and LibreQuake data. Review the captures, require clean
+engine logs, and compile MenuQC and CSQC with zero warnings before packaging.
 
 ## Architecture
 
@@ -144,14 +146,30 @@ and retain their native proportions.
 
 In FTE, `cl_cursor ""` selects the system cursor. Set a packaged image such as
 `cl_cursor "menugfx/cursor_copr.tga"` for a custom cursor. Changes apply while
-the menu is open. Menu layout scales uniformly to fit smaller windows without
-changing the user's scale settings.
+the menu is open. Menu layout scales uniformly relative to a 640x400 reference
+canvas, preserving its proportions without changing the user's scale settings.
 
 The engine shortcuts `menu_load`, `menu_save`, `menu_setup`, and `menu_demo`
 open the corresponding screens, as do `m_load`, `m_save`, `m_setup`, and
 `m_demos`. Save stays visible before a game starts and explains why its slots
 are disabled.
 
+Player Setup uses the game's classic soldier artwork and updates its shirt and
+pants separately. It translates the same palette regions as native Quake:
+shirt indices 16–31, pants indices 96–111, with reversed shade ramps for colors
+8–13. Other pixels retain their authored colors. FTE and QSS both draw 29
+transparent layers made from the user's own `gfx/menuplyr.lmp`, preserving its
+dimensions. All three local `.cmd` launchers call
+`scripts/prepare-manual-menu.ps1` to rebuild the latest menu and regenerate the
+preview from their own Quake or LibreQuake `pak0.pak`. Generated game artwork
+remains local; it is not included in the source or release PAK.
+
+Basic Options includes Always Mouselook and Invert Mouse. Always Mouselook uses
+Quake's persistent `+mlook`/`-mlook` commands and remembers choices made here.
+In QSS, Video Options → Console Zoom defaults to Automatic, keeping a 640-pixel
+virtual console width so console text grows with the window. Fixed zoom values
+remain available. Message Zoom controls centered gameplay messages separately;
+its Automatic mode follows the live window size even with the menu closed.
 ### Add or change a menu item
 
 Open the relevant `menu/*.qc` file, find an existing control of the same type,
@@ -403,12 +421,13 @@ See [Releasing](docs/RELEASING.md) before tagging or uploading an artifact.
 | `menu/` | Project-specific menu screens and controls |
 | `menusys/` | Reusable menu widget framework |
 | `csprogs.src` and `cs/` | Optional CSQC build |
-| `docs/DEVELOPMENT.md` | Contributor build and test workflow |
 | `docs/RELEASING.md` | Packaging and GitHub release workflow |
 | `scripts/build-release.ps1` | Reproducible release packager and validator |
 | `scripts/build-menu.ps1` | MenuQC and CSQC builds under `dist/build` |
 | `scripts/build-menu-assets.ps1` | Generates native Levels and Demos headers |
 | `scripts/test-menu-runtime.ps1` | Isolated engine screenshots and save regression |
+| `scripts/test-menu-scaling.ps1` | Four engine/game combinations, artwork geometry and rendered scaling |
+| `scripts/test-menu-resize.ps1` | Live window resize, portrait layout and pointer conversion regression |
 | `assets/release/` | End-user README and example configuration templates |
 | `LICENSE` | Original project licensing notice |
 | `README.TXT` | Original unformatted project notes, retained for history |

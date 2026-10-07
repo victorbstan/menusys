@@ -49,6 +49,29 @@ static string() skinopts =
 	return opts;
 };
 
+// -1 preserves the existing config behavior until the user changes this option.
+var float autocvar_menu_alwaysmlook = -1;
+static float mouse_preferences_ready;
+static float mouse_legacy_mlook;
+void() M_MousePreferences =
+{
+    if (mouse_preferences_ready) return;
+    mouse_preferences_ready = TRUE;
+    // QSS has no MenuQC query for in_mlook; its config saves +mlook explicitly.
+    float f = fopen("config.cfg", FILE_READ);
+    if (f >= 0)
+    {
+        string line;
+        while ((line = fgets(f)))
+        {
+            if (line == "+mlook") mouse_legacy_mlook = TRUE;
+            if (line == "-mlook") mouse_legacy_mlook = FALSE;
+        }
+        fclose(f);
+    }
+    if (autocvar_menu_alwaysmlook >= 0)
+        localcmd(autocvar_menu_alwaysmlook ? "+mlook\n" : "-mlook\n");
+};
 var float autocvar_m_pitch = 0.022;
 class options_basic : mitem_exmenu
 {
@@ -56,7 +79,7 @@ class options_basic : mitem_exmenu
 	{
 		if (key == "m_pitchsign")
 			return TRUE;
-		if (key == "cl_run")
+		if (key == "cl_run" || key == "menu_alwaysmlook")
 			return TRUE;
 		if (engine == E_QSS)
 		{
@@ -71,6 +94,11 @@ class options_basic : mitem_exmenu
 	{
 		if (key == "m_pitchsign")
 			return (autocvar_m_pitch<0)?"1":"0";
+		if (key == "menu_alwaysmlook")
+		{
+			M_MousePreferences();
+			return ftos(autocvar_menu_alwaysmlook >= 0 ? autocvar_menu_alwaysmlook : mouse_legacy_mlook);
+		}
 		if (key == "cl_run")
 			return (stof(super::get("cl_forwardspeed")) > 200)?"1":"0";
 		if (engine == E_QSS)
@@ -84,7 +112,12 @@ class options_basic : mitem_exmenu
 	};
 	virtual void(string key, string newval) set =
 	{
-		if (key == "m_pitchsign")
+		if (key == "menu_alwaysmlook")
+		{
+			cvar_set(key, newval);
+			localcmd(strcat("seta menu_alwaysmlook ", newval, "\n", stof(newval) ? "+mlook\n" : "-mlook\n"));
+		}
+		else if (key == "m_pitchsign")
 		{
 			float invert;
 			if (stof(newval))
@@ -136,7 +169,6 @@ nonstatic void(mitem_desktop desktop) M_Options_Basic =
 	float spacing = SPACING;
 	float qplaquewidth = 32;
 	float plaquepadding = 24;
-	float titleoffset = -12;
 
 	// Main menu
 
@@ -145,7 +177,7 @@ nonstatic void(mitem_desktop desktop) M_Options_Basic =
 	mm = (mitem_exmenu)desktop.findchildtext(_("Basic Options"));
 	if (mm) { mm.totop(); return; }
 	// create a fullscreen frame
-	mm = spawn(mitem_exmenu, item_text:_("Basic Options"), item_flags:IF_SELECTABLE|IF_NOCURSOR, item_command:"m_options");
+	mm = spawn(options_basic, item_text:_("Basic Options"), item_flags:IF_SELECTABLE|IF_NOCURSOR, item_command:"m_options");
 	desktop.add(mm, RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, '0 0', '0 0');
 	desktop.item_focuschange(mm, IF_KFOCUSED);
 	mm.totop();
@@ -166,7 +198,7 @@ nonstatic void(mitem_desktop desktop) M_Options_Basic =
 	m.add(
 		banner,
 		RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MID|RS_Y_MAX_OWN_MIN,
-		[(banner.item_size_x*-0.5)+titleoffset, padding], [banner.item_size_x*0.5, 24]
+		[-banner.item_size_x*0.5, padding], [banner.item_size_x*0.5, 24]
 	);
 
 	// Content
@@ -216,7 +248,9 @@ nonstatic void(mitem_desktop desktop) M_Options_Basic =
 
 	fr.add(spawn_check (_("Always Run"), cv2("cl_run", "cl_alwaysrun"), optionsize),
 		fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
-	if (engine!=E_QSS) {
+	fr.add(spawn_check (_("Always Mouselook"), "menu_alwaysmlook", optionsize),
+		fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing;
+	{
 		fr.add(spawn_check (_("Invert Mouse"), "m_pitchsign", optionsize),
 			fl, [posx, posy], [maxposx, TXT_NMSZ]); posy += TXT_NMSZ+spacing; }
 	fr.add(spawn_hslider(_("Sensitivity"), "sensitivity", '3 20 1', optionsize),

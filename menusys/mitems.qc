@@ -113,6 +113,10 @@ __strip var float dp_workarounds;
 // traditional quake menu sizes
 #define MENU_WIDTH 320
 #define MENU_HEIGHT 200
+// The classic menu occupies half of this reference canvas. Scaling the
+// canvas uniformly makes the menu grow while retaining its proportions.
+#define MENU_REFERENCE_WIDTH 640
+#define MENU_REFERENCE_HEIGHT 400
 // text
 #define TXT_SMSZ 4
 #define TXT_NMSZ 8
@@ -205,9 +209,16 @@ var uiinfo_t ui =
 // Compensating here preserves artwork proportions and the mouse hitboxes
 // without overwriting the user's scr_*scale settings.
 var vector menu_drawscale = '1 1 1';
+// m_draw supplies the current engine coordinate space. Pair it with live
+// physical dimensions so drawing and input track native window resizing.
+var vector menu_viewportsize;
 static vector(vector v) menu_project =
 {
 	return [v.x*menu_drawscale.x, v.y*menu_drawscale.y, v.z];
+};
+nonstatic vector(vector v) menu_unproject =
+{
+	return [v.x/menu_drawscale.x, v.y/menu_drawscale.y, v.z];
 };
 static void(float x, float y, float w, float h) menu_clip =
 {
@@ -250,11 +261,40 @@ void() queryscreensize =
 	ui.screensize[0] = cvar("vid_conwidth");
 	ui.screensize[1] = cvar("vid_conheight");
 	ui.screensize[2] = 0;
-	float pw = cvar("vid_pixwidth"), ph = cvar("vid_pixheight");
-	menu_drawscale = '1 1 1';
-	if (pw > 0 && ph > 0 && ui.screensize.x > 0 && ui.screensize.y > 0)
+	float pixelwidth = cvar("vid_pixwidth"), pixelheight = cvar("vid_pixheight");
+	float pw = pixelwidth, ph = pixelheight;
+	// MenuQC dimensions are virtual. Read the live drawable dimensions before
+	// converting them; FTE can clamp its two virtual axes independently.
+	if (checkbuiltin(getproperty))
 	{
-		float scale = min(pw/ui.screensize.x, ph/ui.screensize.y, pw/MENU_WIDTH, ph/MENU_HEIGHT);
+		vector physical = (vector)getproperty(VF_SCREENPSIZE);
+		if (physical.x > 0 && physical.y > 0) { pw = physical.x; ph = physical.y; }
+	}
+	// QSS uses vid_width/height when the FTE pixel-size cvars are unavailable.
+	if (pw <= 0) pw = cvar("vid_width");
+	if (ph <= 0) ph = cvar("vid_height");
+	float scale;
+	menu_drawscale = '1 1 1';
+	if (menu_viewportsize.x > 0 && menu_viewportsize.y > 0)
+	{
+		if (pw > 0 && ph > 0)
+		{
+			scale = min(pw/MENU_REFERENCE_WIDTH, ph/MENU_REFERENCE_HEIGHT);
+			menu_drawscale = [scale*menu_viewportsize.x/pw,
+				scale*menu_viewportsize.y/ph, 1];
+			ui.screensize = [pw/scale, ph/scale, 0];
+		}
+		else
+		{
+			scale = min(menu_viewportsize.x/MENU_REFERENCE_WIDTH,
+				menu_viewportsize.y/MENU_REFERENCE_HEIGHT);
+			menu_drawscale = [scale, scale, 1];
+			ui.screensize = [menu_viewportsize.x/scale, menu_viewportsize.y/scale, 0];
+		}
+	}
+	else if (pw > 0 && ph > 0 && ui.screensize.x > 0 && ui.screensize.y > 0)
+	{
+		scale = min(pw/MENU_REFERENCE_WIDTH, ph/MENU_REFERENCE_HEIGHT);
 		menu_drawscale = [scale*ui.screensize.x/pw, scale*ui.screensize.y/ph, 1];
 		ui.screensize = [pw/scale, ph/scale, 0];
 	}

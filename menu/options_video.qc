@@ -1,3 +1,23 @@
+var float autocvar_menu_consoleauto = 1;
+var float autocvar_menu_messageauto = 1;
+static float console_preferences_ready;
+void() M_ConsolePreferences =
+{
+    if (engine != E_QSS) return;
+    // Reapply after config/startup commands; MenuQC can initialize before them.
+    if (autocvar_menu_consoleauto && cvar("scr_conwidth") != 640)
+        cvar_set("scr_conwidth", "640");
+    if (autocvar_menu_messageauto && cvar("scr_menuscale") != 100)
+        cvar_set("scr_menuscale", "100");
+    if (!console_preferences_ready)
+    {
+        console_preferences_ready = TRUE;
+        // QSS clamps this ceiling to the live window dimensions, including
+        // during gameplay when MenuQC is not drawing. It scales centerprints.
+
+        localcmd(strcat("seta menu_consoleauto ", ftos(autocvar_menu_consoleauto), "\nseta menu_messageauto ", ftos(autocvar_menu_messageauto), "\n"));
+    }
+};
 // 160 Is "half screen", assuming screen size is 320
 static float offset_l = -160;
 static float offset_r = 160;
@@ -26,6 +46,7 @@ class options_video : mitem_exmenu
 
 	virtual float(string key) isvalid =
 	{
+		if (key == "menu_consolezoom" || key == "menu_messagezoom") return TRUE;
 		if (key == cv2("vid_mode", "vid_describemodes"))
 			return super::isvalid("vid_width") && super::isvalid("vid_height");
 		return super::isvalid(key);
@@ -34,11 +55,29 @@ class options_video : mitem_exmenu
 	{
 		if (key == cv2("vid_mode", "vid_describemodes"))
 			return videomode;
+		if (key == "menu_consolezoom")
+			return autocvar_menu_consoleauto ? "0" : super::get("scr_conscale");
+		if (key == "menu_messagezoom")
+			return autocvar_menu_messageauto ? "0" : super::get("scr_menuscale");
 		return super::get(key);
 	};
 	virtual void(string key, string newval) set =
 	{
-		if (key == cv2("vid_mode", "vid_describemodes"))
+		if (key == "menu_consolezoom")
+		{
+			float automatic = stof(newval) == 0;
+			cvar_set("menu_consoleauto", ftos(automatic));
+			localcmd(strcat("seta menu_consoleauto ", ftos(automatic), "\n"));
+			cvar_set("scr_conwidth", automatic ? "640" : "0");
+			super::set("scr_conscale", automatic ? "1" : newval);
+		}
+		else if (key == "menu_messagezoom")
+		{
+			cvar_set("menu_messageauto", stof(newval) == 0 ? "1" : "0");
+			localcmd(strcat("seta menu_messageauto ", cvar_string("menu_messageauto"), "\n"));
+			super::set("scr_menuscale", stof(newval) == 0 ? "100" : newval);
+		}
+		else if (key == cv2("vid_mode", "vid_describemodes"))
 		{
 			string old = videomode;
 			videomode = strzone(newval);
@@ -61,7 +100,6 @@ nonstatic void(mitem_desktop desktop) M_Options_Video =
 	float spacing = SPACING;
 	float qplaquewidth = 32;
 	float plaquepadding = 24;
-	float titleoffset = -12;
 
 	// Main menu
 
@@ -91,7 +129,7 @@ nonstatic void(mitem_desktop desktop) M_Options_Video =
 	m.add(
 		banner,
 		RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MID|RS_Y_MAX_OWN_MIN,
-		[(banner.item_size_x*-0.5)+titleoffset, padding], [banner.item_size_x*0.5, 24]
+		[-banner.item_size_x*0.5, padding], [banner.item_size_x*0.5, 24]
 	);
 
 	// Content
@@ -181,13 +219,13 @@ nonstatic void(mitem_desktop desktop) M_Options_Video =
 		fr.add(spawn_combo(_("Video Zoom"), "vid_conautoscale", optionsize, scaleoptions),
 			fl, [posx, posy], [maxposx, TXT_NMSZ]), posy+=TXT_NMSZ+spacing; }
 	if (cvar_type("scr_conscale")) {
-		fr.add(spawn_combo(_("Console Zoom"), "scr_conscale", optionsize, scaleoptions),
+		fr.add(spawn_combo(_("Console Zoom"), engine == E_QSS ? "menu_consolezoom" : "scr_conscale", optionsize, engine == E_QSS ? "0 \"Automatic\" 1 \"x1\" 1.5 \"x1.5\" 2 \"x2\" 4 \"x4\"" : scaleoptions),
 			fl, [posx, posy], [maxposx, TXT_NMSZ]), posy+=TXT_NMSZ+spacing; }
 	if (cvar_type("scr_sbarscale")) {
 		fr.add(spawn_combo(_("Sbar Zoom"), "scr_sbarscale", optionsize, scaleoptions),
 			fl, [posx, posy], [maxposx, TXT_NMSZ]), posy+=TXT_NMSZ+spacing; }
 	if (cvar_type("scr_menuscale")) {
-		fr.add(spawn_combo(_("Menu Zoom"), "scr_menuscale", optionsize, scaleoptions),
+		fr.add(spawn_combo(_("Message Zoom"), engine == E_QSS ? "menu_messagezoom" : "scr_menuscale", optionsize, engine == E_QSS ? "0 \"Automatic\" 1 \"x1\" 1.5 \"x1.5\" 2 \"x2\" 4 \"x4\"" : scaleoptions),
 			fl, [posx, posy], [maxposx, TXT_NMSZ]), posy+=TXT_NMSZ+spacing; }
 	fr.add(spawn_combo(_("Colour Depth"), cv2("vid_bitsperpixel", "vid_bpp"), optionsize, _(
 		"16 \"16bit (No Win10)\"" //r5g6b5, or so. unsupported on win10.

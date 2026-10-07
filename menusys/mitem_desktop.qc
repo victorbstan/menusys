@@ -321,11 +321,14 @@ void(float force) items_updategrabs =
 
 void(mitem_desktop desktop, vector screensize) items_draw =
 {
+#ifdef MENU
+	menu_viewportsize = screensize;
+#endif
 	queryscreensize();
 
 #ifdef MENU
 	ui.mousepos = getmousepos();
-	ui.mousepos = [ui.mousepos.x/menu_drawscale.x, ui.mousepos.y/menu_drawscale.y, 0];
+	ui.mousepos = menu_unproject(ui.mousepos);
 #else
 	if (ui.havemouseworld)
 		ui.havemouseworld = 2;	//stale, but not too stale
@@ -446,7 +449,7 @@ menuonly float(mitem_desktop desktop, float scan, float char, float down) items_
 	queryscreensize();
 	ui.mousepos = getmousepos();
 #ifdef MENU
-	ui.mousepos = [ui.mousepos.x/menu_drawscale.x, ui.mousepos.y/menu_drawscale.y, 0];
+	ui.mousepos = menu_unproject(ui.mousepos);
 #endif
 #ifdef HEIRACHYDEBUG
 	if (scan == K_F1 && down)

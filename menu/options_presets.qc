@@ -55,7 +55,6 @@ nonstatic void(mitem_desktop desktop) M_Preset =
 	float menuy = MENU_HEIGHT;
 	float padding = PADDING;
 	float spacing = SPACING;
-	float titleoffset = -12;
 
 	// Main menu
 
@@ -85,7 +84,7 @@ nonstatic void(mitem_desktop desktop) M_Preset =
 	m.add(
 		banner,
 		RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MID|RS_Y_MAX_OWN_MIN,
-		[(banner.item_size_x*-0.5)+titleoffset, padding], [banner.item_size_x*0.5, 24]
+		[-banner.item_size_x*0.5, padding], [banner.item_size_x*0.5, 24]
 	);
 
 	// Content

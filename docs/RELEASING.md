@@ -8,8 +8,8 @@ Releases consist of a Git tag plus a downloadable ZIP containing a compiled
 1. Merge the completed pull request into `simple-menus`.
 2. Switch to and update the release branch.
 3. Compile `menu.src` from that merged commit.
-4. Complete the regression checklist in
-   [DEVELOPMENT.md](DEVELOPMENT.md#manual-regression-checklist).
+4. Complete the [build and test checks](../README.md#build-and-test), including
+   the engine/game scaling matrix and visual review.
 5. Extract the previous release ZIP. Its directory supplies the cursor and
    menu-button assets. Headers are generated from source; README and example
    configuration come from `assets/release/`.

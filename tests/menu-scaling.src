@@ -1,0 +1,174 @@
+// Issue 6: assertions run against real menu widgets and engine screenshots.
+#define m_init scaling_original_init
+#define m_draw scaling_original_draw
+#define m_consolecommand scaling_original_command
+#include "../menu.src"
+#undef m_init
+#undef m_draw
+#undef m_consolecommand
+mitem_frame(mitem_frame parent) layout_findframe =
+{
+	for (mitem child = parent.item_children; child; child = child.item_next)
+	{
+		if (!(child.item_flags & IF_ISFRAME)) continue;
+		mitem_frame frame = (mitem_frame)child;
+		if (frame.frame_hasscroll) return frame;
+		frame = layout_findframe(frame);
+		if (frame) return frame;
+	}
+	return __NULL__;
+};
+var string scaling_screen;
+var float scaling_checked;
+var float scaling_live = 0;
+var float scaling_request = 0;
+var float scaling_polltime = 0;
+var float scaling_capturetime = 0;
+var float scaling_clock = 0;
+var float autocvar_scaling_test_live = 0;
+void(mitem_frame frame, vector origin) scaling_inspect =
+{
+    for (mitem child = frame.item_children; child; child = child.item_next)
+    {
+        vector absolute = origin + child.item_position;
+        if (child.item_size.x < 0 || child.item_size.y < 0)
+            print("SCALE FAIL negative size ", child.item_text, "\n");
+        if ((!strncmp(child.item_text, "gfx/", 4) || !strncmp(child.item_text, "menugfx/", 8)) && substring(child.item_text, -4, 4) == ".lmp")
+        {
+            vector native = drawgetimagesize(child.item_text);
+            float file = fopen(child.item_text, FILE_READ);
+            if (file < 0 || native.x <= 0 || native.y <= 0)
+                print("SCALE FAIL missing image ", child.item_text, "\n");
+            if (file >= 0) fclose(file);
+            if (native.y > 0 && child.item_size.y > 0 && fabs(child.item_size.x/child.item_size.y - native.x/native.y) > 0.01)
+                print("SCALE FAIL image aspect ", scaling_screen, " ", child.item_text, " size ", vtos(child.item_size), "\n");
+            if (!strncmp(child.item_text, "gfx/p_", 6) || !strncmp(child.item_text, "gfx/ttl_", 8))
+                if (fabs(child.item_position.x+child.item_size.x/2-frame.item_size.x/2) > 0.01)
+                    print("SCALE FAIL title center ", scaling_screen, " ", child.item_text, "\n");
+        }
+        if (child.item_flags & IF_ISFRAME) scaling_inspect((mitem_frame)child, absolute);
+    }
+};
+float(string input) m_consolecommand =
+{
+    tokenize(input);
+    string command = argv(0), screen = argv(1);
+    if (command == "scale_live")
+    {
+        scaling_live = 1;
+        cvar_set("scaling_test_live", "1");
+        print("SCALE LIVE ready\n");
+        if (engine == E_FTE) localcmd("scale_tick\n");
+        return TRUE;
+    }
+    if (command == "scale_tick")
+    {
+        // Explicit captures keep a hidden FTE window drawing across its
+        // delayed startup VM reload without changing user focus.
+        if (cvar("scaling_test_live") && scaling_request >= 0)
+            localcmd("screenshot live-tick.png;in 0.05 scale_tick\n");
+        return TRUE;
+    }
+    if (command == "scale_open")
+    {
+        m_toggle(0);
+        if (scaling_screen) strunzone(scaling_screen);
+        scaling_screen = strzone(screen);
+        scaling_checked = FALSE;
+        if (screen == "main") M_Main(desktop);
+        else if (screen == "single") M_Single(desktop);
+        else if (screen == "multi") M_Multi(desktop);
+        else if (screen == "options") M_Options(desktop);
+        else if (screen == "basic") M_Options_Basic(desktop);
+        else if (screen == "video") M_Options_Video(desktop);
+        else if (screen == "keys") M_Options_Keys(desktop);
+        else if (screen == "audio") M_Options_Audio(desktop);
+        else if (screen == "effects") M_Options_Effects(desktop);
+        else if (screen == "newgame") M_NewGame(desktop);
+        else if (screen == "setup") M_PlayerSetup(desktop);
+        else if (screen == "help") M_Help(desktop);
+        else if (screen == "levels") M_Levels(desktop);
+        else if (screen == "demos") M_Demos(desktop);
+        else if (screen == "load") M_Load(desktop);
+        else print("SCALE FAIL unknown fixture screen\n");
+        ui.mgrabs = ui.kgrabs = __NULL__;
+        items_updategrabs(TRUE);
+        return TRUE;
+    }
+    if (command == "scale_check")
+    {
+        // Physical uniformity is checked independently from screenshot pixels.
+        if (!desktop.item_kactivechild) print("SCALE FAIL no active screen\n");
+        else scaling_inspect((mitem_frame)desktop.item_kactivechild, '0 0 0');
+        print("SCALE checked ", scaling_screen, " virtual ", vtos(ui.screensize), " scale ", vtos(menu_drawscale), "\n");
+        scaling_checked = TRUE;
+        return TRUE;
+    }
+    if (command == "scale_scroll")
+    {
+        mitem_frame scroll = layout_findframe((mitem_frame)desktop.item_kactivechild);
+        if (scroll && scroll.vslider) scroll.vslider.val = scroll.vslider.maxv;
+        return TRUE;
+    }
+    return scaling_original_command(input);
+};
+// Independent pixel measurement in the runner detects physical stretching even
+// if the engine provides virtual dimensions or independently clamps each axis.
+void(vector screensize) m_draw =
+{
+    scaling_clock += 1;
+    scaling_live = cvar("scaling_test_live");
+    scaling_original_draw(screensize);
+    ui.drawfill('8 8', '32 32', '1 0 1', 1, 0);
+    if (scaling_live && scaling_clock >= scaling_polltime)
+    {
+        scaling_polltime = scaling_clock+6;
+        float requestfile = fopen("scale-request.txt", FILE_READ);
+        if (requestfile >= 0)
+        {
+            float request = stof(fgets(requestfile));
+            fclose(requestfile);
+            if (request != scaling_request)
+            {
+                scaling_request = request;
+                scaling_capturetime = scaling_clock+18;
+                if (request == 4)
+                {
+                    // Supply a pointer at a known physical position, expressed
+                    // in the engine's coordinates. Exercise production inverse
+                    // projection, hover/focus and key handling independently of
+                    // Windows' hidden-window cursor/focus behavior.
+                    vector physical = (vector)getproperty(VF_SCREENPSIZE);
+                    float scale = min(physical.x/640, physical.y/400);
+                    vector pointer = [(physical.x/2+32*scale)*screensize.x/physical.x,
+                        (physical.y/2-50*scale)*screensize.y/physical.y, 0];
+                    ui.mousepos = menu_unproject(pointer);
+                    desktop.item_draw(desktop.item_position);
+                    desktop.item_keypress(desktop.item_position, K_MOUSE1, 0, TRUE);
+                    desktop.item_keypress(desktop.item_position, K_MOUSE1, 0, FALSE);
+                }
+            }
+        }
+    }
+    if (scaling_live && scaling_capturetime && scaling_clock >= scaling_capturetime)
+    {
+        scaling_capturetime = 0;
+        if (scaling_request < 0) localcmd("quit\n");
+        else
+        {
+            if (scaling_request == 4 && desktop.item_kactivechild.item_text != "Singleplayer Menu")
+                print("SCALE FAIL mouse click after resize\n");
+            print("SCALE LIVE ", ftos(scaling_request), " active ", desktop.item_kactivechild.item_text, "\n");
+            localcmd(engine == E_QSS ? "scale_check;screenshot png\n" : sprintf("scale_check;screenshot live%g.png\n", scaling_request));
+        }
+    }
+};
+void() m_init =
+{
+    scaling_original_init();
+    registercommand("scale_open");
+    registercommand("scale_check");
+    registercommand("scale_scroll");
+    registercommand("scale_live");
+    registercommand("scale_tick");
+};

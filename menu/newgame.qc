@@ -26,7 +26,6 @@ nonstatic void(mitem_desktop desktop) M_NewGame =
 	float padding = PADDING;
 	float qplaquewidth = 32;
 	float plaquepadding = 24;
-	float titleoffset = -12;
 	// text sizes
 
 	if (gametype == "sp")
@@ -106,7 +105,7 @@ nonstatic void(mitem_desktop desktop) M_NewGame =
 	m.add(
 		banner,
 		RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MID|RS_Y_MAX_OWN_MIN,
-		[(banner.item_size_x*-0.5)+titleoffset, padding], [banner.item_size_x*0.5, 24]
+		[-banner.item_size_x*0.5, padding], [banner.item_size_x*0.5, 24]
 	);
 
 	// Content
@@ -133,7 +132,7 @@ nonstatic void(mitem_desktop desktop) M_NewGame =
 		banner = spawn(mitem_pic, item_text:"gfx/ttl_sgl.lmp", item_size_y:24, item_flags:IF_CENTERALIGN);
 		m.add(banner,
 			RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MID|RS_Y_MAX_OWN_MIN,
-			[(banner.item_size_x*-0.5)+titleoffset, padding], [banner.item_size_x*0.5, 24]
+			[-banner.item_size_x*0.5, padding], [banner.item_size_x*0.5, 24]
 		);
 
 		// Options - single
@@ -148,7 +147,7 @@ nonstatic void(mitem_desktop desktop) M_NewGame =
 		banner = spawn(mitem_pic, item_text:"gfx/p_multi.lmp", item_size_y:24, item_flags:IF_CENTERALIGN);
 		m.add(banner,
 			RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MID|RS_Y_MAX_OWN_MIN,
-			[(banner.item_size_x*-0.5)+titleoffset, padding], [banner.item_size_x*0.5, 24]
+			[-banner.item_size_x*0.5, padding], [banner.item_size_x*0.5, 24]
 		);
 
 		// Options - multi

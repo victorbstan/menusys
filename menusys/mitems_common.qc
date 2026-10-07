@@ -134,11 +134,11 @@ class mitem_pic : mitem
 
 		if (item_text)
 			item_text = strzone(item_text);
-		precache_pic(item_text);
+		precache_pic(item_text, 0);
 		if (item_text_mactive)
 		{
 			item_text_mactive = strzone(item_text_mactive);
-			precache_pic(item_text_mactive);
+			precache_pic(item_text_mactive, 0);
 		}
 
 		if (!item_size[0])
@@ -197,11 +197,11 @@ class mitem_pici : mitem
 
 		if (item_text)
 			item_text = strzone(item_text);
-		precache_pic(item_text);
+		precache_pic(item_text, 0);
 		if (item_text_mactive)
 		{
 			item_text_mactive = strzone(item_text_mactive);
-			precache_pic(item_text_mactive);
+			precache_pic(item_text_mactive, 0);
 		}
 
 		if (item_command != "")

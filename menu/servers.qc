@@ -502,6 +502,17 @@ class mitem_serverpanel : mitem_frame
     };
 };
 
+float native_browser_scale_active;
+float native_browser_old_scale;
+
+nonstatic void() M_ServerRestoreScale =
+{
+    if (!native_browser_scale_active)
+        return;
+    cvar_set("vid_conautoscale", ftos(native_browser_old_scale));
+    native_browser_scale_active = FALSE;
+};
+
 nonstatic void(mitem_desktop desktop) M_Servers =
 {
     // Prefer our layout whenever the host-cache API exists. An explicit native
@@ -514,10 +525,20 @@ nonstatic void(mitem_desktop desktop) M_Servers =
             resorthostcache();
             refreshhostcache(TRUE);
         }
+        // The advanced browser belongs to the engine and does not use our
+        // drawing wrappers. Give it the same live, aspect-preserving scale.
+        if (!native_browser_scale_active)
+            native_browser_old_scale = cvar("vid_conautoscale");
+        native_browser_scale_active = TRUE;
+        // Zero selects FTE's dynamic autoscale mode. Unlike a fixed factor it
+        // is recalculated by the engine whenever the native window is resized.
+        cvar_set("vid_conautoscale", "0");
         if (checkcommand2("menu_servers", FALSE)) localcmd("menu_servers\n");
         else print(_("Server browsing is unavailable in this engine.\n"));
         return;
     }
+
+    M_ServerRestoreScale();
 
     mitem_exmenu existing = (mitem_exmenu)desktop.findchildtext(_("Servers List"));
     if (existing)
@@ -577,9 +598,9 @@ nonstatic void(mitem_desktop desktop) M_Servers =
         panel.add(spawn_servercheck(_("Hide Full"), "sb_hidefull", '128 8'), flags, '168 -28', '128 8');
         panel.add(spawn_servercheck(_("Only Favs"), "sb_onlyfavs", '128 8'), flags, '168 -20', '128 8');
     }
-    if (checkcommand2("menu_servers", FALSE))
-        panel.add(spawn(mitem_text, item_text:_("Advanced browser"), item_command:"m_pop;m_servers native", item_scale:8),
-            flags, '168 -8', '128 8');
+    // Do not advertise the engine's fixed 320x200 browser when this scalable
+    // MenuQC implementation is available. Power users can still invoke the
+    // explicit `m_servers native` console command.
     // Focus the actual list so arrows/Enter/R/F5 work immediately on entry.
     m.item_focuschange(panel, IF_KFOCUSED);
     panel.item_focuschange(ls, IF_KFOCUSED);
