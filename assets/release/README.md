@@ -1,27 +1,87 @@
 # Classic Menu System
 
 A replacement menu for FTEQW and Quakespasm-Spiked, with classic Quake artwork,
-mouse navigation, level and demo browsers, Player Setup, and expanded options.
+mouse navigation, level and demo browsers, Player Setup, and expanded settings.
+The menu scales with the window while preserving the proportions of its artwork.
 
-Copy `menu.pak` into your `id1` or mod directory. Settings in
-`autoexec.cfg.example` are optional; copy the ones you want into your own
-`autoexec.cfg`. Restart the engine after installing.
+## Compatibility
 
-Single Player includes Load, Save, Levels, and Demos. Save requires a running
-single-player game. Multiplayer > Setup includes hostname, player name, shirt
-and pants colors, and the active game's `gfx/menuplyr.lmp` artwork.
+Use FTEQW or Quakespasm-Spiked (QSS) with registered Quake or compatible
+standalone game data, such as LibreQuake. Game data is not included.
 
-FTE uses the system mouse cursor when `cl_cursor ""` is set. To select one of the
-packaged cursors, set `cl_cursor "menugfx/cursor_copr.tga"`. Cursor changes take
-effect while the menu is open. Engine support for custom cursors varies.
+Engines without MenuQC support cannot load this replacement menu. Standard
+Ironwail and Mark V are not supported.
 
-Game artwork takes priority over the packaged fallbacks at `gfx/levels.lmp`,
-`gfx/demos.lmp`, `gfx/p_levels.lmp`, and `gfx/p_demos.lmp`. These may be loose
-files or PAK entries. The replacement menu does not include Quake's base-game
-artwork; install Quake or a compatible standalone game's data alongside it.
+## Installation
 
-Source and bug reports: <https://github.com/victorbstan/menusys>.
+1. Download the compiled ZIP from
+   [GitHub Releases](https://github.com/victorbstan/menusys/releases).
+2. Extract it and copy `menu.pak` into your game's `id1` directory, or the mod
+   directory where you want to use the menu.
+3. Optionally copy the settings you want from `autoexec.cfg.example` into your
+   own `autoexec.cfg`.
+4. Restart the engine.
+
+Installing in a mod directory limits the replacement menu to that mod.
+To uninstall, remove the installed `menu.pak` and any settings you copied from
+the example configuration.
+
+## Using the menu
+
+Press Escape to open the menu. Navigate with the arrow keys and Enter, or
+select items with the mouse. Escape returns to the previous screen or game.
+
+- **Single Player:** start a game, load or save, browse levels, and play demos.
+  Saving requires a running single-player game.
+- **Multiplayer:** join or start a game and open Player Setup to change your
+  name, hostname, shirt color, and pants color. Available networking options
+  depend on the engine.
+- **Options:** adjust controls, video, audio, and effects. Options unsupported
+  by the engine may be unavailable.
+- **Help / Manual:** view the active game's help pages.
+
+Game artwork takes priority over the included Levels and Demos fallback
+headers. The appearance can therefore differ between Quake and LibreQuake.
+
+## Mouse settings
+
+Basic Options includes **Always Mouselook**, **Invert Mouse**, and
+**Sensitivity**. Always Mouselook keeps mouse aiming enabled during gameplay;
+the choice made in this menu is remembered across restarts.
+
+In FTE, `cl_cursor ""` selects the system cursor. To use an included custom
+cursor, enter one of these commands in the console or add it to `autoexec.cfg`:
+
+```text
+cl_cursor "menugfx/cursor_copr.tga"
+cl_cursor "menugfx/cursor_tintin.tga"
+```
+
+Cursor changes apply while the menu is open. Custom cursor support varies
+between engines.
+
+## Text and window size
+
+Menus follow the current window size and keep their classic proportions.
+
+In QSS, Video Options provides separate **Console Zoom** and **Message Zoom**
+settings. **Automatic** makes console text and centered gameplay messages grow
+with the window. Fixed zoom choices remain available.
+
+## Troubleshooting
+
+- **The replacement menu does not appear:** confirm the engine supports MenuQC
+  and the package is installed in the active game directory. Another installed
+  menu replacement may take priority.
+- **Graphics are missing:** confirm the active game's data files are installed.
+  The package uses artwork supplied by Quake or the standalone game.
+- **Save is unavailable:** start a single-player game before opening Save.
+- **A changed installation still shows the old menu:** restart the engine.
+
+## Credits and support
 
 Maintained by vbs; original menu framework and engine support by Spoike.
 Includes menu button artwork from Mark V and cursor artwork including TinTin's
-cursor. Levels and Demos fallback headers are generated from this repository.
+cursor. Levels and Demos fallback headers are supplied with the menu.
+
+[Source, license, and bug reports](https://github.com/victorbstan/menusys).
