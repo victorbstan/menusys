@@ -1,1 +1,10 @@
 /dist/
+
+# Local development and workflow notes.
+/AGENTS.md
+/docs/DEVELOPMENT.md
+/docs/ISSUE6_FIXES.md
+/docs/RELEASING.md
+/docs/MENU_DEVELOPMENT.md
+/README.TXT
+/menusys/readme.txt
