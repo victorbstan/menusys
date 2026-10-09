@@ -200,7 +200,14 @@ var uiinfo_t ui =
 	drawpic,
 	drawfill,
 	drawcharacter,
-	drawstring
+	drawstring,
+	// Older FTEQCC leaves omitted vector z components undefined.
+	__NULL__, __NULL__,
+	0, 0,
+	'0 0 0', '0 0 0', '0 0 0', '0 0 0', '0 0 0'
+#ifndef MENU
+	, 0, '0 0 0', '0 0 0'
+#endif
 };
 
 #ifdef MENU

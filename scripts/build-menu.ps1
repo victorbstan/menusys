@@ -17,9 +17,12 @@ $target = (Join-Path $build $output).Replace('\', '/')
 Push-Location $build
 try {
     if (Test-Path -LiteralPath $target) { Remove-Item -LiteralPath $target }
-    & $Compiler -srcfile $wrapper
-    if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $target)) {
-        throw 'FTEQCC did not produce the requested output.'
+    $compile = @(& $Compiler -srcfile $wrapper 2>&1)
+    $compile | Set-Content -LiteralPath (Join-Path $build ($output + ".compile.log"))
+    $compile | ForEach-Object { Write-Host $_ }
+    if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $target) -or
+        @($compile | Select-String -Pattern "warning:|warning Q|[1-9][0-9]* warnings").Count) {
+        throw 'FTEQCC must produce the requested output with zero warnings. Inspect the compile log.'
     }
     Get-Item -LiteralPath $target | Select-Object FullName, Length
 } finally { Pop-Location }

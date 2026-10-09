@@ -165,6 +165,14 @@ void() m_init =
 
 	desktop = spawn(mitem_desktop);
 	startupmenu_pending = TRUE;
+	// QSS can report disconnected while a command-line map is signing on.
+	// Keep Main closed during signon; Escape still opens it normally.
+	if (engine == E_QSS)
+	{
+		float args = tokenize(cvar_string("cmdline"));
+		for (float i = 0; i < args; i++)
+			if (argv(i) == "+map") startupmenu_pending = FALSE;
+	}
 	classic_menudots_precache();
 
 	if (checkbuiltin(registercommand))

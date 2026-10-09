@@ -2,6 +2,9 @@
 param([Parameter(Mandatory = $true)][string] $OutputDirectory)
 $ErrorActionPreference = 'Stop'
 [void](New-Item -ItemType Directory -Path $OutputDirectory -Force)
+# Static artwork is versioned alongside the menu; no previous release is needed.
+Get-ChildItem -LiteralPath (Join-Path $PSScriptRoot '../assets/menu') -File |
+    Copy-Item -Destination $OutputDirectory -Force
 # Original 5x7 letterforms, expanded to three-pixel strokes with a shadow.
 # Native dimensions are retained at runtime; games can override these headers
 # with gfx/p_levels.lmp and gfx/p_demos.lmp in their own visual style.

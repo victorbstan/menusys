@@ -6,9 +6,6 @@ param(
     [Parameter(Mandatory = $true)]
     [string] $MenuDat,
 
-    [Parameter(Mandatory = $true)]
-    [string] $BasePackageDirectory,
-
     [string] $OutputDirectory = (Join-Path $PSScriptRoot "..\dist"),
 
     [switch] $Force
@@ -208,12 +205,6 @@ if ($Version -notmatch '^v[0-9]+\.[0-9]+(?:\.[0-9]+)?(?:-[0-9A-Za-z.-]+)?$') {
 }
 
 $menuDatPath = Get-RequiredFile (Get-FullPath $MenuDat) "Compiled menu.dat"
-$baseDirectory = Get-FullPath $BasePackageDirectory
-if (-not (Test-Path -LiteralPath $baseDirectory -PathType Container)) {
-    throw "Base package directory was not found: $baseDirectory"
-}
-
-$basePakPath = Get-RequiredFile (Join-Path $baseDirectory "menu.pak") "Base menu.pak"
 $releaseTemplates = Join-Path $PSScriptRoot '../assets/release'
 $baseReadmePath = Get-RequiredFile (Join-Path $releaseTemplates "README.md") "Package README template"
 $baseConfigPath = Get-RequiredFile (
@@ -243,31 +234,20 @@ Assert-ChildPath $outputPath $stagingRoot
 try {
     [void](New-Item -ItemType Directory -Path $stagingPackageDirectory -Force)
 
-    $baseEntries = @(Read-Pak $basePakPath)
-    $supportEntries = @($baseEntries | Where-Object {
-        (Normalize-PakPath $_.Name) -ine "menu.dat"
-    })
-
-    foreach ($required in @('menugfx/levels.lmp', 'menugfx/demos.lmp', 'menugfx/cursor_copr.tga')) {
-        if ($supportEntries.Name -notcontains $required) {
-            throw "Base PAK is missing support asset: $required"
-        }
-    }
-
     $assetDirectory = Join-Path $stagingRoot 'assets'
     & (Join-Path $PSScriptRoot 'build-menu-assets.ps1') -OutputDirectory $assetDirectory
-    foreach ($asset in Get-ChildItem -LiteralPath $assetDirectory -File) {
-        $assetName = 'menugfx/' + $asset.Name
-        $supportEntries = @($supportEntries | Where-Object { $_.Name -ine $assetName }) + @(
-            [pscustomobject]@{ Name = $assetName; Data = [IO.File]::ReadAllBytes($asset.FullName) }
-        )
+    $supportEntries = @(Get-ChildItem -LiteralPath $assetDirectory -File | ForEach-Object {
+        [pscustomobject]@{ Name = 'menugfx/' + $_.Name; Data = [IO.File]::ReadAllBytes($_.FullName) }
+    })
+    foreach ($required in @('menugfx/levels.lmp', 'menugfx/demos.lmp', 'menugfx/cursor_copr.tga')) {
+        if ($supportEntries.Name -notcontains $required) { throw "Missing support asset: $required" }
     }
 
     $duplicateSupportPaths = @($supportEntries |
         Group-Object { (Normalize-PakPath $_.Name).ToLowerInvariant() } |
         Where-Object Count -gt 1)
     if ($duplicateSupportPaths.Count -ne 0) {
-        throw "The base PAK contains duplicate support-asset paths."
+        throw "Support artwork contains duplicate asset paths."
     }
 
     $compiledMenuBytes = [System.IO.File]::ReadAllBytes($menuDatPath)

@@ -92,7 +92,9 @@ foreach($case in $Cases){
             }
             [IO.File]::WriteAllText((Join-Path $game 'scale-request.txt'),[string]$step)
             $filename=if($isQss){'spasm{0:d4}.png' -f ($step-1)}else{"live$step.png"}
-            $path=Join-Path $game $filename;$deadline=[DateTime]::UtcNow.AddSeconds(10)
+            $path=Join-Path $game $filename
+            # Allow high-resolution PNG writes to finish after pointer activation.
+            $deadline=[DateTime]::UtcNow.AddSeconds(20)
             $complete=$false
             while(-not $complete -and [DateTime]::UtcNow -lt $deadline -and -not $process.HasExited){
                 Start-Sleep -Milliseconds 100
