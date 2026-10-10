@@ -6,6 +6,16 @@
 #undef m_init
 #undef m_draw
 #undef m_consolecommand
+void() scaling_checknative =
+{
+    if (!cvar("scaling_test_nativezoom")) return;
+    vector pixels = (vector)getproperty(VF_SCREENPSIZE);
+    float expected = max(1, min(pixels.x/640, pixels.y/400));
+    float actualconsole = cvar(engine == E_QSS ? "scr_conscale" : "con_textsize");
+    float actualhud = cvar(engine == E_QSS ? "scr_sbarscale" : "vid_conautoscale");
+    if (fabs(actualconsole - (engine == E_QSS ? expected : -8*expected)) > 0.01 || fabs(actualhud - expected) > 0.01)
+        print("SCALE FAIL native automatic zoom after resize\n");
+};
 mitem_frame(mitem_frame parent) layout_findframe =
 {
 	for (mitem child = parent.item_children; child; child = child.item_next)
@@ -97,6 +107,7 @@ float(string input) m_consolecommand =
     }
     if (command == "scale_check")
     {
+        scaling_checknative();
         // Physical uniformity is checked independently from screenshot pixels.
         if (!desktop.item_kactivechild) print("SCALE FAIL no active screen\n");
         else scaling_inspect((mitem_frame)desktop.item_kactivechild, '0 0 0');
@@ -139,7 +150,7 @@ void(vector screensize) m_draw =
                     // projection, hover/focus and key handling independently of
                     // Windows' hidden-window cursor/focus behavior.
                     vector physical = (vector)getproperty(VF_SCREENPSIZE);
-                    float scale = min(physical.x/640, physical.y/400);
+                    float scale = cvar("menu_zoom") > 0 ? min(cvar("menu_zoom"), min(physical.x/320, physical.y/200)) : min(physical.x/640, physical.y/400);
                     vector pointer = [(physical.x/2+32*scale)*screensize.x/physical.x,
                         (physical.y/2-50*scale)*screensize.y/physical.y, 0];
                     ui.mousepos = menu_unproject(pointer);

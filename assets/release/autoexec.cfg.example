@@ -8,12 +8,20 @@
 // cl_cursor_size 2
 // cl_cursorbias 0
 
-// QSS: choose Console Zoom and Message Zoom under Options > Video.
-// Automatic follows window size; fixed choices are x1, x1.5, x2, and x4.
-// Set a fixed choice there before using engine text-scale overrides.
-// The replacement menu always scales automatically with the window.
+// Options > Video: Menu Zoom (QSS: Menu/Message Zoom), Console Zoom, HUD Zoom
+// (FTE: HUD/UI Zoom).
+// Menu Zoom: Automatic follows live window size; fixed choices are
+// 1x, 2x, 3x and 4x, limited to fit small windows.
+// seta menu_zoom 0
+// seta menu_zoom 3
+// QSS native messages/scores share this menu setting via scr_menuscale.
+// Native scores retain the last applied scale until a custom menu is reopened.
 
-// Optional QSS status bar scale (independent of menu and text zoom).
+// Console and HUD zoom are independent. Choose Automatic, 1x, 2x, 3x, 4x
+// or Default in Options > Video. Automatic follows the same window reference.
+// FTE HUD/UI Zoom includes native messages and scores; its console text stays
+// independent. Existing native settings are retained until changed there.
+// seta menu_hudauto 0
 // scr_sbarscale 4
 
 // Optional classic texture filtering.

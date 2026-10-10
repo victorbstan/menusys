@@ -17,6 +17,23 @@ mitem(mitem_frame parent, string command) preferences_find =
     }
     return __NULL__;
 };
+void(mitem_frame parent, string key, float nativechoices) preferences_choices =
+{
+    mitem_combo combo = (mitem_combo)preferences_find(parent, key);
+    if (!combo || !(combo.item_flags & IF_SELECTABLE))
+    {
+        print("PREF FAIL zoom combo missing or disabled ", key, "\n");
+        return;
+    }
+    float count = tokenize(combo.mstrlist);
+    if (count != (nativechoices ? 12 : 10) || argv(0) != "0" || argv(1) != "Automatic")
+        print("PREF FAIL automatic/preset choice list ", key, "\n");
+    for (float i = 1; i <= 4; i++)
+        if (argv(i*2) != ftos(i) || argv(i*2+1) != strcat(ftos(i), "x"))
+            print("PREF FAIL integer zoom preset ", key, "\n");
+    if (nativechoices && (argv(10) != "-1" || argv(11) != "Default"))
+        print("PREF FAIL native Default choice ", key, "\n");
+};
 float(string input) m_consolecommand =
 {
     tokenize(input);
@@ -39,13 +56,58 @@ float(string input) m_consolecommand =
         }
         return TRUE;
     }
+    if (argv(0) == "pref_zoom_initial")
+    {
+        if (cvar("menu_zoom") != stof(argv(1))) print("PREF FAIL initial menu zoom\n");
+        return TRUE;
+    }
     if (argv(0) == "pref_zoom")
     {
         options_video menu = (options_video)desktop.item_kactivechild;
+        mitem_combo consolezoom = (mitem_combo)preferences_find(menu, "menu_consolezoom");
+        mitem_combo hudzoom = (mitem_combo)preferences_find(menu, "menu_hudzoom");
+        if (!hudzoom || substring(hudzoom.mstrlist, 0, 1) != "0") print("PREF FAIL HUD automatic choice missing\n");
+        mitem_combo menuzoom = (mitem_combo)preferences_find(menu, "menu_zoom");
+        if (!consolezoom || substring(consolezoom.mstrlist, 0, 1) != "0") print("PREF FAIL console automatic choice missing\n");
+        if (!menuzoom || substring(menuzoom.mstrlist, 0, 1) != "0") print("PREF FAIL menu automatic choice missing\n");
         menu.set("menu_consolezoom", argv(1));
+        menu.set("menu_zoom", argv(2));
+        menu.set("menu_hudzoom", argv(3));
+        if (menu.get("menu_hudzoom") != argv(3)) print("PREF FAIL HUD zoom\n");
+        if (menu.get("menu_consolezoom") != argv(1)) print("PREF FAIL console zoom\n");
+        if (menu.get("menu_zoom") != argv(2) ) print("PREF FAIL menu zoom\n");
         print("PREF zoom ", menu.get("menu_consolezoom"), " width ", cvar_string("scr_conwidth"), "\n");
+        return TRUE;
+    }
+    if (argv(0) == "pref_native")
+    {
+        options_video native_menu = (options_video)desktop.item_kactivechild;
+        if (stof(native_menu.get("menu_consolezoom")) != stof(argv(1)) || stof(native_menu.get("menu_zoom")) != stof(argv(2)) || stof(native_menu.get("menu_hudzoom")) != stof(argv(3)))
+            print("PREF FAIL persisted zoom selections\n");
+        float consolevalue = cvar(engine == E_QSS ? "scr_conscale" : "con_textsize");
+        float hudvalue = cvar(engine == E_QSS ? "scr_sbarscale" : "vid_conautoscale");
+        if (fabs(consolevalue - stof(argv(4))) > 0.01 || fabs(hudvalue - stof(argv(5))) > 0.01)
+            print("PREF FAIL native zoom values ", ftos(consolevalue), " ", ftos(hudvalue), "\n");
+        print("PREF native ", ftos(consolevalue), " ", ftos(hudvalue), "\n");
+        preferences_choices(native_menu, "menu_consolezoom", TRUE);
+        preferences_choices(native_menu, "menu_hudzoom", TRUE);
+        preferences_choices(native_menu, "menu_zoom", FALSE);
+        if (preferences_find(native_menu, "vid_conautoscale") || preferences_find(native_menu, "scr_conscale"))
+            print("PREF FAIL duplicate native zoom controls\n");
+        return TRUE;
+    }
+    if (argv(0) == "pref_independent")
+    {
+        options_video independent_menu = (options_video)desktop.item_kactivechild;
+        float oldconsole = cvar(engine == E_QSS ? "scr_conscale" : "con_textsize");
+        float oldhud = cvar(engine == E_QSS ? "scr_sbarscale" : "vid_conautoscale");
+        float oldmenu = cvar("menu_zoom");
+        independent_menu.set(argv(1), argv(2));
+        if (argv(1) != "menu_consolezoom" && oldconsole != cvar(engine == E_QSS ? "scr_conscale" : "con_textsize")) print("PREF FAIL console coupling\n");
+        if (argv(1) != "menu_hudzoom" && oldhud != cvar(engine == E_QSS ? "scr_sbarscale" : "vid_conautoscale")) print("PREF FAIL HUD coupling\n");
+        if (argv(1) != "menu_zoom" && oldmenu != cvar("menu_zoom")) print("PREF FAIL menu coupling\n");
         return TRUE;
     }
     return preferences_original_command(input);
 };
-void() m_init = { preferences_original_init(); registercommand("pref_toggle"); registercommand("pref_zoom"); registercommand("pref_exit"); registercommand("pref_assert"); };
+void() m_init = { preferences_original_init(); registercommand("pref_native"); registercommand("pref_independent"); registercommand("pref_toggle"); registercommand("pref_zoom"); registercommand("pref_zoom_initial"); registercommand("pref_exit"); registercommand("pref_assert"); };

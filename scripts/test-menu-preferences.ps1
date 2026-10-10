@@ -16,8 +16,9 @@ $build = Join-Path $root 'dist/build'
 [IO.File]::WriteAllText((Join-Path $build 'preferences.src'), "#include `"../../tests/menu-preferences.src`"`n#pragma progs_dat `"preferences-menu.dat`"`n")
 Push-Location $build
 try {
-    & $Compiler -srcfile preferences.src
-    if ($LASTEXITCODE -ne 0) { throw 'Fixture compilation failed' }
+    $compile = @(& $Compiler -srcfile preferences.src 2>&1)
+    $compile | Set-Content (Join-Path $build "preferences.compile.log")
+    if ($LASTEXITCODE -ne 0 -or @($compile | Select-String "warning:|warning Q|[1-9][0-9]* warnings").Count) { throw 'Fixture compilation failed' }
 } finally { Pop-Location }
 $game = Join-Path $base 'menusys_test'
 $id1 = Join-Path $base 'id1'
@@ -32,12 +33,16 @@ Copy-Item -LiteralPath (Join-Path $build 'preferences-menu.dat') -Destination (J
 $pause = 'wait;' * 30
 foreach ($phase in 1..3) {
     $expectedInitial = if ($phase -eq 2) { '1' } else { '0' }
+    $menuZoom = @("0", "3", "0")[$phase - 1]
+    $hudZoom = @("0", "4", "2")[$phase - 1]
+    $nativeZoom = if ($phase -eq 2) { "3" } else { "1.5" }
     $zoom = if ($phase -eq 2) { '4' } else { '0' }
+    $initialZoom = if ($phase -eq 3) { "3" } else { "0" }
     $commands = @(
         'host_maxfps 60',
         "$pause m_pop; m_basicopts; $pause pref_assert $expectedInitial",
         "pref_toggle; $pause screenshot png",
-        "m_pop; m_video; $pause pref_zoom $zoom",
+        "m_pop; m_video; $pause pref_zoom_initial $initialZoom; pref_zoom $zoom $menuZoom $hudZoom",
         "m_pop; toggleconsole; $pause screenshot png", 'pref_exit'
     )
     [IO.File]::WriteAllLines((Join-Path $game 'preferences.cfg'), $commands)
@@ -51,14 +56,19 @@ foreach ($phase in 1..3) {
     $log = [IO.File]::ReadAllText((Join-Path $base 'qconsole.log'))
     if ($log -match 'PREF FAIL|Unknown command') { throw "Phase $phase failed: $log" }
     $config = [IO.File]::ReadAllText((Join-Path $game 'config.cfg'))
-    if ($config -notmatch 'scr_menuscale "100"') { throw 'Gameplay message scale was not saved' }
+    if ($config -notmatch ('scr_menuscale "'+$nativeZoom+'"')) { throw 'Gameplay message scale was not saved' }
+    if ($config -notmatch ('seta menu_zoom "'+$menuZoom+'"')) { throw 'Menu zoom did not persist' }
+    $nativeHud = if ($phase -eq 1) { '1.5' } else { $hudZoom }
+    if ($config -notmatch ('scr_sbarscale "'+$nativeHud+'"')) { throw 'HUD zoom did not persist independently' }
     $enabled = $phase -ne 2
     $expected = if ($enabled) { '1' } else { '0' }
     if ($config -notmatch ('seta menu_alwaysmlook "'+$expected+'"')) { throw 'Mouselook preference was not saved' }
     if (($config -match '(?m)^\+mlook\s*$') -ne $enabled) { throw 'Native mouselook state was not saved' }
-    $expectedWidth = if ($enabled) { '640' } else { '0' }
+    $expectedWidth = '0'
+    $expectedConsole = if ($phase -eq 2) { '4' } else { '1.5' }
+    if ($config -notmatch ('scr_conscale "'+$expectedConsole+'"')) { throw 'Console zoom did not persist independently' }
     if ($config -notmatch ('scr_conwidth "'+$expectedWidth+'"')) { throw 'Console width was not saved' }
     Copy-Item -LiteralPath (Join-Path $base 'qconsole.log') -Destination (Join-Path $base "phase-$phase.log")
     Copy-Item -LiteralPath (Join-Path $game 'config.cfg') -Destination (Join-Path $base "phase-$phase.cfg")
 }
-Write-Host "PASS: checkbox toggles, native mouselook persistence, restart state, fixed/automatic console scale. Screenshots: $game"
+Write-Host "PASS: checkbox toggles, native mouselook persistence, restart state, independent automatic/fixed menu, HUD and console zoom. Screenshots: $game"

@@ -4,7 +4,7 @@ function Get-ScalingErrors($Logs,[bool] $LibreQss){
     # Only allow this exact upstream startup baseline before fixture checkpoints.
     $known='if|vid_fsaamode|scr_pixelaspect|sv_autoload|cl_fakeshaft|gl_texturemode_viewmodels|r_lerpmuzzlehack|gl_texturemode_sky|gl_texturemode_hud|gl_overbright_model|gl_smoothfont|cl_stainmaps|cl_decals|cl_particles_quake|cl_beams_polygons|r_font_postprocess_mono|r_waterscroll'
     foreach($log in $Logs){
-        $checkpoint=Select-String -LiteralPath $log.FullName -Pattern 'SCALE checked|SCALE LIVE' | Select-Object -First 1
+        $checkpoint=Select-String -LiteralPath $log.FullName -Pattern 'SCALE checked|SCALE LIVE|PREF native' | Select-Object -First 1
         foreach($error in @(Select-String -LiteralPath $log.FullName -Pattern 'SCALE FAIL|Unknown command|unimplemented builtin|Host_Error|Menu_Abort|PF_strunzone:|W_GetLumpName:.*not found|Cvar_Set: variable .* not found')){
             if($LibreQss -and $checkpoint -and $error.LineNumber -lt $checkpoint.LineNumber -and $error.Line -match ('^Unknown command "('+ $known +')"$')){
                 Add-Content -LiteralPath (Join-Path $log.DirectoryName 'startup-warnings.txt') -Value $error.Line
@@ -31,10 +31,14 @@ public static class ScalingPixels {
 }
 '@
 }
-function Measure-Marker([string] $Path){
+function Get-TestZoom([double] $Width,[double] $Height,[double] $Zoom){
+    if($Zoom -gt 0){return [Math]::Min($Zoom,[Math]::Min($Width/320.0,$Height/200.0))}
+    return [Math]::Min($Width/640.0,$Height/400.0)
+}
+function Measure-Marker([string] $Path,[double] $Zoom=0){
     $bitmap=[Drawing.Bitmap]::new($Path)
     try{
-        $limit=[int][Math]::Ceiling(44*[Math]::Min($bitmap.Width/640.0,$bitmap.Height/400.0))+4
+        $limit=[int][Math]::Ceiling(44*(Get-TestZoom $bitmap.Width $bitmap.Height $Zoom))+4
         $rectangle=[Drawing.Rectangle]::new(0,0,[Math]::Min($bitmap.Width,$limit),[Math]::Min($bitmap.Height,$limit))
         $bits=$bitmap.LockBits($rectangle,[Drawing.Imaging.ImageLockMode]::ReadOnly,[Drawing.Imaging.PixelFormat]::Format32bppArgb)
         try{

@@ -117,6 +117,14 @@ __strip var float dp_workarounds;
 // canvas uniformly makes the menu grow while retaining its proportions.
 #define MENU_REFERENCE_WIDTH 640
 #define MENU_REFERENCE_HEIGHT 400
+// 0 follows the live window; positive values are fixed physical zoom overrides.
+var float autocvar_menu_zoom = 0;
+float(vector physical) menu_layoutscale =
+{
+    if (autocvar_menu_zoom > 0)
+        return min(autocvar_menu_zoom, min(physical.x/MENU_WIDTH, physical.y/MENU_HEIGHT));
+    return min(physical.x/MENU_REFERENCE_WIDTH, physical.y/MENU_REFERENCE_HEIGHT);
+};
 // text
 #define TXT_SMSZ 4
 #define TXT_NMSZ 8
@@ -286,22 +294,21 @@ void() queryscreensize =
 	{
 		if (pw > 0 && ph > 0)
 		{
-			scale = min(pw/MENU_REFERENCE_WIDTH, ph/MENU_REFERENCE_HEIGHT);
+			scale = menu_layoutscale([pw, ph, 0]);
 			menu_drawscale = [scale*menu_viewportsize.x/pw,
 				scale*menu_viewportsize.y/ph, 1];
 			ui.screensize = [pw/scale, ph/scale, 0];
 		}
 		else
 		{
-			scale = min(menu_viewportsize.x/MENU_REFERENCE_WIDTH,
-				menu_viewportsize.y/MENU_REFERENCE_HEIGHT);
+			scale = menu_layoutscale(menu_viewportsize);
 			menu_drawscale = [scale, scale, 1];
 			ui.screensize = [menu_viewportsize.x/scale, menu_viewportsize.y/scale, 0];
 		}
 	}
 	else if (pw > 0 && ph > 0 && ui.screensize.x > 0 && ui.screensize.y > 0)
 	{
-		scale = min(pw/MENU_REFERENCE_WIDTH, ph/MENU_REFERENCE_HEIGHT);
+		scale = menu_layoutscale([pw, ph, 0]);
 		menu_drawscale = [scale*ui.screensize.x/pw, scale*ui.screensize.y/ph, 1];
 		ui.screensize = [pw/scale, ph/scale, 0];
 	}

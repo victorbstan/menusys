@@ -8,6 +8,8 @@ param(
     [Parameter(Mandatory=$true)][string] $SupportDirectory,
     [string[]] $Cases = @('fte-id1','fte-librequake','qss-id1','qss-librequake'),
     [string[]] $Sizes = @('400x300','960x600','1920x1080','3840x2070'),
+    [ValidateRange(0,4)][double] $MenuZoom = 0,
+    [switch] $CheckNativeZooms,
     [string] $TestName = 'issue6-scaling'
 )
 $ErrorActionPreference='Stop'
@@ -42,7 +44,8 @@ foreach($case in $Cases){
         & (Join-Path $PSScriptRoot 'build-player-preview.ps1') -Pak (Join-Path $id1 'pak0.pak') -OutputDirectory (Join-Path $game 'menugfx/playerpreview') | Out-Null
         Copy-Item -LiteralPath (Join-Path $build 'scaling-menu.dat') -Destination (Join-Path $game 'menu.dat')
         [IO.File]::WriteAllLines((Join-Path $game 'quake.rc'),@('exec default.cfg','exec autoexec.cfg'))
-        $commands=@('developer 1','alias startdemos ""','cl_cursor ""')
+        $commands=@('developer 1','alias startdemos ""','cl_cursor ""',"seta menu_zoom $MenuZoom")
+    if($CheckNativeZooms){$commands+=@('seta scaling_test_nativezoom 1','seta menu_consoleauto 1','seta menu_fteconsolezoom 0','seta menu_hudauto 1')}
         if($isQss){$commands+=@('host_maxfps 60')}
         else{$commands+=@('cl_maxfps 60','cl_maxidlefps 60',(('wait;'*60)+'forceqmenu 0;menu_restart'))}
         $pause='wait;'*20
@@ -68,7 +71,7 @@ foreach($case in $Cases){
         foreach($screen in $screens){
             $path=Join-Path $game "$screen.png"
             if(-not(Test-Path -LiteralPath $path)){$errors+="Missing $screen screenshot";continue}
-            $m=Measure-Marker $path;$expected=32*[Math]::Min($m[0]/640.0,$m[1]/400.0)
+            $m=Measure-Marker $path $MenuZoom;$expected=32*(Get-TestZoom $m[0] $m[1] $MenuZoom)
             if($m[0] -ne $width -or $m[1] -ne $height){$errors+="Wrong drawable dimensions $screen : $($m[0])x$($m[1])"}
             if([Math]::Abs($m[4]-$m[5]) -gt 1 -or [Math]::Abs($m[4]-$expected) -gt 2){$errors+="Physical aspect/scale $screen : $($m[4])x$($m[5]), expected $expected"}
         }

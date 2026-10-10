@@ -68,18 +68,34 @@ between engines.
 
 ## Text and window size
 
-Menus follow the current window size and keep their classic proportions,
-including when you resize the window during play.
+Under **Options -> Video**, **Menu Zoom** defaults to **Automatic**, which follows
+live window size while preserving classic artwork proportions and centering.
+Fixed choices are **1x, 2x, 3x and 4x**; they shrink when necessary to fit
+small windows. Automatic uses a 640x400 reference, so a 960x600 window uses 1.5x.
 
-In QSS, **Options → Video** provides separate **Console Zoom** and **Message Zoom**
-settings. **Automatic** makes console text and centered gameplay messages grow
-with the window, including while the menu is closed. Fixed zoom choices remain
-available. These settings control engine text; menu sizing follows the window
-automatically.
+In QSS this setting is called **Menu/Message Zoom**. It also controls centered
+game messages and the engine's native completion and finale screens. QSS keeps
+these native overlays at least 1x. During completion/finale, QSS stops calling
+MenuQC, so automatic zoom retains its last value until you reopen a custom menu.
+The completion screen remains the engine's original display.
 
-Use these menu controls to choose a fixed text zoom in QSS. Changing only
-`scr_conscale` or `scr_menuscale` in a configuration file can be overridden
-while the corresponding zoom is set to Automatic.
+**Console Zoom** and **HUD Zoom** are independent, with **Automatic**, **1x,
+2x, 3x, 4x** and **Default** choices. Automatic uses the same 640x400 window
+reference as the menus, with a 1x minimum for native UI. Default restores native
+engine behavior. Existing native HUD settings and FTE console text settings are
+retained until you choose a new setting.
+
+FTE calls the HUD control **HUD/UI Zoom** because it also scales native messages,
+scores and other engine overlays. Console Zoom uses a separate physical text size
+and stays independent of HUD/UI Zoom for Automatic and fixed choices. Console
+Default restores FTE's native text behavior, which follows its UI scale.
+Menu Zoom controls the replacement menus.
+FTE's old duplicate Video Zoom control has been removed. QSS Menu/Message Zoom
+continues to control its native messages and scores separately from HUD Zoom.
+
+Selections are saved across restarts. To set menu zoom from the console or
+`autoexec.cfg`, use `seta menu_zoom 0` for Automatic or, for example,
+`seta menu_zoom 3` for 3x. In QSS the menu applies this choice to `scr_menuscale`.
 
 ## Troubleshooting
 

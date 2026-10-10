@@ -1,21 +1,44 @@
+// QSS retains its existing automatic flags. -1 restores native defaults.
 var float autocvar_menu_consoleauto = 1;
-var float autocvar_menu_messageauto = 1;
-static float console_preferences_ready;
+var float autocvar_menu_hudauto = 0;
+// FTE's old console control was an alias of its global UI scale. Leave saved
+// native text settings alone until this independent control is selected.
+var float autocvar_menu_fteconsolezoom = -1;
+void(string key, string value) M_SaveZoom =
+{
+    cvar_set(key, value);
+    localcmd(strcat("seta ", key, " ", value, "\n"));
+};
 void() M_ConsolePreferences =
 {
-    if (engine != E_QSS) return;
-    // Reapply after config/startup commands; MenuQC can initialize before them.
-    if (autocvar_menu_consoleauto && cvar("scr_conwidth") != 640)
-        cvar_set("scr_conwidth", "640");
-    if (autocvar_menu_messageauto && cvar("scr_menuscale") != 100)
-        cvar_set("scr_menuscale", "100");
-    if (!console_preferences_ready)
+    vector physical = (vector)getproperty(VF_SCREENPSIZE);
+    if (physical.x <= 0 || physical.y <= 0) return;
+    float automatic = max(1, min(physical.x/MENU_REFERENCE_WIDTH, physical.y/MENU_REFERENCE_HEIGHT));
+    if (engine == E_QSS)
     {
-        console_preferences_ready = TRUE;
-        // QSS clamps this ceiling to the live window dimensions, including
-        // during gameplay when MenuQC is not drawing. It scales centerprints.
-
-        localcmd(strcat("seta menu_consoleauto ", ftos(autocvar_menu_consoleauto), "\nseta menu_messageauto ", ftos(autocvar_menu_messageauto), "\n"));
+        // MenuQC is not called during intermission; native scores inherit the
+        // last applied menu/message scale. Native overlays have a x1 minimum.
+        float zoom = max(1, autocvar_menu_zoom > 0 ? autocvar_menu_zoom : automatic);
+        if (cvar("scr_menuscale") != zoom) cvar_set("scr_menuscale", ftos(zoom));
+        if (autocvar_menu_consoleauto > 0)
+        {
+            if (cvar("scr_conwidth") != 0) cvar_set("scr_conwidth", "0");
+            if (cvar("scr_conscale") != automatic) cvar_set("scr_conscale", ftos(automatic));
+        }
+        if (autocvar_menu_hudauto > 0 && cvar("scr_sbarscale") != automatic)
+            cvar_set("scr_sbarscale", ftos(automatic));
+    }
+    else if (engine == E_FTE)
+    {
+        if (autocvar_menu_hudauto > 0 && cvar("vid_conautoscale") != automatic)
+            cvar_set("vid_conautoscale", ftos(automatic));
+        if (autocvar_menu_fteconsolezoom >= 0 && cvar_type("con_textsize"))
+        {
+            // Negative con_textsize is physical pixels, independent of FTE's
+            // global UI canvas (vid_conautoscale / scr_conscale alias).
+            float textsize = -8 * (autocvar_menu_fteconsolezoom > 0 ? autocvar_menu_fteconsolezoom : automatic);
+            if (cvar("con_textsize") != textsize) cvar_set("con_textsize", ftos(textsize));
+        }
     }
 };
 // 160 Is "half screen", assuming screen size is 320
@@ -46,7 +69,7 @@ class options_video : mitem_exmenu
 
 	virtual float(string key) isvalid =
 	{
-		if (key == "menu_consolezoom" || key == "menu_messagezoom") return TRUE;
+		if (key == "menu_consolezoom" || key == "menu_zoom" || key == "menu_hudzoom") return TRUE;
 		if (key == cv2("vid_mode", "vid_describemodes"))
 			return super::isvalid("vid_width") && super::isvalid("vid_height");
 		return super::isvalid(key);
@@ -55,28 +78,56 @@ class options_video : mitem_exmenu
 	{
 		if (key == cv2("vid_mode", "vid_describemodes"))
 			return videomode;
-		if (key == "menu_consolezoom")
-			return autocvar_menu_consoleauto ? "0" : super::get("scr_conscale");
-		if (key == "menu_messagezoom")
-			return autocvar_menu_messageauto ? "0" : super::get("scr_menuscale");
+        if (key == "menu_consolezoom")
+        {
+            if (engine == E_FTE) return ftos(autocvar_menu_fteconsolezoom);
+            return autocvar_menu_consoleauto < 0 ? "-1" : (autocvar_menu_consoleauto > 0 ? "0" : super::get("scr_conscale"));
+        }
+        if (key == "menu_zoom") return ftos(autocvar_menu_zoom);
+        if (key == "menu_hudzoom")
+        {
+            if (autocvar_menu_hudauto < 0) return "-1";
+            if (autocvar_menu_hudauto > 0) return "0";
+            float zoom = cvar(engine == E_QSS ? "scr_sbarscale" : "vid_conautoscale");
+            return zoom > 0 ? ftos(zoom) : "-1";
+        }
 		return super::get(key);
 	};
 	virtual void(string key, string newval) set =
 	{
-		if (key == "menu_consolezoom")
-		{
-			float automatic = stof(newval) == 0;
-			cvar_set("menu_consoleauto", ftos(automatic));
-			localcmd(strcat("seta menu_consoleauto ", ftos(automatic), "\n"));
-			cvar_set("scr_conwidth", automatic ? "640" : "0");
-			super::set("scr_conscale", automatic ? "1" : newval);
-		}
-		else if (key == "menu_messagezoom")
-		{
-			cvar_set("menu_messageauto", stof(newval) == 0 ? "1" : "0");
-			localcmd(strcat("seta menu_messageauto ", cvar_string("menu_messageauto"), "\n"));
-			super::set("scr_menuscale", stof(newval) == 0 ? "100" : newval);
-		}
+        if (key == "menu_consolezoom")
+        {
+            float zoom = stof(newval);
+            if (engine == E_FTE)
+            {
+                M_SaveZoom("menu_fteconsolezoom", newval);
+                if (zoom < 0) M_SaveZoom("con_textsize", "8");
+                else
+                {
+                    M_ConsolePreferences();
+                    M_SaveZoom("con_textsize", cvar_string("con_textsize"));
+                }
+            }
+            else
+            {
+                M_SaveZoom("menu_consoleauto", zoom < 0 ? "-1" : (zoom == 0 ? "1" : "0"));
+                cvar_set("scr_conwidth", "0");
+                cvar_set("scr_conscale", zoom > 0 ? newval : "1");
+                M_ConsolePreferences();
+            }
+        }
+        else if (key == "menu_zoom")
+        {
+            M_SaveZoom("menu_zoom", newval);
+            M_ConsolePreferences();
+        }
+        else if (key == "menu_hudzoom")
+        {
+            float hudzoom = stof(newval);
+            M_SaveZoom("menu_hudauto", hudzoom < 0 ? "-1" : (hudzoom == 0 ? "1" : "0"));
+            cvar_set(engine == E_QSS ? "scr_sbarscale" : "vid_conautoscale", hudzoom > 0 ? newval : (engine == E_QSS ? "1" : "0"));
+            M_ConsolePreferences();
+        }
 		else if (key == cv2("vid_mode", "vid_describemodes"))
 		{
 			string old = videomode;
@@ -209,24 +260,17 @@ nonstatic void(mitem_desktop desktop) M_Options_Video =
 		fr.add(spawn_combo(_("Video Mode"), cv2("vid_mode", "vid_describemodes"), optionsize, PrepareVideoModes()),
 			fl, [posx, posy], [maxposx, TXT_NMSZ]); posy+=TXT_NMSZ+spacing;	}
 
-	static const string scaleoptions = _(
-		"0 \"Default\""
-		"1.5 \"x1.5\""
-		"2 \"x2\""
-		"4 \"x4\""
-	);
-	if (cvar_type("vid_conautoscale")) {
-		fr.add(spawn_combo(_("Video Zoom"), "vid_conautoscale", optionsize, scaleoptions),
-			fl, [posx, posy], [maxposx, TXT_NMSZ]), posy+=TXT_NMSZ+spacing; }
-	if (cvar_type("scr_conscale")) {
-		fr.add(spawn_combo(_("Console Zoom"), engine == E_QSS ? "menu_consolezoom" : "scr_conscale", optionsize, engine == E_QSS ? "0 \"Automatic\" 1 \"x1\" 1.5 \"x1.5\" 2 \"x2\" 4 \"x4\"" : scaleoptions),
-			fl, [posx, posy], [maxposx, TXT_NMSZ]), posy+=TXT_NMSZ+spacing; }
-	if (cvar_type("scr_sbarscale")) {
-		fr.add(spawn_combo(_("Sbar Zoom"), "scr_sbarscale", optionsize, scaleoptions),
-			fl, [posx, posy], [maxposx, TXT_NMSZ]), posy+=TXT_NMSZ+spacing; }
-	if (cvar_type("scr_menuscale")) {
-		fr.add(spawn_combo(_("Message Zoom"), engine == E_QSS ? "menu_messagezoom" : "scr_menuscale", optionsize, engine == E_QSS ? "0 \"Automatic\" 1 \"x1\" 1.5 \"x1.5\" 2 \"x2\" 4 \"x4\"" : scaleoptions),
-			fl, [posx, posy], [maxposx, TXT_NMSZ]), posy+=TXT_NMSZ+spacing; }
+    static const string fixedzooms = _("1 \"1x\" 2 \"2x\" 3 \"3x\" 4 \"4x\"");
+    string autozooms = strcat(_("0 \"Automatic\" "), fixedzooms);
+    string nativezooms = strcat(autozooms, _(" -1 \"Default\""));
+    if (engine == E_QSS ? cvar_type("scr_conscale") : cvar_type("con_textsize")) {
+        fr.add(spawn_combo(_("Console Zoom"), "menu_consolezoom", optionsize, nativezooms),
+            fl, [posx, posy], [maxposx, TXT_NMSZ]), posy+=TXT_NMSZ+spacing; }
+    if (engine == E_QSS ? cvar_type("scr_sbarscale") : cvar_type("vid_conautoscale")) {
+        fr.add(spawn_combo(engine == E_QSS ? _("HUD Zoom") : _("HUD/UI Zoom"), "menu_hudzoom", optionsize, nativezooms),
+            fl, [posx, posy], [maxposx, TXT_NMSZ]), posy+=TXT_NMSZ+spacing; }
+    fr.add(spawn_combo(engine == E_QSS ? _("Menu/Message Zoom") : _("Menu Zoom"), "menu_zoom", optionsize, autozooms),
+        fl, [posx, posy], [maxposx, TXT_NMSZ]), posy+=TXT_NMSZ+spacing;
 	fr.add(spawn_combo(_("Colour Depth"), cv2("vid_bitsperpixel", "vid_bpp"), optionsize, _(
 		"16 \"16bit (No Win10)\"" //r5g6b5, or so. unsupported on win10.
 		"24 \"24bit (Default)\"" //rgba8 - we don't count the alpha.
