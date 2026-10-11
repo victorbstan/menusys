@@ -161,7 +161,7 @@ void(mitem_desktop desktop) M_Levels =
 	// Content
 
 	// banner image
-	mitem_pic banner = spawn(mitem_pic, item_text:saveorload, item_flags:IF_CENTERALIGN);
+	mitem_pic banner = spawn(mitem_pic, item_text:saveorload, item_size_y:24, item_flags:IF_CENTERALIGN);
 	m.add(banner, RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MID|RS_Y_MAX_OWN_MIN, // top-left|bottom-right relation
 		[banner.item_size_x*-0.5, padding], // top-left
 		[banner.item_size_x*0.5, banner.item_size_y]); // bottom-right

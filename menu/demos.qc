@@ -9,7 +9,7 @@ void(mitem_desktop desktop) M_Demos =
 	mitem_frame m = spawn(mitem_frame, item_flags:IF_SELECTABLE);
 	mm.add(m, RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID|RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID,
 		[-MENU_WIDTH/2, -MENU_HEIGHT/2], [MENU_WIDTH/2, MENU_HEIGHT/2]);
-	mitem_pic banner = spawn(mitem_pic, item_text:classic_art("gfx/p_demos.lmp", "menugfx/p_demos.lmp"));
+	mitem_pic banner = spawn(mitem_pic, item_text:classic_art("gfx/p_demos.lmp", "menugfx/p_demos.lmp"), item_size_y:24);
 	m.add(banner, RS_X_MIN_PARENT_MID, [-banner.item_size.x/2, PADDING], banner.item_size);
 	mitem_frame fr = spawn(mitem_frame, item_flags:IF_SELECTABLE|IF_FOCUSFOLLOWSMOUSE,
 		frame_hasscroll:TRUE, item_framesize:[PADDING, PADDING, PADDING]);

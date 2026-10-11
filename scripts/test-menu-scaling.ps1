@@ -10,6 +10,7 @@ param(
     [string[]] $Sizes = @('400x300','960x600','1920x1080','3840x2070'),
     [ValidateRange(0,4)][double] $MenuZoom = 0,
     [switch] $CheckNativeZooms,
+    [switch] $ImageAudit,
     [string] $TestName = 'issue6-scaling'
 )
 $ErrorActionPreference='Stop'
@@ -29,6 +30,7 @@ try{
 }finally{Pop-Location}
 . (Join-Path $PSScriptRoot 'scaling-test-tools.ps1')
 $screens=@('main','single','multi','options','basic','video','keys','audio','effects','newgame','setup','help','levels','demos','load','video-scrolled')
+if($ImageAudit){$screens+=@('save','particles','hud','configs','presets','cvars','mods','help1','help2','help3','help4','help5')}
 $results=@()
 foreach($case in $Cases){
     if($case -notin @('fte-id1','fte-librequake','qss-id1','qss-librequake')){throw 'Invalid case'}
@@ -60,7 +62,7 @@ foreach($case in $Cases){
         if(-not $isQss){$arguments=@('-nohome','+set','vid_fullscreen','0')+$arguments}
         $process=Start-Process -FilePath $engine -ArgumentList $arguments -WorkingDirectory $base -WindowStyle Hidden -PassThru
         $errors=@()
-        if(-not $process.WaitForExit(55000)){Stop-Process -Id $process.Id;$errors+='Engine timed out'}
+        if(-not $process.WaitForExit([Math]::Max(55000, $screens.Count*2500))){Stop-Process -Id $process.Id;$errors+='Engine timed out'}
         if($isQss){
             $shots=@(Get-ChildItem -LiteralPath $game -Filter 'spasm*.png' | Sort-Object Name)
             if($shots.Count -eq $screens.Count){for($i=0;$i -lt $shots.Count;$i++){Move-Item -LiteralPath $shots[$i].FullName -Destination (Join-Path $game ($screens[$i]+'.png'))}}
@@ -72,11 +74,12 @@ foreach($case in $Cases){
             $path=Join-Path $game "$screen.png"
             if(-not(Test-Path -LiteralPath $path)){$errors+="Missing $screen screenshot";continue}
             $m=Measure-Marker $path $MenuZoom;$expected=32*(Get-TestZoom $m[0] $m[1] $MenuZoom)
+            if(-not(Test-PixelFont $path)){$errors+="Font interpolation/resampling $screen"}
             if($m[0] -ne $width -or $m[1] -ne $height){$errors+="Wrong drawable dimensions $screen : $($m[0])x$($m[1])"}
             if([Math]::Abs($m[4]-$m[5]) -gt 1 -or [Math]::Abs($m[4]-$expected) -gt 2){$errors+="Physical aspect/scale $screen : $($m[4])x$($m[5]), expected $expected"}
         }
         # Contact sheets are for human review; keep original engine captures.
-        $sheet=[Drawing.Bitmap]::new(1280,960);$g=[Drawing.Graphics]::FromImage($sheet);$g.Clear([Drawing.Color]::Black)
+        $sheet=[Drawing.Bitmap]::new(1280,[int](240*[Math]::Ceiling($screens.Count/4.0)));$g=[Drawing.Graphics]::FromImage($sheet);$g.Clear([Drawing.Color]::Black)
         $font=[Drawing.Font]::new('Arial',11)
         try{
             for($i=0;$i -lt $screens.Count;$i++){

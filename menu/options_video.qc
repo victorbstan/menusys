@@ -95,6 +95,12 @@ class options_video : mitem_exmenu
 	};
 	virtual void(string key, string newval) set =
 	{
+        if (engine == E_FTE && key == "cl_sbaralpha")
+        {
+            // FTE's classic opaque and heads-up modes ignore background alpha.
+            // Only switch to the translucent classic bar when explicitly edited.
+            super::set("cl_sbar", "2");
+        }
         if (key == "menu_consolezoom")
         {
             float zoom = stof(newval);
@@ -266,11 +272,15 @@ nonstatic void(mitem_desktop desktop) M_Options_Video =
     if (engine == E_QSS ? cvar_type("scr_conscale") : cvar_type("con_textsize")) {
         fr.add(spawn_combo(_("Console Zoom"), "menu_consolezoom", optionsize, nativezooms),
             fl, [posx, posy], [maxposx, TXT_NMSZ]), posy+=TXT_NMSZ+spacing; }
+    fr.add(spawn_combo(_("Menu Zoom"), "menu_zoom", optionsize, autozooms),
+        fl, [posx, posy], [maxposx, TXT_NMSZ]), posy+=TXT_NMSZ+spacing;
     if (engine == E_QSS ? cvar_type("scr_sbarscale") : cvar_type("vid_conautoscale")) {
         fr.add(spawn_combo(engine == E_QSS ? _("HUD Zoom") : _("HUD/UI Zoom"), "menu_hudzoom", optionsize, nativezooms),
             fl, [posx, posy], [maxposx, TXT_NMSZ]), posy+=TXT_NMSZ+spacing; }
-    fr.add(spawn_combo(engine == E_QSS ? _("Menu/Message Zoom") : _("Menu Zoom"), "menu_zoom", optionsize, autozooms),
-        fl, [posx, posy], [maxposx, TXT_NMSZ]), posy+=TXT_NMSZ+spacing;
+    string hudalpha = engine == E_FTE ? "cl_sbaralpha" : "scr_sbaralpha";
+    if (cvar_type(hudalpha)) {
+        fr.add(spawn_hslider(_("HUD Alpha"), hudalpha, '0 1 0.05', optionsize),
+            fl, [posx, posy], [maxposx, TXT_NMSZ]), posy+=TXT_NMSZ+spacing; }
 	fr.add(spawn_combo(_("Colour Depth"), cv2("vid_bitsperpixel", "vid_bpp"), optionsize, _(
 		"16 \"16bit (No Win10)\"" //r5g6b5, or so. unsupported on win10.
 		"24 \"24bit (Default)\"" //rgba8 - we don't count the alpha.

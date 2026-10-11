@@ -128,12 +128,6 @@ nonstatic void(mitem_desktop desktop) M_NewGame =
 		break;
 	case "sp":
 		// NOTE: Deprecated. There is a single player entry from main menu
-		// Title - single
-		banner = spawn(mitem_pic, item_text:"gfx/ttl_sgl.lmp", item_size_y:24, item_flags:IF_CENTERALIGN);
-		m.add(banner,
-			RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MID|RS_Y_MAX_OWN_MIN,
-			[-banner.item_size_x*0.5, padding], [banner.item_size_x*0.5, 24]
-		);
 
 		// Options - single
 		m.add(spawn(mitem_text, item_text:"Single Player", item_command:"m_pop;m_newgame sp", item_scale:TXT_LGSZ),
@@ -143,12 +137,6 @@ nonstatic void(mitem_desktop desktop) M_NewGame =
 		addmenuback(mm);
 		break;
 	default:
-		// Title - multi
-		banner = spawn(mitem_pic, item_text:"gfx/p_multi.lmp", item_size_y:24, item_flags:IF_CENTERALIGN);
-		m.add(banner,
-			RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MID|RS_Y_MAX_OWN_MIN,
-			[-banner.item_size_x*0.5, padding], [banner.item_size_x*0.5, 24]
-		);
 
 		// Options - multi
 		// NOTE: Could this simply be a drop-down selection in a new MP game setup screen?

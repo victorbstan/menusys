@@ -60,7 +60,7 @@ void(mitem_desktop desktop) M_PlayerSetup =
 	mitem_frame m = spawn(mitem_frame, item_text:"Setup panel", item_flags:IF_SELECTABLE|IF_FOCUSFOLLOWSMOUSE);
 	mm.add(m, RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID|RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID,
 		[-MENU_WIDTH/2, -MENU_HEIGHT/2], [MENU_WIDTH/2, MENU_HEIGHT/2]);
-	mitem_pic banner = spawn(mitem_pic, item_text:"gfx/p_multi.lmp");
+	mitem_pic banner = spawn(mitem_pic, item_text:"gfx/p_multi.lmp", item_size_y:24);
 	m.add(banner, RS_X_MIN_PARENT_MID, [-banner.item_size.x/2, PADDING], banner.item_size);
 	m.add(spawn_edit(_("Hostname"), "hostname", '280 8'), 0, [16, 40], '280 8');
 	m.add(spawn_edit(_("Player Name"), cv2("_cl_name", "name"), '280 8'), 0, [16, 64], '280 8');

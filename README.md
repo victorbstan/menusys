@@ -73,7 +73,7 @@ live window size while preserving classic artwork proportions and centering.
 Fixed choices are **1x, 2x, 3x and 4x**; they shrink when necessary to fit
 small windows. Automatic uses a 640x400 reference, so a 960x600 window uses 1.5x.
 
-In QSS this setting is called **Menu/Message Zoom**. It also controls centered
+In QSS, **Menu Zoom** also controls centered
 game messages and the engine's native completion and finale screens. QSS keeps
 these native overlays at least 1x. During completion/finale, QSS stops calling
 MenuQC, so automatic zoom retains its last value until you reopen a custom menu.
@@ -90,12 +90,22 @@ scores and other engine overlays. Console Zoom uses a separate physical text siz
 and stays independent of HUD/UI Zoom for Automatic and fixed choices. Console
 Default restores FTE's native text behavior, which follows its UI scale.
 Menu Zoom controls the replacement menus.
-FTE's old duplicate Video Zoom control has been removed. QSS Menu/Message Zoom
+FTE's old duplicate Video Zoom control has been removed. QSS Menu Zoom
 continues to control its native messages and scores separately from HUD Zoom.
+
+**HUD Alpha** in **Options -> Video** controls the status-bar backgrounds:
+`0` is transparent and `1` is opaque; numbers and icons remain readable.
+Changing it in FTE selects the translucent classic status-bar mode. Use View
+Size `100` or `110` for an overlay; smaller views still reserve a border.
+In QSS, alpha below `1` also removes the tiled fill beside the status bar.
 
 Selections are saved across restarts. To set menu zoom from the console or
 `autoexec.cfg`, use `seta menu_zoom 0` for Automatic or, for example,
 `seta menu_zoom 3` for 3x. In QSS the menu applies this choice to `scr_menuscale`.
+
+Classic menu text uses sharp bitmap scaling by default. In FTE, the shared font
+filter also makes console text sharp. Explicit menu font overrides retain their
+existing rendering.
 
 ## Troubleshooting
 

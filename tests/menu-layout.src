@@ -119,9 +119,25 @@ float(string cstr) m_consolecommand =
 	items_updategrabs(TRUE);
 	return TRUE;
 };
+void(mitem_frame frame) layout_checktitles =
+{
+    for (mitem child = frame.item_children; child; child = child.item_next)
+    {
+        if (!strncmp(child.item_text, "gfx/p_", 6) || !strncmp(child.item_text, "gfx/ttl_", 8))
+        {
+            vector native = drawgetimagesize(child.item_text);
+            if (fabs(child.item_size.y-24) > 0.01 || native.y <= 0 ||
+                fabs(child.item_size.x/child.item_size.y-native.x/native.y) > 0.01 ||
+                fabs(child.item_position.x+child.item_size.x/2-frame.item_size.x/2) > 0.01)
+                print("LAYOUT FAIL banner size/aspect/center ", child.item_text, "\n");
+        }
+        if (child.item_flags & IF_ISFRAME) layout_checktitles((mitem_frame)child);
+    }
+};
 void(vector screensize) m_draw =
 {
 	layout_original_draw(screensize);
+	if (desktop.item_kactivechild) layout_checktitles((mitem_frame)desktop.item_kactivechild);
 	if (layout_frame && layout_frame.vslider)
 		layout_frame.vslider.val = min(96, layout_frame.vslider.maxv);
 };

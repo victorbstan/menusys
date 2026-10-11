@@ -28,14 +28,87 @@ mitem_frame(mitem_frame parent) layout_findframe =
 	}
 	return __NULL__;
 };
+var float scaling_iconcalls;
+float(vector pos, string pic, vector size, vector rgb, float alpha, float flags) scaling_iconpic =
+{
+    vector native = drawgetimagesize(pic);
+    vector expected = native * min(16/native.x, 16/native.y);
+    vector expectedpos = '37 51 0' + ('16 16 0'-expected)*0.5;
+    if (vlen(size-expected) > 0.01 || vlen(pos-expectedpos) > 0.01)
+        print("SCALE FAIL mod icon aspect/centering\n");
+    scaling_iconcalls += 1;
+    return 0;
+};
+void() scaling_checkicons =
+{
+    float(vector pos, string pic, vector size, vector rgb, float alpha, float flags) savedpic = ui.drawpic;
+    ui.drawpic = scaling_iconpic;
+    scaling_iconcalls = 0;
+    for (float i = 0; i < 2; i++)
+    {
+        mitem_pictext icon = spawn(mitem_pictext, pic:i ? "gfx/qplaque.lmp" : "gfx/p_multi.lmp", item_size:'100 16', item_text:"", item_scale:8);
+        icon.item_draw('37 51 0');
+        icon.item_remove();
+    }
+    ui.drawpic = savedpic;
+    if (scaling_iconcalls != 2) print("SCALE FAIL mod icons bypass menu projection\n");
+};
 var string scaling_screen;
 var float scaling_checked;
+var float scaling_titles;
+var float scaling_iconchecked;
 var float scaling_live = 0;
 var float scaling_request = 0;
 var float scaling_polltime = 0;
 var float scaling_capturetime = 0;
 var float scaling_clock = 0;
 var float autocvar_scaling_test_live = 0;
+mitem(mitem_frame frame, string command) scaling_findcontrol =
+{
+    for (mitem child = frame.item_children; child; child = child.item_next)
+    {
+        if (child.item_command == command) return child;
+        if (child.item_flags & IF_ISFRAME)
+        {
+            mitem found = scaling_findcontrol((mitem_frame)child, command);
+            if (found) return found;
+        }
+    }
+    return __NULL__;
+};
+void() scaling_checkhudalpha =
+{
+    string key = engine == E_FTE ? "cl_sbaralpha" : "scr_sbaralpha";
+    mitem control = scaling_findcontrol((mitem_frame)desktop.item_kactivechild, key);
+    if (!control || !(control.item_flags & IF_SELECTABLE))
+    {
+        print("SCALE FAIL HUD Alpha control missing/disabled\n");
+        return;
+    }
+    float oldalpha = cvar(key), oldmode = cvar("cl_sbar");
+    float oldview = cvar("viewsize"), oldmenu = cvar("menu_zoom");
+    float oldhud = cvar(engine == E_FTE ? "vid_conautoscale" : "scr_sbarscale");
+    float oldconsole = cvar(engine == E_FTE ? "con_textsize" : "scr_conscale");
+    cvar_set(key, "0.5");
+    control.item_keypress('0 0', K_RIGHTARROW, 0, TRUE);
+    if (fabs(cvar(key)-0.55) > 0.001)
+        print("SCALE FAIL HUD Alpha keyboard/native binding\n");
+    if (engine == E_FTE && cvar("cl_sbar") != 2)
+        print("SCALE FAIL FTE translucent HUD mode\n");
+    cvar_set(key, "0");
+    control.item_keypress('0 0', K_LEFTARROW, 0, TRUE);
+    if (cvar(key) != 0) print("SCALE FAIL HUD Alpha lower bound\n");
+    cvar_set(key, "1");
+    control.item_keypress('0 0', K_RIGHTARROW, 0, TRUE);
+    if (cvar(key) != 1) print("SCALE FAIL HUD Alpha upper bound\n");
+    if (cvar("viewsize") != oldview || cvar("menu_zoom") != oldmenu ||
+        cvar(engine == E_FTE ? "vid_conautoscale" : "scr_sbarscale") != oldhud ||
+        cvar(engine == E_FTE ? "con_textsize" : "scr_conscale") != oldconsole)
+        print("SCALE FAIL HUD Alpha changed unrelated settings\n");
+    cvar_set(key, ftos(oldalpha));
+    if (engine == E_FTE) cvar_set("cl_sbar", ftos(oldmode));
+    print("SCALE HUD Alpha checked\n");
+};
 void(mitem_frame frame, vector origin) scaling_inspect =
 {
     for (mitem child = frame.item_children; child; child = child.item_next)
@@ -52,9 +125,18 @@ void(mitem_frame frame, vector origin) scaling_inspect =
             if (file >= 0) fclose(file);
             if (native.y > 0 && child.item_size.y > 0 && fabs(child.item_size.x/child.item_size.y - native.x/native.y) > 0.01)
                 print("SCALE FAIL image aspect ", scaling_screen, " ", child.item_text, " size ", vtos(child.item_size), "\n");
-            if (!strncmp(child.item_text, "gfx/p_", 6) || !strncmp(child.item_text, "gfx/ttl_", 8))
+            if (!strncmp(child.item_text, "gfx/p_", 6) || !strncmp(child.item_text, "gfx/ttl_", 8) || !strncmp(child.item_text, "menugfx/p_", 10))
+            {
+                scaling_titles += 1;
+                if (scaling_screen == "newgame" && child.item_text != "gfx/p_multi.lmp")
+                    print("SCALE FAIL multiplayer artwork missing\n");
+                if (fabs(absolute.y-(ui.screensize.y/2-MENU_HEIGHT/2+PADDING)) > 0.01)
+                    print("SCALE FAIL title vertical origin ", scaling_screen, "\n");
+                if (fabs(child.item_size.y-24) > 0.01)
+                    print("SCALE FAIL title height ", scaling_screen, " ", child.item_text, "\n");
                 if (fabs(child.item_position.x+child.item_size.x/2-frame.item_size.x/2) > 0.01)
                     print("SCALE FAIL title center ", scaling_screen, " ", child.item_text, "\n");
+            }
         }
         if (child.item_flags & IF_ISFRAME) scaling_inspect((mitem_frame)child, absolute);
     }
@@ -85,6 +167,7 @@ float(string input) m_consolecommand =
         if (scaling_screen) strunzone(scaling_screen);
         scaling_screen = strzone(screen);
         scaling_checked = FALSE;
+        scaling_iconchecked = FALSE;
         if (screen == "main") M_Main(desktop);
         else if (screen == "single") M_Single(desktop);
         else if (screen == "multi") M_Multi(desktop);
@@ -100,6 +183,28 @@ float(string input) m_consolecommand =
         else if (screen == "levels") M_Levels(desktop);
         else if (screen == "demos") M_Demos(desktop);
         else if (screen == "load") M_Load(desktop);
+        else if (screen == "save") M_Save(desktop);
+        else if (screen == "particles") M_Options_Particles(desktop);
+        else if (screen == "hud") M_Options_Hud(desktop);
+        else if (screen == "configs") M_Configs(desktop);
+        else if (screen == "presets") M_Preset(desktop);
+        else if (screen == "cvars") M_Menu_Cvars(desktop);
+        else if (screen == "mods")
+        {
+            M_Menu_Mods(desktop);
+            mitem_frame modlist = layout_findframe((mitem_frame)desktop.item_kactivechild);
+            // Real production icon drawing, with wide and tall native assets.
+            float iconrow = 0;
+            for (mitem row = modlist.item_children; row; row = row.item_next)
+                iconrow = max(iconrow, row.item_position.y+row.item_size.y);
+            modlist.add(spawn(mitem_pictext, pic:"gfx/p_multi.lmp", item_text:"Wide icon", item_scale:8), 0, [0, iconrow], '200 16');
+            modlist.add(spawn(mitem_pictext, pic:"gfx/qplaque.lmp", item_text:"Tall icon", item_scale:8), 0, [0, iconrow+16], '200 16');
+        }
+        else if (screen == "help1") M_Help1(desktop);
+        else if (screen == "help2") M_Help2(desktop);
+        else if (screen == "help3") M_Help3(desktop);
+        else if (screen == "help4") M_Help4(desktop);
+        else if (screen == "help5") M_Help5(desktop);
         else print("SCALE FAIL unknown fixture screen\n");
         ui.mgrabs = ui.kgrabs = __NULL__;
         items_updategrabs(TRUE);
@@ -108,9 +213,17 @@ float(string input) m_consolecommand =
     if (command == "scale_check")
     {
         scaling_checknative();
+        if (scaling_screen == "video") scaling_checkhudalpha();
         // Physical uniformity is checked independently from screenshot pixels.
         if (!desktop.item_kactivechild) print("SCALE FAIL no active screen\n");
-        else scaling_inspect((mitem_frame)desktop.item_kactivechild, '0 0 0');
+        else
+        {
+            scaling_titles = 0;
+            scaling_inspect((mitem_frame)desktop.item_kactivechild, '0 0 0');
+            if (strncmp(scaling_screen, "help", 4) && scaling_titles != 1)
+                print("SCALE FAIL missing/duplicate title ", scaling_screen, "\n");
+
+        }
         print("SCALE checked ", scaling_screen, " virtual ", vtos(ui.screensize), " scale ", vtos(menu_drawscale), "\n");
         scaling_checked = TRUE;
         return TRUE;
@@ -131,6 +244,20 @@ void(vector screensize) m_draw =
     scaling_live = cvar("scaling_test_live");
     scaling_original_draw(screensize);
     ui.drawfill('8 8', '32 32', '1 0 1', 1, 0);
+    // A native 8x8 glyph enlarged to 32 physical pixels in height. The runner
+    // checks flat texel rows and sharp edges, allowing native font aspect bias.
+    vector pixels = (vector)getproperty(VF_SCREENPSIZE);
+    vector pixelunit = [screensize.x/pixels.x/menu_drawscale.x,
+        screensize.y/pixels.y/menu_drawscale.y, 0];
+    ui.drawfill([64*pixelunit.x, 8*pixelunit.y, 0],
+        [40*pixelunit.x, 40*pixelunit.y, 0], '0 0 0', 1, 0);
+    ui.drawstring([64*pixelunit.x, 8*pixelunit.y, 0], "A",
+        [32*pixelunit.x, 32*pixelunit.y, 0], '1 1 1', 1, 0);
+    if (scaling_screen == "mods" && !scaling_iconchecked)
+    {
+        scaling_checkicons();
+        scaling_iconchecked = TRUE;
+    }
     if (scaling_live && scaling_clock >= scaling_polltime)
     {
         scaling_polltime = scaling_clock+6;

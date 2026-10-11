@@ -4,7 +4,15 @@ class mitem_pictext : mitem_text
 	virtual void(vector pos) item_draw =
 	{
 		if (pic)
-			drawpic(pos, pic, [item_size_y,item_size_y], '1 1 1', 1, 0);
+		{
+			vector native = drawgetimagesize(pic);
+			if (native.x > 0 && native.y > 0)
+			{
+				vector size = native * min(item_size.y/native.x, item_size.y/native.y);
+				ui.drawpic(pos + ([item_size.y, item_size.y, 0]-size)*0.5,
+					pic, size, '1 1 1', 1, 0);
+			}
+		}
 		pos_x += item_size_y;
 		super::item_draw(pos);
 	};
@@ -12,7 +20,7 @@ class mitem_pictext : mitem_text
 
 void(mitem_desktop desktop) M_Menu_Mods =
 {
-	float h = (480+240)/2;
+	float h = MENU_HEIGHT;
 
 	//create the menu, give it focus, and make sure its displayed over everything else.
 	mitem_exmenu m = spawn(mitem_exmenu, item_text:_("Mods List"), item_flags:IF_SELECTABLE, item_command:"m_main", frame_stdheight:h);
@@ -22,7 +30,7 @@ void(mitem_desktop desktop) M_Menu_Mods =
 
 	//draw title art above the options
 	mitem_pic banner = spawn(mitem_pic, item_text:"gfx/ttl_cstm.lmp", item_size_y:24, item_flags:IF_CENTERALIGN);
-	m.add(banner, RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_OWN_MIN, [banner.item_size_x*-0.5, h*-0.5], [banner.item_size_x*0.5, 24]);
+	m.add(banner, RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_OWN_MIN, [banner.item_size_x*-0.5, h*-0.5+PADDING], [banner.item_size_x*0.5, 24]);
 
 	//spawn a container frame for the actual options. this provides a scrollbar if we have too many items.
 	mitem_frame fr = spawn(mitem_frame, item_flags: IF_SELECTABLE, frame_hasscroll:TRUE);

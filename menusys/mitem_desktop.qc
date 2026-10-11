@@ -41,14 +41,27 @@ void() mitem_desktop::mitem_desktop =
 
 	if (checkextension("DP_GFX_FONTS"))
 	{
-		//make sure we have a font that can cope with slightly up-scaled stuff.
-		//windows is special because we can load from the system fonts
+		// Explicit font overrides retain their scalable/outlined rendering.
 		string fontname = menu_font_fallback;
 		if (menu_font_win != "" && !strncasecmp(cvar_string("sys_platform"), "Win", 3))
 			fontname = menu_font_win;
 		else if (menu_font != "")
 			fontname = menu_font;
-		drawfont = loadfont("", fontname, "8 12 16 outline=1", -1);
+		if (fontname == "")
+		{
+			// Keep the game's 8-pixel conchars bitmap, without resampling or
+			// outlines. FTE shares this sampler with its other native fonts.
+			if (cvar_type("r_font_linear") && cvar("r_font_linear") != 0)
+			{
+				cvar_set("r_font_linear", "0");
+				// Older FTE caches the sampler when loading fonts. Refresh
+				// resources once; vid_reload retains the video context/window.
+				localcmd("vid_reload\n");
+			}
+			drawfont = loadfont("menusys_classic", "", "outline=0 8", -1);
+		}
+		else
+			drawfont = loadfont("", fontname, "8 12 16 outline=1", -1);
 	}
 
 	item_text = "desktop";

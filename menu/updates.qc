@@ -178,7 +178,7 @@ void(mitem_desktop desktop) M_Menu_Updates =
 	mitem_frame panel = spawn(mitem_frame, item_flags:IF_SELECTABLE);
 	m.add(panel, RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID,
 		[-MENU_WIDTH/2, -MENU_HEIGHT/2], [MENU_WIDTH/2, MENU_HEIGHT/2]);
-	mitem_pic banner = spawn(mitem_pic, item_text:"gfx/ttl_cstm.lmp");
+	mitem_pic banner = spawn(mitem_pic, item_text:"gfx/ttl_cstm.lmp", item_size_y:24);
 	panel.add(banner, RS_X_MIN_PARENT_MID, [-banner.item_size.x/2, PADDING], banner.item_size);
 	float top = banner.item_size.y + PADDING*2;
 	float split = 192;
