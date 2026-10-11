@@ -1,0 +1,157 @@
+// Test-only entry points; never package this module as a release.
+#define m_init layout_original_init
+#define m_draw layout_original_draw
+#define m_consolecommand layout_original_command
+#include "../menu.src"
+#undef m_init
+#undef m_draw
+#undef m_consolecommand
+
+mitem_frame layout_frame;
+vector layout_main_plaque;
+mitem_frame(mitem_frame parent) layout_findframe =
+{
+	for (mitem child = parent.item_children; child; child = child.item_next)
+	{
+		if (!(child.item_flags & IF_ISFRAME)) continue;
+		mitem_frame frame = (mitem_frame)child;
+		if (frame.frame_hasscroll) return frame;
+		frame = layout_findframe(frame);
+		if (frame) return frame;
+	}
+	return __NULL__;
+};
+void(vector pos, float idx) layout_grid_draw =
+{
+	ui.drawstring(pos, sprintf("Package %02g", idx), '8 8', RGB_TXT, 1, 0);
+};
+string(string key) layout_info =
+{
+	if (key == "info")
+		return "^aVersion:^a 1.2.3\n^aAuthor:^a Layout fixture\n^aLicense:^a GPL\n^aWebsite:^a https://example.invalid/a/very/long/package/path\n^aDescription:^a Long wrapped package metadata. This description is deliberately tall enough to require scrolling in the details pane.\nFirst extra line\nSecond extra line\nThird extra line\nFourth extra line\nFifth extra line";
+	return cvar_string(key);
+};
+float(string cstr) m_consolecommand =
+{
+	tokenize(cstr);
+	string cmd = argv(0);
+	if (cmd == "layout_main" || cmd == "layout_solo" || cmd == "layout_options" || cmd == "layout_servers")
+	{
+		m_toggle(0);
+		layout_frame = __NULL__;
+		if (cmd == "layout_main") M_Main(desktop);
+		else if (cmd == "layout_solo") M_Single(desktop);
+		else if (cmd == "layout_options") M_Options(desktop);
+		else M_Servers(desktop);
+		mitem_frame outer = (mitem_frame)desktop.item_kactivechild;
+		mitem_frame centerpanel = __NULL__;
+		for (mitem entry = outer.item_children; entry; entry = entry.item_next)
+			if (entry.item_flags & IF_ISFRAME) { centerpanel = (mitem_frame)entry; break; }
+		if (!centerpanel) print("LAYOUT FAIL missing content panel\n");
+		if (fabs(centerpanel.item_position.x+centerpanel.item_size.x*0.5-outer.item_size.x*0.5) > 0.01 ||
+			fabs(centerpanel.item_position.y+centerpanel.item_size.y*0.5-outer.item_size.y*0.5) > 0.01)
+			print("LAYOUT FAIL uncentered centerpanel ", cmd, "\n");
+		mitem plaque = centerpanel.findchildtext("gfx/qplaque.lmp");
+		if (cmd == "layout_main") layout_main_plaque = plaque.item_position;
+		else if (cmd == "layout_options" && plaque.item_position != layout_main_plaque)
+			print("LAYOUT FAIL Options plaque shifted\n");
+		if (cmd == "layout_solo")
+		{
+			mitem solo = centerpanel.findchildtext("gfx/sp_menu.lmp");
+			if (solo.item_size.x == 172 && solo.item_size.y == 63)
+			{
+				mitem levels = centerpanel.findchildtext("gfx/levels.lmp");
+				mitem demos = centerpanel.findchildtext("gfx/demos.lmp");
+				if (fabs(levels.item_position.x+71.5-160) > 0.01 ||
+					fabs(demos.item_position.x+78.5-160) > 0.01)
+					print("LAYOUT FAIL Solo labels shifted\n");
+			}
+		}
+		print("LAYOUT centered ", cmd, " ", vtos(centerpanel.item_size), "\n");
+	}
+	else if (cmd == "layout_video" || cmd == "layout_effects")
+	{
+		m_toggle(0);
+		if (cmd == "layout_video") M_Options_Video(desktop);
+		else M_Options_Effects(desktop);
+		layout_frame = layout_findframe((mitem_frame)desktop.item_kactivechild);
+		print("LAYOUT active ", desktop.item_kactivechild.item_text, "\n");
+	}
+	else if (cmd == "layout_updates")
+	{
+		m_toggle(0);
+		M_Menu_Updates(desktop);
+		layout_frame = __NULL__;
+	}
+	else if (cmd == "layout_servers_end")
+	{
+		mitem_frame servermenu = (mitem_frame)desktop.findchildtext("Servers List");
+		for (mitem serverpanel = servermenu.item_children; serverpanel; serverpanel = serverpanel.item_next)
+			if (serverpanel.item_flags & IF_ISFRAME)
+			{
+				mitem_servers rows = (mitem_servers)((mitem_frame)serverpanel).findchildtext("Server rows");
+				rows.item_keypress(rows.item_position, K_END, 0, TRUE);
+				print("LAYOUT servers ", ftos(gethostcachevalue(SLIST_HOSTCACHEVIEWCOUNT)), " rows\n");
+				break;
+			}
+	}
+	else if (cmd == "layout_metadata")
+	{
+		menu_updates updates = (menu_updates)desktop.findchildtext("Updates List");
+		updates.get = layout_info;
+		updates.grid.grid_draw = layout_grid_draw;
+		updates.grid.grid_numchildren = 60;
+		updates.grid.item_resized();
+		updates.grid.grid_kactive = 59;
+		updates.grid.vslider.val = updates.grid.vslider.maxv;
+	}
+	else if (cmd == "layout_details")
+	{
+		menu_updates details = (menu_updates)desktop.findchildtext("Updates List");
+		mitem_frame panel = (mitem_frame)details.grid.item_parent;
+		mitem_label label = (mitem_label)panel.findchildtext("info");
+		if (label.vslider) label.vslider.val = label.vslider.maxv;
+		print("LAYOUT details height ", ftos(label.vslider.maxv), "\n");
+	}
+	else return layout_original_command(cstr);
+	// Clear grabs retained by the previous fixture before forcing a fresh draw.
+	ui.kgrabs = ui.mgrabs = __NULL__;
+	items_updategrabs(TRUE);
+	return TRUE;
+};
+void(mitem_frame frame) layout_checktitles =
+{
+    for (mitem child = frame.item_children; child; child = child.item_next)
+    {
+        if (!strncmp(child.item_text, "gfx/p_", 6) || !strncmp(child.item_text, "gfx/ttl_", 8))
+        {
+            vector native = drawgetimagesize(child.item_text);
+            if (fabs(child.item_size.y-24) > 0.01 || native.y <= 0 ||
+                fabs(child.item_size.x/child.item_size.y-native.x/native.y) > 0.01 ||
+                fabs(child.item_position.x+child.item_size.x/2-frame.item_size.x/2) > 0.01)
+                print("LAYOUT FAIL banner size/aspect/center ", child.item_text, "\n");
+        }
+        if (child.item_flags & IF_ISFRAME) layout_checktitles((mitem_frame)child);
+    }
+};
+void(vector screensize) m_draw =
+{
+	layout_original_draw(screensize);
+	if (desktop.item_kactivechild) layout_checktitles((mitem_frame)desktop.item_kactivechild);
+	if (layout_frame && layout_frame.vslider)
+		layout_frame.vslider.val = min(96, layout_frame.vslider.maxv);
+};
+void() m_init =
+{
+	layout_original_init();
+	registercommand("layout_video");
+	registercommand("layout_effects");
+	registercommand("layout_updates");
+	registercommand("layout_metadata");
+	registercommand("layout_details");
+	registercommand("layout_main");
+	registercommand("layout_solo");
+	registercommand("layout_options");
+	registercommand("layout_servers");
+	registercommand("layout_servers_end");
+};

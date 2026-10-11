@@ -13,41 +13,50 @@ class mitem_combo_popup;
 
 class mitem_combo : mitem_edit
 {
-	virtual void(vector pos)								item_draw;
+	virtual void(vector pos)										item_draw;
 	virtual float(vector pos, float scan, float char, float down)	item_keypress;
-	virtual void(mitem newfocus, float changedflag)				item_focuschange;
+	virtual void(mitem newfocus, float changedflag)					item_focuschange;
 
-	mitem_combo_popup		cpopup;
-	string	mstrlist;
-	float		firstrow;
-	float		visrows;
+	mitem_combo_popup cpopup;
+	string mstrlist;
+	float firstrow;
+	float visrows;
 
 	virtual void() item_remove;
-	
+
+	void() mitem_combo =
+	{
+		if (item_text)
+			item_text = strzone(item_text);
+		if (item_command)
+			item_command = strzone(item_command);
+		if (isvalid(item_command))
+			item_flags |= IF_SELECTABLE;
+		if (mstrlist)
+			mstrlist = strzone(mstrlist);
+		spos = -1;
+	};
+
 	virtual void() item_resized =
 	{
 		if (isvalid(item_command))
-			item_flags |= IF_SELECTABLE;		
+			item_flags |= IF_SELECTABLE;
 		else
 			item_flags &= ~IF_SELECTABLE;
 		super::item_resized();
-	};
-	void() mitem_combo =
-	{
-		spos = -1;
 	};
 };
 
 class mitem_combo_popup : mitem
 {
-	virtual void(vector pos)								item_draw;
+	virtual void(vector pos)										item_draw;
 	virtual float(vector pos, float scan, float char, float down)	item_keypress;
-	virtual void(mitem newfocus, float changedflag)				item_focuschange;
+	virtual void(mitem newfocus, float changedflag)					item_focuschange;
 
 	mitem_combo 		pcombo;
 	mitem_vslider		pslider;
-	float			slidercache;
-	
+	float				slidercache;
+
 	virtual void() item_remove =
 	{
 		if (pslider)
@@ -63,9 +72,11 @@ void() mitem_combo::item_remove =
 	mitem_combo_popup p = cpopup;
 	if (p)
 		p.item_remove();
-	strunzone(mstrlist);
+	// super does strunzoneing
 	item_text = __NULL__;
 	item_command = __NULL__;
+	if (mstrlist)
+		strunzone(mstrlist);
 	super::item_remove();
 };
 
@@ -76,7 +87,7 @@ void(vector pos) mitem_combo::item_draw =
 	vector rgb = item_rgb;
 	if (!(item_flags & IF_SELECTABLE))
 		rgb *= 0.2;
-	
+
 	if (cpopup)
 		cpopup.item_position = pos + [item_size_x / 2, item_size_y];
 
@@ -88,11 +99,10 @@ void(vector pos) mitem_combo::item_draw =
 	else
 		mitem::item_draw(pos);
 
+	// display the friendly string if the current value matches
 	v = tokenize(mstrlist);
-
-	//display the friendly string if the current value matches
-//	if (!(item_flags & IF_KFOCUSED) && (!cfriend || !(cfriend.item_flags & IF_KFOCUSED)))
-	{
+	// if (!(item_flags & IF_KFOCUSED) && (!cfriend || !(cfriend.item_flags & IF_KFOCUSED)))
+	// {
 		for (i = 0; i < v; i+=2)
 		{
 			if (argv(i) == curval)
@@ -101,7 +111,7 @@ void(vector pos) mitem_combo::item_draw =
 				break;
 			}
 		}
-	}
+	// }
 
 	pos_x += item_size_x / 2;
 
@@ -113,7 +123,7 @@ void(vector pos) mitem_combo::item_draw =
 	ui.drawfill(pos + [0, item_size_y-1], [item_size_x/2, 1], TD_TOP, item_alpha, 0);
 */
 	//silly strings need to get cut off properly.
-	ui.setcliparea(pos[0], pos[1], item_size_x/2, item_size_y);
+	ui_clipchild(pos[0], pos[1], item_size_x/2, item_size_y);
 	pos_y += (item_size_y - item_scale)*0.5;
 	pos_x += 1;
 	ui.drawstring(pos, curval, '1 1 0' * item_scale, rgb, item_alpha, 0);
@@ -147,8 +157,6 @@ void(vector pos) mitem_combo_popup::item_draw =
 
 	vector popupsize = item_size;
 
-	
-
 	if (!((f.item_flags | item_flags) & IF_KFOCUSED))
 	{
 		item_size = maxs = '0 0';
@@ -163,7 +171,9 @@ void(vector pos) mitem_combo_popup::item_draw =
 	ui.drawfill(pos, [1, popupsize_y - 1], TD_RGT, item_alpha, 0);
 	ui.drawfill(pos + [popupsize_x-1, 1], [1, popupsize_y - 1], TD_LFT, item_alpha, 0);
 	ui.drawfill(pos + [0, popupsize_y-1], [popupsize_x, 1], TD_TOP, item_alpha, 0);
-*/	pos_x += 1;
+*/
+
+	pos_x += 1;
 
 	v = tokenize(f.mstrlist);
 	for (c = 0; c < v; c += 2)
@@ -178,7 +188,7 @@ void(vector pos) mitem_combo_popup::item_draw =
 		i = 0;
 	else if (c >= 0)
 	{
-		//bound the displayed position 
+		//bound the displayed position
 		if (c < i)
 			i = c;
 		if (i < c - (f.visrows-1)*2)
@@ -214,7 +224,7 @@ void(vector pos) mitem_combo_popup::item_draw =
 	}
 
 	//constrain the drawing so it doesn't overflow the popup
-	ui.setcliparea(pos[0], pos[1], popupsize[0], popupsize[1]);
+	ui_clipchild(pos[0], pos[1], popupsize[0], popupsize[1]);
 
 	if (pslider)
 	{
@@ -230,16 +240,21 @@ void(vector pos) mitem_combo_popup::item_draw =
 		col = f.item_rgb;
 		if (item_flags & IF_MFOCUSED)
 			if (mouseinbox(pos, [popupsize_x, item_scale]))
-				col_z = 0;
+				col = RGB_MFOCUS;
 		if (c == i)
-			col_x = 0;
+			col = RGB_KFOCUS;
 
 		ui.drawstring(pos, argv(i+1), '1 1 0' * item_scale, col, f.item_alpha, 0);
 		pos_y += item_scale;
 	}
 
 	//reset the clip area
-	ui.setcliparea(ui.drawrectmin[0], ui.drawrectmin[1], ui.drawrectmax[0] - ui.drawrectmin[0], ui.drawrectmax[1] - ui.drawrectmin[1]);
+	ui.setcliparea(
+		ui.drawrectmin[0],
+		ui.drawrectmin[1],
+		ui.drawrectmax[0] - ui.drawrectmin[0],
+		ui.drawrectmax[1] - ui.drawrectmin[1]
+	);
 };
 float(vector pos, float scan, float char, float down) mitem_combo_popup::item_keypress =
 {
@@ -249,7 +264,6 @@ float(vector pos, float scan, float char, float down) mitem_combo_popup::item_ke
 		if (mouseinbox(pos + [item_size_x-pslider.item_size_x,0], pslider.item_size))
 			return pslider.item_keypress(sliderpos, scan, char, down);
 	}
-			
 	return pcombo.item_keypress(pos - [0, pcombo.item_size_y], scan, char, down);
 };
 float(vector pos, float scan, float char, float down) mitem_combo::item_keypress =
@@ -301,14 +315,14 @@ float(vector pos, float scan, float char, float down) mitem_combo::item_keypress
 			cpopup.item_remove();
 			return TRUE;
 		}
-		
+
 		visrows = ((c>18)?18/2:c/2);
 		if (!cpopup)
 		{
 			cpopup = spawn(mitem_combo_popup);
 			cpopup.pcombo = this;
-			cpopup.item_scale = 8;
-			cpopup.item_rgb = MENUBACK_RGB;
+			cpopup.item_scale = TXT_NMSZ;
+			cpopup.item_rgb = RGB_MENUBACK;
 			cpopup.item_alpha = MENUBACK_ALPHA;
 			pos = item_position;
 			mitem_frame fr = item_parent;
@@ -336,7 +350,7 @@ float(vector pos, float scan, float char, float down) mitem_combo::item_keypress
 				cpopup.item_flags &~= IF_SELECTABLE;
 				cpopup.item_size = cpopup.maxs = '0 0';
 				item_parent.item_focuschange(this, IF_MFOCUSED|IF_KFOCUSED);
-				
+
 				cpopup.item_remove();
 			}
 		}
@@ -359,16 +373,13 @@ float(vector pos, float scan, float char, float down) mitem_combo::item_keypress
 	set(item_command, curval);
 	return TRUE;
 };
-mitem_combo(string text, string command, vector sz, string valuelist) menuitemcombo_spawn =
+mitem_combo(string text, string command, vector sz, string valuelist) spawn_combo =
 {
-	mitem_combo n = spawn(mitem_combo);
-	n.item_scale = sz_y;
-	n.item_text = text;
-	n.item_size = sz;
-	n.mstrlist = strzone(valuelist);
-
-	n.item_command = command;
-	if (n.isvalid(command))
-		n.item_flags |= IF_SELECTABLE;
-	return n;
+	return spawn(mitem_combo,
+		item_text: strcat("^m", text),
+		item_command: command,
+		item_size: sz,
+		mstrlist: valuelist,
+		item_scale: sz_y
+	);
 };

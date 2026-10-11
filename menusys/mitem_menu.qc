@@ -27,7 +27,7 @@ class mitem_menu : mitem_frame
 	{
 		item_text = strzone(item_text);
 		item_scale = 8;
-		item_rgb = MENUBACK_RGB;
+		item_rgb = RGB_MENUBACK;
 		item_alpha = MENUBACK_ALPHA;
 
 		if (item_framesize == '0 0 0')
@@ -37,7 +37,7 @@ class mitem_menu : mitem_frame
 		item_size[1] += item_framesize[1]+item_framesize[2];
 
 		item_flags |= IF_SELECTABLE;
-		
+
 #ifdef CSQC
 		cprint("");
 #endif
@@ -61,7 +61,7 @@ void(mitem newfocus, float flag) mitem_menu::item_focuschange =
 		//move the window to the top of the z-order when it gets focus.
 		if (item_flags & IF_KFOCUSED)
 			totop();
-		//release grabs if someone else took focus.	
+		//release grabs if someone else took focus.
 		else if (ui.mgrabs == this)
 		{
 			ui.mgrabs = __NULL__;
@@ -181,7 +181,7 @@ float(vector pos, float scan, float char, float down) mitem_menu::item_keypress 
 		draginfo[2] = 0;
 		return TRUE;
 	}
-	
+
 	if (!super::item_keypress(pos, scan, char, down))
 	{
 		down &= 1;
@@ -303,11 +303,11 @@ void(vector pos) mitem_menu::item_draw =
 		this::drawgrabhandle(pos, drag);
 
 	ui.drawfill(pos, efsize, item_rgb, item_alpha, 0);
-	local vector col = '1 1 1';
+	local vector col = RGB_TXT;
 	if (item_flags & IF_KFOCUSED)
-		col_x = 0;
+		col = RGB_KFOCUS;
 	if ((item_flags & IF_MFOCUSED) && mouseinbox(pos, [efsize_x-item_framesize[1], item_framesize[1]]))
-		col_z = 0;
+		col = RGB_MFOCUS;
 	inset = (item_framesize[1]-item_scale)*0.5;
 	ui.drawstring(pos + '1 1'*inset, item_text, item_scale*'1 1', col, 1, 0);
 	if (!(item_flags & IF_NOKILL))

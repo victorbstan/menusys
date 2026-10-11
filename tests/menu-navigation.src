@@ -1,0 +1,159 @@
+// Test-only input/navigation hooks. Never distribute this module.
+#define m_init navigation_original_init
+#define m_consolecommand navigation_original_command
+#include "../menu.src"
+#undef m_init
+#undef m_consolecommand
+
+mitem navigation_refresh_menu;
+mitem_servers navigation_refresh_list;
+mitem_servers() navigation_list =
+{
+	mitem_frame menu = (mitem_frame)desktop.item_kactivechild;
+	if (!menu || menu.item_text != "Servers List") return __NULL__;
+	mitem_frame panel = (mitem_frame)menu.findchildtext("Server panel");
+	return (mitem_servers)panel.findchildtext("Server rows");
+};
+
+mitem(mitem_frame parent, string command, float depth) navigation_find =
+{
+	if (depth > 20) { print("NAV FAIL parent cycle\n"); return __NULL__; }
+	for (mitem child = parent.item_children; child; child = child.item_next)
+	{
+		if (child.item_command == command) return child;
+		if (child.item_flags & IF_ISFRAME)
+		{
+			mitem found = navigation_find((mitem_frame)child, command, depth+1);
+			if (found) return found;
+		}
+	}
+	return __NULL__;
+};
+void(mitem item) navigation_focus =
+{
+	if (item.item_parent)
+	{
+		navigation_focus(item.item_parent);
+		item.item_parent.item_focuschange(item, IF_KFOCUSED);
+	}
+};
+float(string input) m_consolecommand =
+{
+	tokenize(input);
+	string cmd = argv(0), action = argv(1);
+	mitem_servers listing;
+	if (cmd == "nav_open")
+	{
+		m_toggle(0);
+		M_Multi(desktop);
+		items_updategrabs(TRUE);
+		print("NAV opened active ", desktop.item_kactivechild.item_text, "\n");
+	}
+	else if (cmd == "nav_action")
+	{
+		string command;
+		if (action == "advanced")
+		{
+			// The native browser is intentionally absent from the MenuQC UI.
+			// Exercise its documented console escape hatch directly.
+			if (navigation_find((mitem_frame)desktop.item_kactivechild, "m_pop;m_servers native", 0))
+				print("NAV FAIL native browser button is visible\n");
+			localcmd("m_pop;m_servers native\n");
+			print("NAV action ", cmd, " ", action, "\n");
+			return TRUE;
+		}
+		if (action == "join") command = "m_pop;m_servers";
+		else if (action == "refresh") command = "m_servers refresh";
+		else if (action == "setup") command = "m_pop;m_setup";
+		else if (action == "favs") command = "sb_onlyfavs";
+		else if (action == "nq") command = "sb_hidenetquake";
+		else if (action == "qw") command = "sb_hidequakeworld";
+		else if (action == "empty") command = "sb_hideempty";
+		else if (action == "full") command = "sb_hidefull";
+		else if (action == "address") command = "sb_showaddress";
+		else { print("NAV FAIL unknown action\n"); return TRUE; }
+		mitem button = navigation_find((mitem_frame)desktop.item_kactivechild, command, 0);
+		if (!button) { print("NAV FAIL missing button ", action, "\n"); return TRUE; }
+		if (action == "refresh")
+		{
+			navigation_refresh_menu = desktop.item_kactivechild;
+			navigation_refresh_list = navigation_list();
+		}
+		navigation_focus(button);
+		items_updategrabs(TRUE);
+		m_keydown(K_ENTER, 0);
+		m_keyup(K_ENTER, 0);
+	}
+	else if (cmd == "nav_focuslist")
+	{
+		listing = navigation_list();
+		if (!listing) { print("NAV FAIL missing list\n"); return TRUE; }
+		navigation_focus(listing);
+		items_updategrabs(TRUE);
+	}
+	else if (cmd == "nav_key")
+	{
+		// QSS 2021 advertises stringtokeynum but leaves builtin 614
+		// unimplemented. Keep the fixture portable by mapping the keys it uses.
+		float key;
+		if (action == "UPARROW") key = K_UPARROW;
+		else if (action == "DOWNARROW") key = K_DOWNARROW;
+		else if (action == "LEFTARROW") key = K_LEFTARROW;
+		else if (action == "RIGHTARROW") key = K_RIGHTARROW;
+		else if (action == "ENTER") key = K_ENTER;
+		else if (action == "ESCAPE") key = K_ESCAPE;
+		else if (action == "END") key = K_END;
+		else if (action == "F5") key = K_F5;
+		else { print("NAV FAIL unknown key ", action, "\n"); return TRUE; }
+		m_keydown(key, 0);
+		m_keyup(key, 0);
+	}
+	else if (cmd == "nav_assert")
+	{
+		listing = navigation_list();
+		if (!listing) { print("NAV FAIL missing Join checkpoint\n"); return TRUE; }
+		if (action == "refreshed" && (desktop.item_kactivechild != navigation_refresh_menu || listing != navigation_refresh_list))
+			print("NAV FAIL Refresh replaced its widgets\n");
+		float addressfield = gethostcacheindexforkey("cname");
+		// Check a freshly polled view; replies can grow the cache between draws.
+		float count = servers_poll();
+		for (float index = 0; index < count; index++)
+		{
+			if (gethostcachestring(addressfield, index) == "") print("NAV FAIL missing cached row\n");
+			if (cvar("sb_hideempty") && gethostcachenumber(gethostcacheindexforkey("numhumans"), index) == 0)
+				print("NAV FAIL empty server passed filter\n");
+			// FTE masks stored freeslots, but its numeric getter recomputes from
+			// players, which QW parsing changes afterwards. Those values differ;
+			// exercise the Full switch through its toggle/navigation cycle instead.
+			if (cvar("sb_onlyfavs") && !(gethostcachenumber(gethostcacheindexforkey("flags"), index) & 32))
+				print("NAV FAIL nonfavorite passed filter\n");
+			float basegame = gethostcachenumber(gethostcacheindexforkey("basegame"), index);
+			if (cvar("sb_hidenetquake") && (basegame == 2 || basegame == 3)) print("NAV FAIL NQ passed filter\n");
+			if (cvar("sb_hidequakeworld") && basegame == 1) print("NAV FAIL QW passed filter\n");
+		}
+		if (gethostcachestring(addressfield, count) != "") print("NAV FAIL incomplete row count\n");
+		print("NAV cached rows ", ftos(count), "\n");
+		print("NAV checkpoint ", action, " active ", desktop.item_kactivechild.item_text, "\n");
+	}
+	else if (cmd == "nav_assertscale")
+	{
+		float expected = stof(action);
+		if (fabs(cvar("vid_conautoscale")-expected) > 0.01)
+			print("NAV FAIL menu scale ", ftos(cvar("vid_conautoscale")), " expected ", action, "\n");
+		else
+			print("NAV scale ", action, "\n");
+	}
+	else return navigation_original_command(input);
+	print("NAV action ", cmd, " ", action, "\n");
+	return TRUE;
+};
+void() m_init =
+{
+	navigation_original_init();
+	registercommand("nav_open");
+	registercommand("nav_action");
+	registercommand("nav_key");
+	registercommand("nav_focuslist");
+	registercommand("nav_assert");
+	registercommand("nav_assertscale");
+};

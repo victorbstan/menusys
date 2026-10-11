@@ -27,6 +27,11 @@ class mitem_updategrid : mitem_grid
 				grid_numchildren++;
 			item_resized();
 		}
+		if (!grid_numchildren)
+		{
+			ui.drawstring(pos, _("No packages available"), '1 1 0'*item_scale, RGB_MUTED, 1, 0);
+			return;
+		}
 		super::item_draw(pos);
 	};
 	virtual void(vector pos, float idx) grid_draw;
@@ -39,9 +44,9 @@ void(vector pos, float idx) mitem_updategrid::grid_draw =
 
 	vector col = item_rgb;
 	if (item_flags & IF_MFOCUSED && idx == grid_mactive)
-		col_z = 0;
+		col = RGB_MFOCUS;
 	if (item_flags & IF_KFOCUSED && idx == grid_kactive)
-		col_x = 0;
+		col = RGB_KFOCUS;
 
 	string status = getpackagemanagerinfo(idx, GPMI_INSTALLED);
 	string action = getpackagemanagerinfo(idx, GPMI_ACTION);
@@ -106,7 +111,7 @@ void(vector pos, float idx) mitem_updategrid::grid_draw =
 			action = "rem";
 		else if (action=="auto")	//install(to satisfy dependancies)
 			action = "rem";
-		else 
+		else
 			action = "del";
 
 		text = strcat("pkg quiet_", action, " \"", text, "\"\n");
@@ -138,6 +143,8 @@ class menu_updates : mitem_exmenu
 	{
 		if (key == "info")
 		{
+			if (grid.grid_kactive < 0 || !getpackagemanagerinfo(grid.grid_kactive, GPMI_NAME))
+				return _("Select a package to view its details.");
 			string text=__NULL__, tmp;
 			tmp = getpackagemanagerinfo(grid.grid_kactive, GPMI_VERSION);		text = strcat(text, "^aVersion:^a ", tmp?:"Unspecified");
 			tmp = getpackagemanagerinfo(grid.grid_kactive, GPMI_AUTHOR);		text = strcat(text, "\n^aAuthor:^a ", tmp?:"Unknown");
@@ -154,30 +161,40 @@ class menu_updates : mitem_exmenu
 
 void(mitem_desktop desktop) M_Menu_Updates =
 {
-	mitem it;
-	float h = (480+240)/2;
+	menu_updates m = (menu_updates)desktop.findchildtext(_("Updates List"));
+	if (m) { m.totop(); return; }
+	if (!checkbuiltin2(getpackagemanagerinfo, FALSE))
+		return;
 
 	localcmd("pkg update\n");
 
 	//create the menu, give it focus, and make sure its displayed over everything else.
-	menu_updates m = spawn(menu_updates, item_text:_("Updates List"), item_flags:IF_SELECTABLE, item_command:"m_main", frame_stdheight:h);
+	m = spawn(menu_updates, item_text:_("Updates List"), item_flags:IF_SELECTABLE, item_command:"m_main");
 	desktop.add(m, RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, '0 0', '0 0');
 	desktop.item_focuschange(m, IF_KFOCUSED);
 	m.totop();
 
-	//draw title art above the options
-	mitem_pic banner = spawn(mitem_pic, item_text:"gfx/ttl_cstm.lmp", item_size_y:24, item_flags:IF_CENTERALIGN);
-	m.add(banner, RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_OWN_MIN, [banner.item_size_x*-0.5, h*-0.5], [banner.item_size_x*0.5, 24]);
+	// Keep the banner, list, details, and Apply button on one classic canvas.
+	mitem_frame panel = spawn(mitem_frame, item_flags:IF_SELECTABLE);
+	m.add(panel, RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID,
+		[-MENU_WIDTH/2, -MENU_HEIGHT/2], [MENU_WIDTH/2, MENU_HEIGHT/2]);
+	mitem_pic banner = spawn(mitem_pic, item_text:"gfx/ttl_cstm.lmp", item_size_y:24);
+	panel.add(banner, RS_X_MIN_PARENT_MID, [-banner.item_size.x/2, PADDING], banner.item_size);
+	float top = banner.item_size.y + PADDING*2;
+	float split = 192;
+	float bottom = MENU_HEIGHT-PADDING;
+	float applytop = bottom-TXT_NMSZ-PADDING*2;
 
 	//spawn our grid for the actual options. this provides a scrollbar if we have too many items.
-	m.grid = spawn(mitem_updategrid, item_flags: IF_SELECTABLE, item_scale: 8);
-	m.add(m.grid, RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, [-160, h*-0.5+32], [40, h*0.5]);
+	m.grid = spawn(mitem_updategrid, item_flags:IF_SELECTABLE, item_scale:TXT_NMSZ, grid_mactive:-1);
+	panel.add(m.grid, 0, [PADDING, top], [split-PADDING*2, bottom-top]);
 
-	it = spawn(mitem_label, item_text: "info", item_flags: 0, item_scale: 8);
-	m.add(it, RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MID, [40, h*-0.5+32], [0, h*0.5-16]);
+	mitem it = spawn(mitem_label, item_text:"info", item_scale:TXT_NMSZ);
+	panel.add(it, 0, [split, top], [MENU_WIDTH-split-PADDING, applytop-top-PADDING]);
 
-	it = spawn(mitem_button, item_text: "Apply", item_command: "pkg apply\n", item_flags: IF_SELECTABLE, item_scale: 8);
-	m.add(it, RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MID, [40+1, h*0.5-16+1], [0-1, h*0.5-1]);
+	it = spawn(mitem_button, item_text:_("Apply"), item_command:"pkg apply\n", item_flags:IF_SELECTABLE, item_scale:TXT_NMSZ);
+	panel.add(it, 0, [split, applytop], [MENU_WIDTH-split-PADDING, bottom-applytop]);
+	panel.item_focuschange(m.grid, IF_KFOCUSED);
 
 	//and give us a suitable menu tint too, just because.
 	addmenuback(m);

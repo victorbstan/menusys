@@ -9,10 +9,103 @@ class mitem_fill : mitem
 		ui.drawfill(pos, this.item_size, this.item_rgb, this.item_alpha, 0);
 	};
 };
-#define menuitemfill_spawn(sz,rgb,alph) spawn(mitem_fill, item_size:sz, item_rgb:rgb, item_alpha:alph)
+#define menuitemfill_spawn(sz,rgb,alpha) spawn(mitem_fill, item_size:sz, item_rgb:rgb, item_alpha:alpha)
 
 /***************************************************************************
-basic picture item.
+simple spacing item, like block-fill, but invisible
+non-interactable.
+*/
+class mitem_spacer : mitem
+{
+	virtual void(vector pos) item_draw =
+	{
+		// -1 is no alpha, and 0 is full alpha?
+		// ugly pink for debugging if alpha is not -1
+		ui.drawfill(pos, this.item_size, '1 0 1', item_alpha, 0);
+	};
+};
+#define spawn_mitem_spacer(sz,alpha) spawn(mitem_spacer, item_size:sz, item_alpha:alpha)
+
+/***************************************************************************
+interactive block-fill item
+can be used like a click-area / hotspot over images, etc.
+*/
+class mitem_filli : mitem
+{
+	float alpha;
+
+	// shows hover text by cursor when over relevant items,
+	// could be done better, more generic
+	string hover_text;
+	float hovtyoffset;
+	float hovtsize;
+
+	virtual void(vector pos) item_draw =
+	{
+		ui.drawfill(pos, item_size, item_rgb, alpha, 0);
+		// draw something that follows cursor pos
+		if (hover_text != "" && mouseinbox(pos, item_size)) {
+			// note: will draw within widget area, might get cropped
+			ui.drawstring(ui.mousepos - [0, hovtyoffset], hover_text, hovtsize*'1 1', RGB_TXT, 1, 0);
+		}
+	};
+
+	virtual mitem(string ht, float htyo=-16, float hts=TXT_NMSZ) s_hover_text =
+	{
+		// Copy first: callers can pass the widget's current hover text.
+		string replacement = ht != "" ? strzone(ht) : __NULL__;
+		if (hover_text)
+			strunzone(hover_text);
+		hover_text = replacement;
+		hovtyoffset = htyo;
+		hovtsize = hts;
+		return self;
+	};
+
+	void() mitem_filli =
+	{
+		alpha = item_alpha;
+
+		if (item_command != "")
+		{
+			item_command = strzone(item_command);
+			item_flags |= IF_SELECTABLE;
+		}
+		else
+			item_command = __NULL__;
+		if (hover_text)
+			hover_text = strzone(hover_text);
+	};
+
+	virtual float(vector pos, float scan, float char, float down) item_keypress =
+	{
+		if (item_command)
+		{
+			if (!down)
+				return FALSE;
+			if (scan == K_ENTER || (scan == K_MOUSE1 && mouseinbox(pos, item_size)))
+			{
+				item_parent.item_execcommand(this, item_command);
+				return TRUE;
+			}
+		}
+		return FALSE;
+	};
+
+	virtual void() item_remove =
+	{
+		if (item_command)
+			strunzone(item_command);
+		if (hover_text)
+			strunzone(hover_text);
+		super::item_remove();
+	};
+};
+#define spawn_filli(c,sz,rgb,alph,ht) spawn(mitem_filli, item_command:c, item_size:sz, item_rgb:rgb, item_alpha:alph, hover_text:ht)
+
+
+/***************************************************************************
+picture item.
 non-interactable.
 
 item_text: the normal image to use
@@ -39,12 +132,13 @@ class mitem_pic : mitem
 				item_text_mactive = substring(item_text_mactive, 0, -4);
 		}
 
-		item_text = strzone(item_text);
-		precache_pic(item_text);
+		if (item_text)
+			item_text = strzone(item_text);
+		precache_pic(item_text, 0);
 		if (item_text_mactive)
 		{
 			item_text_mactive = strzone(item_text_mactive);
-			precache_pic(item_text_mactive);
+			precache_pic(item_text_mactive, 0);
 		}
 
 		if (!item_size[0])
@@ -60,18 +154,112 @@ class mitem_pic : mitem
 			}
 		}
 	};
-	virtual void() item_remove = 
+	virtual void() item_remove =
 	{
-		strunzone(item_text);
+		if (item_text)
+			strunzone(item_text);
 		if (item_text_mactive)
 			strunzone(item_text_mactive);
 		super::item_remove();
 	};
 };
-#define menuitempic_spawn(img,sz) spawn(mitem_pic, item_text:img, item_size:sz)
+#define spawn_pic(img,sz) spawn(mitem_pic, item_text:img, item_size:sz)
+
 
 /***************************************************************************
-basic text item.
+interactive picture item.
+
+item_command: the command to execute
+item_text: the normal image to use
+item_text_mactive: the image to use when the mouse is over it.
+item_size: if not set, will be set to the size of the image named by item_text. if only y is set, x will be sized to match aspect with y.
+*/
+class mitem_pici : mitem
+{
+	string item_text_mactive;
+	virtual void(vector pos) item_draw =
+	{
+		if (item_text_mactive != "" && (item_flags & IF_MFOCUSED))
+			ui.drawpic(pos, item_text_mactive, item_size, item_rgb, item_alpha, 0);
+		else
+			ui.drawpic(pos, item_text, item_size, item_rgb, item_alpha, 0);
+	};
+
+	void() mitem_pici =
+	{
+		if (dp_workarounds)
+		{
+			if (substring(item_text, -4, 4) == ".lmp")
+				item_text = substring(item_text, 0, -5);
+			if (substring(item_text_mactive , -4, 5) == ".lmp")
+				item_text_mactive = substring(item_text_mactive, 0, -4);
+		}
+
+		if (item_text)
+			item_text = strzone(item_text);
+		precache_pic(item_text, 0);
+		if (item_text_mactive)
+		{
+			item_text_mactive = strzone(item_text_mactive);
+			precache_pic(item_text_mactive, 0);
+		}
+
+		if (item_command != "")
+		{
+			item_command = strzone(item_command);
+			item_flags |= IF_SELECTABLE;
+		}
+		else
+			item_command = __NULL__;
+
+		if (!item_size[0])
+		{
+			float y = item_size[1];
+			item_size = drawgetimagesize(item_text);
+			if (y)	//rescale x to ma
+			{
+				if (!item_size[1])	//bad image? don't glitch out too much.
+					item_size = item_size[0] * '1 1 0';
+				else
+					item_size = [item_size[0] * (y / item_size[1]), y, 0];
+			}
+		}
+	};
+
+	virtual float(vector pos, float scan, float char, float down) item_keypress =
+	{
+		if (this.item_command)
+		{
+			if (!down)
+				return FALSE;
+			if (scan == K_ENTER || (scan == K_MOUSE1 && mouseinbox(pos, this.item_size)))
+			{
+				item_parent.item_execcommand(this, this.item_command);
+				return TRUE;
+			}
+		}
+		return FALSE;
+	};
+
+	virtual void() item_remove =
+	{
+		if (item_text)
+			strunzone(item_text);
+		if (item_text_mactive)
+			strunzone(item_text_mactive);
+		if (item_command)
+			strunzone(item_command);
+		super::item_remove();
+	};
+};
+#define menuitempici_spawn(img,command,sz) spawn(mitem_pici, item_text:img, item_command:command, item_size:sz)
+// mitem(string img, string command, float sz) menuitempici_spawn =
+// {
+// 	return spawn(mitem_pici, item_text:img, item_command:command, item_size:sz);
+// };
+
+/***************************************************************************
+text item.
 interactable - executes a given console command.
 */
 class mitem_text : mitem
@@ -102,47 +290,131 @@ class mitem_text : mitem
 			if (scan == K_ENTER || (scan == K_MOUSE1 && mouseinbox(pos, this.item_size)))
 			{
 				item_parent.item_execcommand(this, this.item_command);
-//				localcmd(strcat(this.item_command, "\n"));
 				return TRUE;
 			}
 		}
 		return FALSE;
 	};
 
-	//zone+unzone input strings as needed
-	virtual void() item_remove = 
+	void() mitem_text =
 	{
-		strunzone(item_text);
+		if (item_text) // keep last as it depends on condition above
+			item_text = strzone(item_text);
+		if (item_command != "") {
+			item_command = strzone(item_command);
+			item_flags |= IF_SELECTABLE;
+		}
+		else
+			item_command = __NULL__;
+	};
+
+	//zone+unzone input strings as needed
+	virtual void() item_remove =
+	{
+		if (item_text)
+			strunzone(item_text);
 		if (item_command)
 			strunzone(item_command);
 		super::item_remove();
 	};
-	void() mitem_text =
-	{
-		item_text = strzone(item_text);
-		if (item_command != "")
-		{
-			item_command = strzone(item_command);
-			item_flags |= IF_SELECTABLE;
-		}
-	};
 };
-mitem(string text, string command, float height) menuitemtext_spawn =
+mitem(string text, string command, float height) spawn_text =
 {
-	return spawn(mitem_text, item_scale:height, item_text:text, item_command:command, item_size:[stringwidth(text, TRUE, '1 1 0'*height), height, 0]);
+	return spawn(mitem_text,
+		item_scale:height,
+		item_text:text,
+		item_command:command,
+		item_size:[stringwidth(text, TRUE, '1 1 0'*height), height, 0]
+	);
+};
+mitem(string text, float height=TXT_NMSZ) spawn_headline =
+{
+	return spawn(mitem_text,
+		item_scale:height,
+		item_text: text,
+		item_rgb: RGB_MUTED,
+		item_size:[stringwidth(text, TRUE, '1 1 0'*height), height, 0]
+	);
 };
 
+
+/***************************************************************************
+label item.
+*/
+// Wrap through the same UI draw path as other text. The engine text-field
+// builtin has its own font sizing and bypasses our canvas projection.
+void(vector pos, float width, float alignflags, string line, float scale) ui_textline =
+{
+	float linewidth = stringwidth(line, TRUE, [scale, scale]);
+	if (alignflags & 4)
+		pos.x += width-linewidth;
+	else if (!(alignflags & 1))
+		pos.x += (width-linewidth)/2;
+	ui.drawstring(pos, line, [scale, scale], RGB_TXT, 1, 0);
+};
+float(vector pos, vector size, float alignflags, string text, float scale) ui_textfield =
+{
+	float start = 0, i = 0, lastspace = -1, lines = 0;
+	float length = strlen(text);
+	if (size.x <= 0 || scale <= 0 || !length)
+		return 0;
+	// Metadata may be a temporary engine string. Keep it alive while the
+	// wrapping loop creates substring temporaries of its own.
+	text = strzone(text);
+	while (i < length)
+	{
+		string ch = substring(text, i, 1);
+		if (ch == "\n")
+		{
+			ui_textline(pos+[0, lines*scale], size.x, alignflags, substring(text, start, i-start), scale);
+			lines++;
+			start = ++i;
+			lastspace = -1;
+			continue;
+		}
+		if (ch == " ")
+			lastspace = i;
+		// Do not split an engine color/alternate-font escape across lines.
+		float end = i+1;
+		if (ch == "^" && end < length)
+		{
+			string code = substring(text, end, 1);
+			end = min(length, i+(code == "x" ? 5 : code == "&" ? 4 : 2));
+		}
+		if (i > start && stringwidth(substring(text, start, end-start), TRUE, [scale, scale]) > size.x)
+		{
+			float cut = lastspace > start ? lastspace : i;
+			ui_textline(pos+[0, lines*scale], size.x, alignflags, substring(text, start, cut-start), scale);
+			lines++;
+			start = cut;
+			while (substring(text, start, 1) == " ") start++;
+			i = start;
+			lastspace = -1;
+		}
+		else
+			i = end;
+	}
+	if (start < length)
+	{
+		ui_textline(pos+[0, lines*scale], size.x, alignflags, substring(text, start, length-start), scale);
+		lines++;
+	}
+	strunzone(text);
+	return lines*scale;
+};
 
 class mitem_label : mitem
 {	//class that queries its frame to find the text to show.
 	mitem_vslider vslider;
 	virtual void(vector pos) item_draw =
 	{
+		// vector rgb = this.item_rgb ? this.item_rgb : menuitem_textcolour(this);
 		vector rgb = menuitem_textcolour(this);
 		string text = get(item_text);
 		float fl = 2;	//top-align
 		vector textpos = pos;
 		vector clientsize = item_size;
+		float textheight = -1;
 		if (item_flags & IF_CENTERALIGN)
 			fl |= 0;	//default is to center align
 		else if (item_flags & IF_RIGHTALIGN)
@@ -153,7 +425,6 @@ class mitem_label : mitem
 		if (vslider)
 		{
 			textpos[1] -= vslider.val;
-			clientsize[1] += vslider.val;
 			clientsize[0] -= vslider.item_size[0];
 		}
 
@@ -171,12 +442,13 @@ class mitem_label : mitem
 		if (ui.drawrectmax[0] > ui.drawrectmin[0] && ui.drawrectmax[1] > ui.drawrectmin[1])
 		{
 			ui.setcliparea(ui.drawrectmin[0], ui.drawrectmin[1], ui.drawrectmax[0] - ui.drawrectmin[0], ui.drawrectmax[1] - ui.drawrectmin[1]);
-			clientsize[1] = drawtextfield(textpos, clientsize, fl, text) * item_scale;
+			textheight = ui_textfield(textpos, clientsize, fl, text, item_scale);
 			ui.setcliparea(omin_x, omin_y, omax_x - omin_x, omax_y - omin_y);
 
 			if (vslider)
 			{
 				vslider.item_size[1] = item_size[1];
+				vslider.item_position = [clientsize.x, 0];
 				if (ui.mousepos != ui.oldmousepos)
 				{
 					if (mouseinbox(pos + [clientsize[0], 0], vslider.item_size))
@@ -188,14 +460,15 @@ class mitem_label : mitem
 		ui.drawrectmin = omin;
 		ui.drawrectmax = omax;
 
-		if (clientsize[1] > item_size[1])
+		if (textheight > item_size[1])
 		{	//enough text that we need a scrollbar.
 			if (!vslider)
 				vslider = spawn(mitem_vslider, val:0, stride:8);
-			vslider.maxv = clientsize[1] - item_size[1];
+			vslider.maxv = textheight - item_size[1];
+			vslider.val = bound(vslider.minv, vslider.val, vslider.maxv);
 			item_flags |= IF_SELECTABLE;
 		}
-		else if (vslider)
+		else if (textheight >= 0 && vslider)
 		{	//the text got shorter...
 			vslider.item_remove();
 			vslider = (mitem_vslider)__NULL__;
@@ -206,7 +479,8 @@ class mitem_label : mitem
 	virtual float(vector pos, float scan, float char, float down) item_keypress =
 	{
 		if (vslider)
-			if (vslider.item_keypress(pos, scan, char, down))
+			if ((scan != K_MOUSE1 || ui.mgrabs == vslider || mouseinbox(pos+vslider.item_position, vslider.item_size)) &&
+				vslider.item_keypress(pos+vslider.item_position, scan, char, down))
 				return TRUE;
 		if (this.item_command)
 		{
@@ -222,9 +496,24 @@ class mitem_label : mitem
 		return FALSE;
 	};
 
-	//zone+unzone input strings as needed
-	virtual void() item_remove = 
+	void() mitem_label =
 	{
+		if (item_text)
+			item_text = strzone(item_text);
+		if (item_command != "")
+		{
+			item_command = strzone(item_command);
+			item_flags |= IF_SELECTABLE;
+		}
+		else
+			item_command = __NULL__;
+	};
+
+	//zone+unzone input strings as needed
+	virtual void() item_remove =
+	{
+		if (item_text)
+			strunzone(item_text);
 		if (item_command)
 			strunzone(item_command);
 		if (vslider)
@@ -234,19 +523,11 @@ class mitem_label : mitem
 		}
 		super::item_remove();
 	};
-	void() mitem_label =
-	{
-		if (item_command != "")
-		{
-			item_command = strzone(item_command);
-			item_flags |= IF_SELECTABLE;
-		}
-	};
 };
 
 
 /***************************************************************************
-basic text item.
+button item.
 identical to text, but includes a 3dish border.
 */
 class mitem_button : mitem
@@ -272,7 +553,16 @@ class mitem_button : mitem
 			return FALSE;
 		return TRUE;
 	};
-	virtual void() item_remove = 
+	void () mitem_button =
+	{
+		if (item_text)
+			item_text = strzone(item_text);
+		if (item_command)
+			item_command = strzone(item_command);
+		if (isvalid(item_command))
+			item_flags |= IF_SELECTABLE;
+	};
+	virtual void() item_remove =
 	{
 		strunzone(item_text);
 		if (item_command)
@@ -280,18 +570,13 @@ class mitem_button : mitem
 		super::item_remove();
 	};
 };
-mitem_button(string text, string command, vector sz) menuitembutton_spawn =
+mitem_button(string text, string command, vector sz) spawn_button =
 {
-	mitem_button n = spawn(mitem_button);
-	n.item_scale = sz_y - 4;
-	n.item_text = strzone(text);
-	n.item_size = sz;
-
-	if (command != "")
-	{
-		n.item_command = strzone(command);
-		n.item_flags |= IF_SELECTABLE;
-	}	
-	return n;
+	return spawn(mitem_button,
+		item_scale: sz_y - 4,
+		item_text: text,
+		item_size: sz,
+		item_command: command
+	);
 };
 

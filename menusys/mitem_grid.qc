@@ -8,6 +8,7 @@ class mitem_grid : mitem
 	virtual float(vector pos, float scan, float char, float down)	item_keypress;
 	virtual void(vector pos)	item_draw;
 	virtual void() 			item_resized;
+	virtual void() item_remove;
 
 	//first child is determined from the vslider.
 	float		grid_numchildren;
@@ -19,6 +20,13 @@ class mitem_grid : mitem
 	virtual void(vector pos, float idx) grid_draw = 0;
 	virtual float(vector pos, float scan, float char, float down, float idx) grid_keypress = {return FALSE;};
 	virtual void(float olditem, float newitem) grid_selectionchanged = {};	//just key focus
+};
+
+void() mitem_grid::item_remove =
+{
+	if (vslider)
+		vslider.item_remove();
+	super::item_remove();
 };
 
 //does NOT wrap.
@@ -83,8 +91,9 @@ float(vector pos, float scan, float char, float down) mitem_grid::item_keypress 
 		}
 	}
 
+	vector clientpos = pos;
 	if (vslider)
-		pos[1] -= vslider.val;
+		clientpos[1] -= vslider.val;
 
 	if (ch<0&&vslider)
 	{
@@ -92,7 +101,7 @@ float(vector pos, float scan, float char, float down) mitem_grid::item_keypress 
 			handled = vslider.item_keypress(pos + vslider.item_position, scan, char, down);
 	}
 	else if (!handled && ch >= 0 && ch < grid_numchildren)
-		handled = grid_keypress(pos + vslider.item_position + [0,ch]*item_scale, scan, char, down, ch);
+		handled = grid_keypress(clientpos + [0,ch]*item_scale, scan, char, down, ch);
 	if (!handled && down)
 	{
 		ch = grid_kactive;
@@ -128,6 +137,15 @@ float(vector pos, float scan, float char, float down) mitem_grid::item_keypress 
 			grid_kactive = ch;
 			handled = TRUE;
 		}
+		if (vslider && grid_kactive >= 0 && scan != K_MWHEELUP && scan != K_MWHEELDOWN)
+		{
+			float rowtop = grid_kactive*item_scale;
+			if (rowtop < vslider.val)
+				vslider.val = rowtop;
+			else if (rowtop+item_scale > vslider.val+item_size.y)
+				vslider.val = rowtop+item_scale-item_size.y;
+			vslider.val = bound(vslider.minv, vslider.val, vslider.maxv);
+		}
 	}
 
 	return handled;
@@ -140,6 +158,9 @@ void() mitem_grid::item_resized =
 		if (!vslider)
 			vslider = spawn(mitem_vslider, val:0, stride:8);
 		vslider.maxv = clientheight - item_size[1];
+		vslider.val = bound(vslider.minv, vslider.val, vslider.maxv);
+		vslider.item_position = [item_size.x-vslider.item_size.x, 0];
+		vslider.item_size.y = item_size.y;
 	}
 	else if (vslider)
 	{
@@ -167,7 +188,9 @@ void(vector pos) mitem_grid::item_draw =
 	if (ui.mousepos != ui.oldmousepos)
 	{
 		local mitem newfocus = __NULL__;
-		grid_mactive = floor((ui.mousepos[1]-clientpos_y)/item_scale);
+		grid_mactive = -1;
+		if (mouseinbox(pos, clientsize) && mouseinbox(omin, omax-omin))
+			grid_mactive = floor((ui.mousepos[1]-clientpos_y)/item_scale);
 
 		if (vslider)
 			if (mouseinbox(pos + [clientsize[0], 0], vslider.item_size))

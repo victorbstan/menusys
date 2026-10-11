@@ -6,13 +6,24 @@ Screw Quake colours, they're too brown!
 */
 class mitem_colours : mitem
 {
+	float quakecolours;
 	virtual void(vector pos) item_draw;
 	virtual float(vector pos, float scan, float char, float down) item_keypress;
-	
+
+	void() mitem_colours =
+	{
+		if (item_text)
+			item_text = strzone(item_text);
+		if (item_command)
+			item_command = strzone(item_command);
+		if (isvalid(item_command))
+			item_flags |= IF_SELECTABLE;
+	};
+
 	virtual void() item_resized =
 	{
 		if (isvalid(item_command))
-			item_flags |= IF_SELECTABLE;		
+			item_flags |= IF_SELECTABLE;
 		else
 			item_flags &= ~IF_SELECTABLE;
 		super::item_resized();
@@ -114,7 +125,7 @@ static vector(string v) hextorgb =
 		case  5:	return [0xaf, 0x67, 0x23]/255;
 		case  6:	return [0xff, 0xf3, 0x1b]/255;
 		case  7:	return [0xe3, 0xb3, 0x97]/255;
-		
+
 		case  8:	return [0xab, 0x8b, 0xa3]/255;
 		case  9:	return [0xbb, 0x73, 0x97]/255;
 		case 10:	return [0xdb, 0xc3, 0xbb]/255;
@@ -144,7 +155,6 @@ void(vector pos) mitem_colours::item_draw =
 	super::item_draw(pos);
 
 	//calculate the rgb from hue at each step across the colour block
-#define STEPS 32
 	pos_x += item_size_x / 2;
 
 	if (ui.mgrabs == this)
@@ -159,6 +169,31 @@ void(vector pos) mitem_colours::item_draw =
 	}
 	curval = get(item_command);
 
+	if (quakecolours)
+	{
+#define STEPS 14
+		stride = (item_size_x / 2) / STEPS;
+		for (step = 0; step < STEPS; step++, pos_x += stride)
+		{
+			string v = ftos(step);
+			rgb = hextorgb(v);
+			if (!(item_flags & IF_SELECTABLE))
+				rgb *= 0.2;
+			rgb *= 0.5;
+			if (v == curval)
+			{
+				ui.drawfill(pos, [stride, item_size_y], rgb*2, item_alpha, 0);
+				rgb *= 1 + sin(time*4)*.2;
+				ui.drawfill(pos+[0,2], [stride, item_size_y-4], rgb, item_alpha, 0);
+			}
+			else
+				ui.drawfill(pos+[0,2], [stride, item_size_y-4], rgb, item_alpha, 0);
+		}
+		return;
+#undef STEPS
+	}
+
+#define STEPS 32
 	stride = (item_size_x / 2 - (item_size_y+4)) / STEPS;
 
 	ui.drawfill(pos, [item_size_y, item_size_y], hextorgb(curval), item_alpha, 0);
@@ -204,21 +239,31 @@ float(vector pos, float scan, float char, float down) mitem_colours::item_keypre
 			ui.mgrabs = __NULL__;
 		return FALSE;
 	}
-	local float curval = rgbtohsv(hextorgb(get(item_command)))[0];
 	if (scan == K_MWHEELUP || scan == K_MWHEELDOWN)
 	{
 		if (mouseinbox(pos, item_size))
 			scan = ((scan == K_MWHEELDOWN)?K_LEFTARROW:K_RIGHTARROW);
 	}
+
+
+	local float curval = rgbtohsv(hextorgb(get(item_command)))[0];
 	if (scan == K_MOUSE1)
 	{
-		pos_x += item_size_x / 2;
-		pos_x += item_size_y+4;
-		curval = (ui.mousepos[0] - pos_x) / (item_size_x / 2 - item_size_y+4);
+		float width = item_size_x / 2;
+		pos_x += width;
+		if (!quakecolours)
+		{
+			pos_x += item_size_y+4;
+			width = width - item_size_y+4;
+		}
+		curval = (ui.mousepos[0] - pos_x) / width;
 		if (curval < 0 || curval > 1)
 			return FALSE;
 		curval = curval;
-		set(item_command, rgbtohex(hsvtorgb([(curval), 1, 1])));
+		if (quakecolours)
+			set(item_command, ftos(floor(curval*14)));
+		else
+			set(item_command, rgbtohex(hsvtorgb([(curval), 1, 1])));
 		ui.mgrabs = this;
 	}
 	else if (scan == K_LEFTARROW || scan == K_SPACE)
@@ -233,15 +278,14 @@ float(vector pos, float scan, float char, float down) mitem_colours::item_keypre
 		return FALSE;
 	return TRUE;
 };
-mitem_colours(string text, string command, vector sz) menuitemcolour_spawn =
+mitem_colours(string text, string command, float limited, vector sz) menuitemcolour_spawn =
 {
-	mitem_colours n = spawn(mitem_colours);
-	n.item_scale = sz_y;
-	n.item_text = text;
-	n.item_size = sz;
-
-	n.item_command = command;
-	n.item_flags |= IF_SELECTABLE;
-	return n;
+	return spawn(mitem_colours,
+		item_text: strcat("^m", text),
+		item_command: command,
+		item_size: sz,
+		item_scale: sz_y,
+		quakecolours: limited
+	);
 };
 

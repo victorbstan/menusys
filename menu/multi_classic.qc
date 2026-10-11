@@ -1,0 +1,86 @@
+/*
+The main / root menu.
+*/
+nonstatic void(mitem_desktop desktop) M_Multi =
+{
+	float menux = MENU_WIDTH;
+	float menuy = MENU_HEIGHT;
+	float padding = PADDING;
+	float leftpadding = 16;
+	float plaquepadding = 24;
+
+	// Main menu
+
+	// no dupes please.
+	local mitem_exmenu mm;
+	mm = (mitem_exmenu)desktop.findchildtext(_("Multiplayer Menu"));
+	if (mm) { mm.totop(); return; }
+	// create a fullscreen frame, target previous menu
+	mm = spawn(mitem_exmenu, item_text:_("Multiplayer Menu"), item_flags:IF_SELECTABLE , item_command:"m_main");
+	desktop.add(mm, RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_PARENT_MAX, '0 0', '0 0');
+	desktop.item_focuschange(mm, IF_KFOCUSED);
+	mm.totop();
+
+	// Frame menu
+
+	mitem_frame m = spawn(mitem_frame, item_flags:IF_SELECTABLE|IF_NOCURSOR|IF_FOCUSFOLLOWSMOUSE, frame_hasscroll:FALSE);
+	mm.add(
+		m,
+		RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, // top-left|bottom-right relation
+		[menux*-0.5, menuy*-0.5], // top-left
+		[menux*0.5, menuy*0.5] // bottom-right
+	);
+
+	// Left plaque
+
+	float qplaquewidth = 32;
+	m.add(spawn_pic("gfx/qplaque.lmp", '32 144'),
+		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN,
+		[leftpadding, padding], [qplaquewidth, 144]);
+
+	// Title
+
+	mitem_pic banner = spawn(mitem_pic, item_text:"gfx/p_multi.lmp", item_size_y:24, item_flags:IF_CENTERALIGN);
+	m.add(
+		banner,
+		RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN,
+		[-banner.item_size_x*0.5, padding], [banner.item_size_x, 24]
+	);
+
+	// Content
+
+	// Button overlay hotspots spawn
+	float alpha = -1;
+	mitem_classicbutton btn1 = spawn(mitem_classicbutton, item_command:"m_pop;m_servers",
+		item_size:'10 10', item_rgb:'255 0 0', item_alpha:alpha); // join
+	mitem_classicbutton btn2 = spawn(mitem_classicbutton, item_command:"m_pop;m_newgame mp", // TODO: proper mp menu
+		item_size:'10 10', item_rgb:'255 0 0', item_alpha:alpha); // new game
+	mitem_classicbutton btn3 = spawn(mitem_classicbutton, item_command:"m_pop;m_setup",
+		item_size:'10 10', item_rgb:'255 0 0', item_alpha:alpha); // setup
+
+	// buttons start location
+	float bsx = qplaquewidth+leftpadding+plaquepadding;
+	float bsy = banner.item_size_y+(padding*2);
+	// position hotspots over relevant image button location
+	float by = bsy;
+	#define bposrel RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN
+	m.add(btn1, bposrel, [bsx, by], [240, 19]); by+=20; // join
+	m.add(btn2, bposrel, [bsx, by], [240, 19]); by+=20; // new game
+	m.add(btn3, bposrel, [bsx, by], [240, 19]); by+=20; // setup
+
+	// Menu options image
+	mitem_pic menuart = spawn(mitem_pic, item_text:"gfx/mp_menu.lmp");
+	vector msize = menuart.item_size;
+	m.add(menuart,
+		RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_OWN_MIN|RS_Y_MAX_OWN_MIN,
+		[bsx, bsy], msize);
+
+	mm.item_focuschange(m, IF_KFOCUSED);
+	m.item_focuschange(btn1, IF_KFOCUSED);
+
+	//spinny quad/pent, for the luls
+	// local string it = (random()<0.9)?"progs/quaddama.mdl":"progs/invulner.mdl";
+	// m.add(spawn (mitem_spinnymodel, item_text: it), RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, [offset_l, 12*-16/2], [0, 12*16/2]);
+
+	addmenuback(mm);
+};
